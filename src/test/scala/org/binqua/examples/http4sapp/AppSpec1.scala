@@ -1,14 +1,16 @@
 package org.binqua.examples.http4sapp
 
+import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec._
 import org.scalatest.matchers._
 
-class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome  {
+class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen {
 
   val host = "http://localhost:8081/"
 
-  Feature("Navigation bar should work:1") {
-    Scenario("we can go from home to page3") {
+  Feature("f1: Navigation bar should work") {
+    Scenario("s1: we can go from home to page3") {
+      println(s"Thread.currentThread() in test is ${Thread.currentThread()}")
       go to (host + "home.html")
       pageTitle should be("Home")
 
@@ -25,7 +27,7 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       pageTitle should be("Home")
     }
 
-    Scenario("we can go from page2 to home") {
+    Scenario("s2: we can go from page2 to home") {
       go to (host + "page3.html")
       pageTitle should be("Page 3")
 
@@ -39,8 +41,9 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       pageTitle should be("Home")
     }
   }
-  Feature("Navigation bar should work:2") {
-    Scenario("we can go from home to page2") {
+
+  Feature("f2: Navigation bar should work:2") {
+    Scenario("s1: we can go from home to page2") {
       go to (host + "home.html")
       pageTitle should be("Home")
 
@@ -51,7 +54,7 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       pageTitle should be("Page 2")
     }
 
-    Scenario("we can go from page2 to home") {
+    Scenario("s2: we can go from page2 to home") {
       go to (host + "page2.html")
       pageTitle should be("Page 2")
 

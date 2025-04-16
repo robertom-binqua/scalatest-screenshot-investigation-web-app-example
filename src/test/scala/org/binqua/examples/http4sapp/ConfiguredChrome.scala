@@ -24,7 +24,7 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
 
   private def chromeOptions(): ChromeOptions = {
     val options: ChromeOptions = new ChromeOptions
-    options.setBrowserVersion("133")
+    options.setBrowserVersion("135")
     options.addArguments("--disable-features=MediaRouter")
     options.setAcceptInsecureCerts(true)
     options
@@ -46,14 +46,15 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
         println(s"text ${element.getText}")
       }
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
-        ScreenshotUtils.createScreenshotOnEnter(driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), driver.getCurrentUrl, TheState, driver)
+        println(s"Thread.currentThread() is ${Thread.currentThread()}")
+        ScreenshotUtils.createScreenshotOnEnter(driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), driver.getCurrentUrl, TheState)
       }
     }
 
     override def afterAnyCall(target: AnyRef, method: Method, args: Array[AnyRef],result: AnyRef): Unit = {
       println(s"afterAnyCall ${target.getClass} ")
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
-        ScreenshotUtils.createScreenshotOnExit(driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), driver.getCurrentUrl, TheState, driver)
+        ScreenshotUtils.createScreenshotOnExit(driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), driver.getCurrentUrl, TheState)
       }
     }
   }
