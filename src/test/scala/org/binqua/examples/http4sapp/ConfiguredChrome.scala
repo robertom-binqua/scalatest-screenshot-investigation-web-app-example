@@ -38,7 +38,7 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
       println(s"method $method")
 
       if (target.isInstanceOf[WebElement]) {
-        //(target.asInstanceOf[RemoteWebElement]).getTagName
+        // (target.asInstanceOf[RemoteWebElement]).getTagName
         val element = target.asInstanceOf[RemoteWebElement]
         println(s"(target.asInstanceOf[RemoteWebElement]).getTagName ${element.getTagName}")
         println(s"type ${element.getAttribute("type")}")
@@ -47,14 +47,24 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
       }
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
         println(s"Thread.currentThread() is ${Thread.currentThread()}")
-        ScreenshotUtils.createScreenshotOnEnter(driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), driver.getCurrentUrl, TheState)
+        ScreenshotUtils.createScreenshotOnEnter(
+          scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
+          pageUrl = driver.getCurrentUrl,
+          state = TheState,
+          testRunningInfo = TestRunningInfo.testRunningInfo.get()
+        )
       }
     }
 
-    override def afterAnyCall(target: AnyRef, method: Method, args: Array[AnyRef],result: AnyRef): Unit = {
+    override def afterAnyCall(target: AnyRef, method: Method, args: Array[AnyRef], result: AnyRef): Unit = {
       println(s"afterAnyCall ${target.getClass} ")
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
-        ScreenshotUtils.createScreenshotOnExit(driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), driver.getCurrentUrl, TheState)
+        ScreenshotUtils.createScreenshotOnExit(
+          driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
+          driver.getCurrentUrl,
+          TheState,
+          testRunningInfo = TestRunningInfo.testRunningInfo.get()
+        )
       }
     }
   }
