@@ -11,6 +11,7 @@ import org.binqua.examples.http4sapp.util.utils.EitherOps
 import org.scalatest.events.Ordinal
 
 import java.io.File
+
 trait State {
 
   def add(event: StateEvent): Unit
@@ -71,15 +72,15 @@ object Scenarios {
 }
 case class Scenarios(scenarios: Map[String, Scenario]) {
   def testUpdate(scenarioDescription: String, timestamp: Long, newState: TestOutcome): Either[String, Scenarios] =
-    scenarios.get(scenarioDescription) match {
-      case Some(scenarioFound) =>
+    scenarios
+      .get(scenarioDescription)
+      .toRight(s"no scenario with description $scenarioDescription")
+      .flatMap(scenarioFound =>
         if (scenarioFound.testOutcome != TestOutcome.STARTING)
           s"lastScenario testOutcome is ${scenarioFound.testOutcome} and should be ${TestOutcome.STARTING}".asLeft
         else
           this.copy(scenarios = scenarios.updated(scenarioDescription, scenarioFound.copy(finishedTimestamp = Some(timestamp), testOutcome = newState))).asRight
-      case None =>
-        s"no scenario with description $scenarioDescription".asLeft
-    }
+      )
 
   def testStarting(ordinal: Ordinal, scenarioDescription: String, timestamp: Long): Either[String, Scenarios] =
     scenarios.get(scenarioDescription) match {
@@ -219,24 +220,25 @@ case class Tests(tests: Map[String, Test]) {
       )
 
   def testStarting(runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
-    tests.get(runningScenario.test) match {
-      case Some(testAlreadyPresent) =>
-        testAlreadyPresent
-          .withNewFeatureOrScenario(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp)
-          .map((updatedTest: Test) => Tests(tests = tests.updated(runningScenario.test, updatedTest)))
-      case None =>
-        Tests(tests =
+    tests
+      .get(runningScenario.test)
+      .fold[Either[String, Tests]](
+        ifEmpty = Tests(tests =
           tests.updated(
             runningScenario.test,
             Test(runningScenario.test, Features.starting(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp))
           )
         ).asRight
-    }
+      )(testAlreadyPresent =>
+        testAlreadyPresent
+          .withNewFeatureOrScenario(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp)
+          .map((updatedTest: Test) => Tests(tests = tests.updated(runningScenario.test, updatedTest)))
+      )
 
   def testFailed(runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
     tests
       .get(runningScenario.test)
-      .toRight("sI was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist")
+      .toRight(s"I was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist")
       .flatMap(
         _.markAsFailed(runningScenario.feature, runningScenario.scenario, timestamp)
           .map(tests.updated(runningScenario.test, _))
