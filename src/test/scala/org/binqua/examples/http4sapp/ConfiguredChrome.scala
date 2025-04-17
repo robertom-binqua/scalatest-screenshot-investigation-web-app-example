@@ -46,12 +46,11 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
         println(s"text ${element.getText}")
       }
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
-        println(s"Thread.currentThread() is ${Thread.currentThread()}")
         ScreenshotUtils.createScreenshotOnEnter(
           scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
           pageUrl = driver.getCurrentUrl,
           state = TheState,
-          testRunningInfo = TestRunningInfo.testRunningInfo.get()
+          testRunningInfo = TheState.tests.runningTest.get
         )
       }
     }
@@ -63,7 +62,7 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
           driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
           driver.getCurrentUrl,
           TheState,
-          testRunningInfo = TestRunningInfo.testRunningInfo.get()
+          TheState.tests.runningTest.get
         )
       }
     }

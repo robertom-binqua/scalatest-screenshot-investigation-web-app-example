@@ -2,38 +2,66 @@ package org.binqua.examples.http4sapp
 
 import munit.FunSuite
 import org.binqua.examples.http4sapp.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
-import org.binqua.examples.http4sapp.TestOutcome.STARTING
+import org.binqua.examples.http4sapp.TestOutcome.{FAILED, STARTING, SUCCEEDED}
 import org.scalatest.events.Ordinal
+
+import java.io.File
 
 class ScenariosSpec extends FunSuite {
 
-  test("test") {
+  test("we can add 2 screenshots to a scenario that is in STARTING state") {
 
-    val startingScenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, STARTING)
+    val scenario: Scenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, STARTING)
 
-    val actual1: Either[String, Scenarios] = Scenarios(List(startingScenario)).withNewScreenshot("url", ON_ENTER_PAGE)
+    val actual1: Either[String, (Scenarios, File)] =
+      Scenarios(scenarios = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
 
     val expected1: Scenarios = Scenarios(
-      List(
-        Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), Some(List(Screenshot("url", ON_ENTER_PAGE, startingScenario.ordinal, 1))), STARTING)
-      )
+      Map("desc" -> scenario.copy(screenshots = Some(List(Screenshot("url", ON_ENTER_PAGE, scenario.ordinal, 1)))))
     )
 
-    assertEquals(actual1, Right(expected1))
+    assertEquals(actual1.map(_._1), Right(expected1))
 
-    val actual2: Either[String, Scenarios] = actual1.flatMap(startingScenario => startingScenario.withNewScreenshot("url2", ON_EXIT_PAGE))
+    val actual2: Either[String, (Scenarios, File)] =
+      actual1.flatMap(result =>
+        result._1.withNewScreenshot(ordinal = scenario.ordinal, scenarioDescription = scenario.description, pageUrl = "url2", screenshotMoment = ON_EXIT_PAGE)
+      )
 
     val expected2: Scenarios = Scenarios(
-      List(
-        Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), Some(List(
-          Screenshot("url2", ON_EXIT_PAGE, startingScenario.ordinal, 2),
-          Screenshot("url", ON_ENTER_PAGE, startingScenario.ordinal, 1),
-        )), STARTING)
+      Map(
+        "desc" -> scenario.copy(screenshots =
+          Some(
+            List(
+              Screenshot(pageUrl = "url2", screenshotMoment = ON_EXIT_PAGE, ordinal = scenario.ordinal, index = 2),
+              Screenshot(pageUrl = "url", screenshotMoment = ON_ENTER_PAGE, ordinal = scenario.ordinal, index = 1)
+            )
+          )
+        )
       )
     )
 
-
-    assertEquals(actual2, Right(expected2))
+    assertEquals(actual2.map(_._1), Right(expected2))
 
   }
+  test("we cannot add screenshots to a scenario that is in FAILED state") {
+
+    val scenario: Scenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, FAILED)
+
+    val actual1: Either[String, (Scenarios, File)] =
+      Scenarios(scenarios = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
+
+    assertEquals(actual1.map(_._1), Left("Sorry last scenario does not have testOutcome equal to STARTING but FAILED"))
+
+  }
+  test("we cannot add screenshots to a scenario that is in SUCCEEDED state") {
+
+    val scenario: Scenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, SUCCEEDED)
+
+    val actual1: Either[String, (Scenarios, File)] =
+      Scenarios(scenarios = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
+
+    assertEquals(actual1.map(_._1), Left("Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED"))
+
+  }
+
 }

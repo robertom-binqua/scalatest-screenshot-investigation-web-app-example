@@ -10,7 +10,6 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
 
   Feature("f1: Navigation bar should work") {
     Scenario("s1: we can go from home to page3") {
-      println(s"Thread.currentThread() in test is ${Thread.currentThread()}")
       go to (host + "home.html")
       pageTitle should be("Home")
 
