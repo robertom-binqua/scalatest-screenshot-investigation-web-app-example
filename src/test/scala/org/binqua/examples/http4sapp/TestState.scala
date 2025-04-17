@@ -1,21 +1,22 @@
 package org.binqua.examples.http4sapp
 
+import cats.implicits.catsSyntaxEitherId
 import org.apache.commons.io.FileUtils
 import org.binqua.examples.http4sapp.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.binqua.examples.http4sapp.TestOutcome._
+import org.binqua.examples.http4sapp.util.utils.EitherOps
 import org.scalatest.events.Ordinal
 
 import java.io.File
-
 trait State {
 
   def add(event: StateEvent): Unit
 
   def createReport(): Unit
 
-  def addScreenshotOnEnterAt(pageUrl: String, runningScenario: RunningScenario): Either[String, File]
+  def addScreenshotOnEnterAt(pageUrl: String, runningScenario: RunningScenario): Either[String, (Tests, File)]
 
-  def addScreenshotOnExitAt(pageUrl: String, runningScenario: RunningScenario): Either[String, File]
+  def addScreenshotOnExitAt(pageUrl: String, runningScenario: RunningScenario): Either[String, (Tests, File)]
 
 }
 
@@ -50,19 +51,19 @@ case class Scenarios(scenarios: Map[String, Scenario]) {
     scenarios.get(scenarioDescription) match {
       case Some(scenarioFound) =>
         if (scenarioFound.testOutcome != TestOutcome.STARTING)
-          Left(s"lastScenario testOutcome is ${scenarioFound.testOutcome} and should be ${TestOutcome.STARTING}")
+          s"lastScenario testOutcome is ${scenarioFound.testOutcome} and should be ${TestOutcome.STARTING}".asLeft
         else
-          Right(this.copy(scenarios = scenarios.updated(scenarioDescription, scenarioFound.copy(finishedTimestamp = Some(timestamp), testOutcome = newState))))
+          this.copy(scenarios = scenarios.updated(scenarioDescription, scenarioFound.copy(finishedTimestamp = Some(timestamp), testOutcome = newState))).asRight
       case None =>
-        Left(s"no scenario with description $scenarioDescription")
+        s"no scenario with description $scenarioDescription".asLeft
     }
 
   def testStarting(ordinal: Ordinal, scenarioDescription: String, timestamp: Long): Either[String, Scenarios] =
     scenarios.get(scenarioDescription) match {
       case Some(scenarioAlreadyPresent) =>
-        Left(s"scenarioAlreadyPresent bro $scenarioAlreadyPresent, I cannot start it")
+        s"scenarioAlreadyPresent bro $scenarioAlreadyPresent, I cannot start it".asLeft
       case None =>
-        Right(this.copy(scenarios = this.scenarios.updated(scenarioDescription, Scenario.starting(ordinal, scenarioDescription, timestamp))))
+        this.copy(scenarios = this.scenarios.updated(scenarioDescription, Scenario.starting(ordinal, scenarioDescription, timestamp))).asRight
     }
 
   def withNewScreenshot(ordinal: Ordinal, scenarioDescription: String, pageUrl: String, screenshotMoment: ScreenshotMoment): Either[String, (Scenarios, File)] =
@@ -73,9 +74,9 @@ case class Scenarios(scenarios: Map[String, Scenario]) {
         if (lastScenario.testOutcome == TestOutcome.STARTING && lastScenario.ordinal == ordinal) {
           val (updatedScenario, screenshotFile) = lastScenario.withNewScreenshot(pageUrl, screenshotMoment)
           val scenarios = this.copy(scenarios = this.scenarios.updated(scenarioDescription, updatedScenario))
-          Right(scenarios, screenshotFile)
+          (scenarios, screenshotFile).asRight
         } else
-          Left(s"Sorry last scenario does not have testOutcome equal to STARTING but ${lastScenario.testOutcome}")
+          s"Sorry last scenario does not have testOutcome equal to STARTING but ${lastScenario.testOutcome}".asLeft
       )
 
 }
@@ -118,7 +119,7 @@ case class Features(features: Map[String, Feature]) {
           featureDescription,
           Scenarios(Map(scenarioDescription -> Scenario(ordinal, scenarioDescription, timestamp, None, None, TestOutcome.STARTING)))
         )
-        Right(Features(Map(featureDescription -> newF)))
+        Features(Map(featureDescription -> newF)).asRight
     }
 
   def addScreenshot(
@@ -152,6 +153,7 @@ object Features {
 object Tests {
   val empty: Tests = Tests(Map.empty)
 }
+
 case class Tests(tests: Map[String, Test]) {
 
   def runningTest: Option[RunningScenario] = {
@@ -171,16 +173,16 @@ case class Tests(tests: Map[String, Test]) {
   }
 
   def addScreenshot(runningScenario: RunningScenario, pageUrl: String, screenshotMoment: ScreenshotMoment): Either[String, (Tests, File)] =
-    tests.get(runningScenario.test) match {
-      case Some(testFound) =>
-        testFound
-          .addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, pageUrl, screenshotMoment)
+    tests
+      .get(runningScenario.test)
+      .toRight("I cannot add screenshots because there are no tests")
+      .flatMap(
+        _.addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, pageUrl, screenshotMoment)
           .map((updatedTest: (Test, File)) => {
             val newTests = Tests(tests = tests.updated(runningScenario.test, updatedTest._1))
             (newTests, updatedTest._2)
           })
-      case None => Left("I cannot add screenshots because there are no tests")
-    }
+      )
 
   def testStarting(runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
     tests.get(runningScenario.test) match {
@@ -189,33 +191,33 @@ case class Tests(tests: Map[String, Test]) {
           .withNewFeatureOrScenario(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp)
           .map((updatedTest: Test) => Tests(tests = tests.updated(runningScenario.test, updatedTest)))
       case None =>
-        Right(
-          Tests(tests =
-            tests.updated(
-              runningScenario.test,
-              Test(runningScenario.test, Features.starting(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp))
-            )
+        Tests(tests =
+          tests.updated(
+            runningScenario.test,
+            Test(runningScenario.test, Features.starting(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp))
           )
-        )
+        ).asRight
     }
 
   def testFailed(runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
-    tests.get(runningScenario.test) match {
-      case Some(testAlreadyPresent) =>
-        testAlreadyPresent
-          .markAsFailed(runningScenario.feature, runningScenario.scenario, timestamp)
-          .map((updatedTest: Test) => Tests(tests = tests.updated(runningScenario.test, updatedTest)))
-      case None => Left(s"I was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist")
-    }
+    tests
+      .get(runningScenario.test)
+      .toRight("s\"I was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist\"")
+      .flatMap(
+        _.markAsFailed(runningScenario.feature, runningScenario.scenario, timestamp)
+          .map(tests.updated(runningScenario.test, _))
+          .map(Tests(_))
+      )
 
   def testSucceeded(runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
-    tests.get(runningScenario.test) match {
-      case Some(testAlreadyPresent) =>
-        testAlreadyPresent
-          .markAsSucceeded(runningScenario.feature, runningScenario.scenario, timestamp)
-          .map((updatedTest: Test) => Tests(tests = tests.updated(runningScenario.test, updatedTest)))
-      case None => Left(s"I was going to update test ${runningScenario.test} to succeeded but test ${runningScenario.test} does not exist")
-    }
+    tests
+      .get(runningScenario.test)
+      .toRight(s"I was going to update test ${runningScenario.test} to succeeded but test ${runningScenario.test} does not exist")
+      .flatMap(
+        _.markAsSucceeded(runningScenario.feature, runningScenario.scenario, timestamp)
+          .map(tests.updated(runningScenario.test, _))
+          .map(Tests(_))
+      )
 
 }
 
@@ -239,7 +241,10 @@ case class Test(name: String, features: Features) {
   ): Either[String, (Test, File)] =
     features
       .addScreenshot(ordinal, featureDescription, scenarioDescription, pageUrl, screenshotMoment)
-      .map((result: (Features, File)) => (this.copy(features = result._1), result._2))
+      .map(result => {
+        val (features, file) = result
+        (this.copy(features = features), file)
+      })
 
 }
 
@@ -249,72 +254,48 @@ object TheState extends State {
 
   var tests: Tests = Tests(Map.empty)
 
-  var screenshots: List[Screenshot] = List.empty
-
-  def add(event: StateEvent): Unit = {
+  def add(event: StateEvent): Unit =
     event match {
       case StateEvent.TestStarting(runningScenario, timestamp) =>
-        tests.testStarting(runningScenario, timestamp) match {
-          case Left(value) => throw new IllegalStateException(value)
-          case Right(newTests) =>
-            tests = newTests
-        }
+        tests = tests.testStarting(runningScenario, timestamp).getOrThrow
 
       case StateEvent.TestFailed(runningScenario, timestamp) =>
-        tests.testFailed(runningScenario, timestamp) match {
-          case Left(value) => throw new IllegalStateException(value)
-          case Right(newTests) =>
-            tests = newTests
-        }
+        tests = tests.testFailed(runningScenario, timestamp).getOrThrow
 
       case StateEvent.TestSucceeded(runningScenario, timestamp) =>
-        tests.testSucceeded(runningScenario, timestamp) match {
-          case Left(error) => throw new IllegalStateException(error)
-          case Right(newTests) =>
-            tests = newTests
-        }
-
-      case _ =>
+        tests = tests.testSucceeded(runningScenario, timestamp).getOrThrow
     }
-  }
 
   def createReport(): Unit = ???
 
-  override def addScreenshotOnEnterAt(pageUrl: String, runningScenario: RunningScenario): Either[String, File] =
+  override def addScreenshotOnEnterAt(pageUrl: String, runningScenario: RunningScenario): Either[String, (Tests, File)] =
     addScreenshot(runningScenario, pageUrl, ON_ENTER_PAGE)
 
-  override def addScreenshotOnExitAt(pageUrl: String, runningScenario: RunningScenario): Either[String, File] =
+  override def addScreenshotOnExitAt(pageUrl: String, runningScenario: RunningScenario): Either[String, (Tests, File)] =
     addScreenshot(runningScenario, pageUrl, ON_EXIT_PAGE)
 
-  private def addScreenshot(testRunningInfo: RunningScenario, pageUrl: String, screenshotMoment: ScreenshotMoment): Either[String, File] =
+  private def addScreenshot(testRunningInfo: RunningScenario, pageUrl: String, screenshotMoment: ScreenshotMoment): Either[String, (Tests, File)] =
     tests
-      .addScreenshot(testRunningInfo, pageUrl, screenshotMoment) match {
-      case Left(error) => throw new IllegalStateException(error)
-      case Right(newTests) =>
-        tests = newTests._1
-        Right(new File(root.getAbsolutePath + File.separator + newTests._2))
-    }
+      .addScreenshot(testRunningInfo, pageUrl, screenshotMoment)
+      .map(r => (r._1, new File(root.getAbsolutePath + File.separator + r._2)))
 
 }
 
 object ScreenshotUtils {
-  def createScreenshotOnEnter(scrFile: File, pageUrl: String, state: State, testRunningInfo: RunningScenario): Unit = {
-    state.addScreenshotOnEnterAt(pageUrl, testRunningInfo) match {
-      case Left(error)        => throw new IllegalStateException(error)
-      case Right(destination) => FileUtils.copyFile(scrFile, destination)
-    }
-  }
+  def createScreenshotOnEnter(scrFile: File, pageUrl: String, state: State, testRunningInfo: RunningScenario): Unit =
+    state
+      .addScreenshotOnEnterAt(pageUrl, testRunningInfo)
+      .map((r: (Tests, File)) => FileUtils.copyFile(scrFile, r._2))
+      .getOrThrow
 
-  def createScreenshotOnExit(scrFile: File, pageUrl: String, state: State, testRunningInfo: RunningScenario): Unit = {
-    state.addScreenshotOnExitAt(pageUrl, testRunningInfo) match {
-      case Left(error)        => throw new IllegalStateException(error)
-      case Right(destination) => FileUtils.copyFile(scrFile, destination)
-    }
-  }
+  def createScreenshotOnExit(scrFile: File, pageUrl: String, state: State, testRunningInfo: RunningScenario): Unit =
+    state
+      .addScreenshotOnExitAt(pageUrl, testRunningInfo)
+      .map((r: (Tests, File)) => FileUtils.copyFile(scrFile, r._2))
+      .getOrThrow
 }
 
 trait StateEvent
-
 object StateEvent {
   case class TestStarting(runningScenario: RunningScenario, timestamp: Long) extends StateEvent
 
@@ -324,7 +305,6 @@ object StateEvent {
 }
 
 sealed trait TestOutcome
-
 object TestOutcome {
   case object SUCCEEDED extends TestOutcome
 
@@ -334,9 +314,7 @@ object TestOutcome {
 }
 
 sealed trait ScreenshotMoment
-
 object ScreenshotMoment {
   case object ON_ENTER_PAGE extends ScreenshotMoment
-
   case object ON_EXIT_PAGE extends ScreenshotMoment
 }

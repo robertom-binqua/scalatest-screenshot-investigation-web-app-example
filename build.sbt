@@ -23,6 +23,7 @@ lazy val root = (project in file("."))
       "ch.qos.logback" % "logback-core" % LogbackVersion,
       "org.slf4j" % "jcl-over-slf4j" % "2.0.17",
       "org.slf4j" % "slf4j-api" % "2.0.17",
+      "org.typelevel" %% "cats-effect" % "3.6.1",
       "org.scalameta" %% "munit" % MunitVersion % "test",
       "org.typelevel" %% "munit-cats-effect-3" % MunitCatsEffectVersion % "test",
       "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0" % "test",

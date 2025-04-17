@@ -1,5 +1,6 @@
 package org.binqua.examples.http4sapp
 
+import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
 import org.binqua.examples.http4sapp.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.binqua.examples.http4sapp.TestOutcome.{FAILED, STARTING, SUCCEEDED}
@@ -40,7 +41,7 @@ class ScenariosSpec extends FunSuite {
       )
     )
 
-    assertEquals(actual2.map(_._1), Right(expected2))
+    assertEquals(actual2.map(_._1), expected2.asRight)
 
   }
   test("we cannot add screenshots to a scenario that is in FAILED state") {
@@ -50,7 +51,7 @@ class ScenariosSpec extends FunSuite {
     val actual1: Either[String, (Scenarios, File)] =
       Scenarios(scenarios = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
 
-    assertEquals(actual1.map(_._1), Left("Sorry last scenario does not have testOutcome equal to STARTING but FAILED"))
+    assertEquals(actual1.map(_._1), "Sorry last scenario does not have testOutcome equal to STARTING but FAILED".asLeft)
 
   }
   test("we cannot add screenshots to a scenario that is in SUCCEEDED state") {
@@ -60,7 +61,7 @@ class ScenariosSpec extends FunSuite {
     val actual1: Either[String, (Scenarios, File)] =
       Scenarios(scenarios = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
 
-    assertEquals(actual1.map(_._1), Left("Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED"))
+    assertEquals(actual1.map(_._1), "Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED".asLeft)
 
   }
 

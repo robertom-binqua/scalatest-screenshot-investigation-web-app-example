@@ -59,10 +59,10 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
       println(s"afterAnyCall ${target.getClass} ")
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
         ScreenshotUtils.createScreenshotOnExit(
-          driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
-          driver.getCurrentUrl,
-          TheState,
-          TheState.tests.runningTest.get
+          scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
+          pageUrl = driver.getCurrentUrl,
+          state = TheState,
+          testRunningInfo = TheState.tests.runningTest.get
         )
       }
     }
