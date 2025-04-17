@@ -1,4 +1,4 @@
-package org.binqua.examples.http4sapp
+package org.binqua.examples.http4sapp.app
 
 import org.scalatest.Reporter
 import org.scalatest.events._
@@ -12,7 +12,7 @@ class ScreenshotReporterImpl extends Reporter {
       case TestStarting(ordinal, _, testName, _, feature, scenario, _, _, _, _, _, timestamp) => {
         state.add(StateEvent.TestStarting(RunningScenario(ordinal, testName, feature, scenario), timestamp))
       }
-      case tf @ TestFailed(ordinal, _, _, testName, _, feature, scenario, _, _, _, _, _, _, _, _, _, timestamp) => {
+      case TestFailed(ordinal, _, _, testName, _, feature, scenario, _, _, _, _, _, _, _, _, _, timestamp) => {
         state.add(StateEvent.TestFailed(RunningScenario(ordinal, testName, feature, scenario), timestamp))
       }
       case TestSucceeded(ordinal, _, testName, _, feature, scenario, _, _, _, _, _, _, _, timestamp) => {

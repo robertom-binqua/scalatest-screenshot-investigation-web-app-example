@@ -1,8 +1,8 @@
-package org.binqua.examples.http4sapp
+package org.binqua.examples.http4sapp.app
 
 import munit.FunSuite
-import org.binqua.examples.http4sapp.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
-import org.binqua.examples.http4sapp.TestOutcome.STARTING
+import org.binqua.examples.http4sapp.app.ScreenshotMoment._
+import org.binqua.examples.http4sapp.app.TestOutcome._
 import org.scalatest.events.Ordinal
 
 import java.io.File

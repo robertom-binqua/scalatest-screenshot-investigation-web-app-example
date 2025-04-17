@@ -1,4 +1,4 @@
-package org.binqua.examples.http4sapp
+package org.binqua.examples.http4sapp.app
 
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.remote.RemoteWebElement

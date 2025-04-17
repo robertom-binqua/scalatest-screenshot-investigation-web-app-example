@@ -1,9 +1,12 @@
-package org.binqua.examples.http4sapp
+package org.binqua.examples.http4sapp.app
 
 import cats.implicits.catsSyntaxEitherId
+import io.circe.generic.semiauto.deriveEncoder
+import io.circe.syntax.EncoderOps
+import io.circe.{Encoder, Json}
 import org.apache.commons.io.FileUtils
-import org.binqua.examples.http4sapp.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
-import org.binqua.examples.http4sapp.TestOutcome._
+import org.binqua.examples.http4sapp.app.ScreenshotMoment._
+import org.binqua.examples.http4sapp.app.TestOutcome._
 import org.binqua.examples.http4sapp.util.utils.EitherOps
 import org.scalatest.events.Ordinal
 
@@ -20,13 +23,28 @@ trait State {
 
 }
 
+object Screenshot {
+  implicit val encoder: Encoder[Screenshot] = (screenshot: Screenshot) => Json.obj("location" -> Json.fromString(screenshot.toFile.toString))
+}
+
 case class Screenshot(pageUrl: String, screenshotMoment: ScreenshotMoment, ordinal: Ordinal, index: Int) {
-  def toFile: File = new File(ordinal.toList.mkString("_") + File.separator + s"screenshot_${index}_$screenshotMoment.png")
+  def toFile: File = new File(s"scenario_ordinal_${ordinal.toList.mkString("_")}" + File.separator + s"screenshot_${index}_$screenshotMoment.png")
 }
 
 object Scenario {
-  def starting(ordinal: Ordinal, scenarioDescription: String, timestamp: Long): Scenario =
-    Scenario(ordinal, scenarioDescription, timestamp, None, None, TestOutcome.STARTING)
+  implicit val ordinalEncoder: Encoder[Ordinal] = (ordinal: Ordinal) => Json.fromString(ordinal.toList.mkString("_"))
+  implicit val encoder: Encoder[Scenario] = deriveEncoder[Scenario]
+
+  def starting(ordinal: Ordinal, name: String, timestamp: Long): Scenario =
+    Scenario(
+      ordinal = ordinal,
+      description = name,
+      startedTimestamp = timestamp,
+      finishedTimestamp = None,
+      screenshots = None,
+      testOutcome = TestOutcome.STARTING
+    )
+
 }
 
 case class Scenario(
@@ -46,6 +64,11 @@ case class Scenario(
   }
 }
 
+object Scenarios {
+  implicit val encoder: Encoder[Scenarios] = Encoder.instance { scenario =>
+    scenario.scenarios.values.asJson
+  }
+}
 case class Scenarios(scenarios: Map[String, Scenario]) {
   def testUpdate(scenarioDescription: String, timestamp: Long, newState: TestOutcome): Either[String, Scenarios] =
     scenarios.get(scenarioDescription) match {
@@ -79,6 +102,15 @@ case class Scenarios(scenarios: Map[String, Scenario]) {
           s"Sorry last scenario does not have testOutcome equal to STARTING but ${lastScenario.testOutcome}".asLeft
       )
 
+}
+
+object Feature {
+  implicit val featureEncoder: Encoder[Feature] = Encoder.instance { feature =>
+    Json.obj(
+      "description" -> Json.fromString(feature.description),
+      "scenarios" -> feature.scenarios.asJson
+    )
+  }
 }
 
 case class Feature(description: String, scenarios: Scenarios) {
@@ -151,6 +183,8 @@ object Features {
 }
 
 object Tests {
+  implicit val encoder: Encoder[Tests] = (tests: Tests) => tests.tests.values.asJson
+
   val empty: Tests = Tests(Map.empty)
 }
 
@@ -202,7 +236,7 @@ case class Tests(tests: Map[String, Test]) {
   def testFailed(runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
     tests
       .get(runningScenario.test)
-      .toRight("s\"I was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist\"")
+      .toRight("sI was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist")
       .flatMap(
         _.markAsFailed(runningScenario.feature, runningScenario.scenario, timestamp)
           .map(tests.updated(runningScenario.test, _))
@@ -221,6 +255,14 @@ case class Tests(tests: Map[String, Test]) {
 
 }
 
+object Test {
+  implicit val encoder: Encoder[Test] = (test: Test) =>
+    Json.obj(
+      "name" -> Json.fromString(test.name),
+      "features" -> test.features.features.values.asJson
+    )
+
+}
 case class Test(name: String, features: Features) {
 
   def withNewFeatureOrScenario(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Test] =
@@ -306,6 +348,9 @@ object StateEvent {
 
 sealed trait TestOutcome
 object TestOutcome {
+
+  implicit val encoder: Encoder[TestOutcome] = (a: TestOutcome) => Json.fromString(a.toString.toLowerCase)
+
   case object SUCCEEDED extends TestOutcome
 
   case object FAILED extends TestOutcome

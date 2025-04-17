@@ -1,11 +1,10 @@
-package org.binqua.examples.http4sapp
+package org.binqua.examples.http4sapp.app
 
 import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
-import org.binqua.examples.http4sapp.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
-import org.binqua.examples.http4sapp.TestOutcome.{FAILED, STARTING, SUCCEEDED}
 import org.scalatest.events.Ordinal
-
+import org.binqua.examples.http4sapp.app.ScreenshotMoment._
+import org.binqua.examples.http4sapp.app.TestOutcome._
 import java.io.File
 
 class ScenariosSpec extends FunSuite {
