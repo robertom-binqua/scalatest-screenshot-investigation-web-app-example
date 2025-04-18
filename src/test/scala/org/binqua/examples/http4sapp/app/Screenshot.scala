@@ -6,7 +6,12 @@ import org.scalatest.events.Ordinal
 import java.io.File
 
 object Screenshot {
-  implicit val encoder: Encoder[Screenshot] = (screenshot: Screenshot) => Json.obj("location" -> Json.fromString(screenshot.toFile.toString))
+  implicit val encoder: Encoder[Screenshot] = (screenshot: Screenshot) => Json.obj(
+    "location" -> Json.fromString(screenshot.toFile.toString),
+    "pageUrl" -> Json.fromString(screenshot.pageUrl),
+    "index" -> Json.fromInt(screenshot.index),
+    "screenshotMoment" -> Json.fromString(screenshot.screenshotMoment.toString)
+  )
 }
 
 case class Screenshot(pageUrl: String, screenshotMoment: ScreenshotMoment, ordinal: Ordinal, index: Int) {

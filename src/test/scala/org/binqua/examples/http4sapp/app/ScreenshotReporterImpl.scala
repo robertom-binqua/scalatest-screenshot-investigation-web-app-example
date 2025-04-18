@@ -3,7 +3,7 @@ package org.binqua.examples.http4sapp.app
 import org.scalatest.Reporter
 import org.scalatest.events._
 
-object ScreenshotReporterRunner extends Reporter {
+class ScreenshotReporterRunner extends Reporter {
   val reporter = new ScreenshotReporterImpl(TestsCollector.testsCollector)
   override def apply(event: Event): Unit = reporter.apply(event)
 }

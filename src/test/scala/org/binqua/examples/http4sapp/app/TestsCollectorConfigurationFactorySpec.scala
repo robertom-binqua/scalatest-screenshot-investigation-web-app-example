@@ -43,8 +43,8 @@ class TestsCollectorConfigurationFactorySpec extends FunSuite {
     val expectedReportDir = new File(expRoot.getAbsoluteFile + File.separator + "report")
     val expectedScreenshotDir = new File(expRoot.getAbsoluteFile + File.separator + "screenshots")
 
-    assertEquals(actual.map(_.reportLocation), expectedReportDir.asRight)
-    assertEquals(actual.map(_.screenshotLocation), expectedScreenshotDir.asRight)
+    assertEquals(actual.map(_.reportRootLocation), expectedReportDir.asRight)
+    assertEquals(actual.map(_.screenshotsRootLocation), expectedScreenshotDir.asRight)
 
     assertEquals(expectedReportDir.exists(), true)
     assertEquals(expectedScreenshotDir.exists(), true)

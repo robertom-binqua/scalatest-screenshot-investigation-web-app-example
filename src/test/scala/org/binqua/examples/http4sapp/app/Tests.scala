@@ -36,8 +36,9 @@ case class Tests(tests: Map[String, Test]) {
     tests
       .get(runningScenario.test)
       .toRight("I cannot add screenshots because there are no tests")
-      .flatMap(
-        _.addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, pageUrl, screenshotMoment)
+      .flatMap((runningTest: Test) =>
+        runningTest
+          .addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, pageUrl, screenshotMoment)
           .map((updatedTest: (Test, File)) => {
             val newTests = Tests(tests = tests.updated(runningScenario.test, updatedTest._1))
             (newTests, updatedTest._2)
