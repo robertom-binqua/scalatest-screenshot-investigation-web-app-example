@@ -7,7 +7,6 @@ import org.scalatest.events.Ordinal
 
 import java.io.File
 
-
 object Scenarios {
   implicit val encoder: Encoder[Scenarios] = Encoder.instance { scenario =>
     scenario.scenarios.values.asJson

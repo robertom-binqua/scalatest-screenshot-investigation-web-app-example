@@ -31,6 +31,7 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
   }
 
   class Listener(driver: WebDriver) extends WebDriverListener {
+    val testsCollector: TestsCollector = TestsCollector.testsCollector
     override def beforeAnyCall(target: AnyRef, method: Method, args: Array[AnyRef]): Unit = {
       //      val driver = target.asInstanceOf[ChromeDriver]
       //      println(s"driver $driver")
@@ -46,24 +47,18 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
         println(s"text ${element.getText}")
       }
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
-        ScreenshotUtils.createScreenshotOnEnter(
-          scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
-          pageUrl = driver.getCurrentUrl,
-          state = TheState,
-          testRunningInfo = TheState.tests.runningTest.get
-        )
+        testsCollector
+          .addScreenshotOnEnterAt(
+            scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
+            pageUrl = driver.getCurrentUrl)
       }
     }
 
     override def afterAnyCall(target: AnyRef, method: Method, args: Array[AnyRef], result: AnyRef): Unit = {
       println(s"afterAnyCall ${target.getClass} ")
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
-        ScreenshotUtils.createScreenshotOnExit(
-          scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
-          pageUrl = driver.getCurrentUrl,
-          state = TheState,
-          testRunningInfo = TheState.tests.runningTest.get
-        )
+        testsCollector
+          .addScreenshotOnExitAt(scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), pageUrl = driver.getCurrentUrl)
       }
     }
   }

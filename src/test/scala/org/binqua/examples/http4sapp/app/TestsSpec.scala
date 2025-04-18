@@ -1,11 +1,11 @@
 package org.binqua.examples.http4sapp.app
 
-import org.binqua.examples.http4sapp.app.ScreenshotMoment._
-import org.binqua.examples.http4sapp.app.TestOutcome._
 import cats.implicits.catsSyntaxEitherId
 import io.circe.syntax.EncoderOps
 import munit.FunSuite
 import org.binqua.examples.http4sapp
+import org.binqua.examples.http4sapp.app.ScreenshotMoment._
+import org.binqua.examples.http4sapp.app.TestOutcome._
 import org.scalatest.events.Ordinal
 
 import java.io.File
@@ -58,12 +58,11 @@ class TestsSpec extends FunSuite {
 
     assertEquals(actualTest3.map(_._1), Right(expectedTests3))
 
+    val result: Either[String, RunningScenario] = actualTest3.flatMap(_._1.runningTest)
+
     assertEquals(
-      actualTest3
-        .map(_._1.runningTest)
-        .toOption
-        .flatten,
-      Some(RunningScenario(expScenario1.ordinal, expTest1.name, expFeature1.description, expScenario1.description))
+      obtained = result,
+      expected = RunningScenario(expScenario1.ordinal, expTest1.name, expFeature1.description, expScenario1.description).asRight
     )
 
   }
@@ -76,7 +75,7 @@ class TestsSpec extends FunSuite {
       .testStarting(runningScenario, timestamp = 1L)
       .flatMap(_.testSucceeded(runningScenario, timestamp = 2L))
 
-    assertEquals(actualTests.map(_.runningTest.get), Right(runningScenario))
+    assertEquals(actualTests.flatMap(_.runningTest), runningScenario.asRight)
 
     val invalidTests: Either[String, (Tests, File)] = actualTests.flatMap(_.addScreenshot(runningScenario, "url", ON_EXIT_PAGE))
 
@@ -92,7 +91,7 @@ class TestsSpec extends FunSuite {
       .testStarting(runningScenario, timestamp = 1L)
       .flatMap(_.testFailed(runningScenario, timestamp = 2L))
 
-    assertEquals(actualTests.map(_.runningTest.get), Right(runningScenario))
+    assertEquals(actualTests.flatMap(_.runningTest), Right(runningScenario))
 
     val invalidTests: Either[String, (Tests, File)] = actualTests.flatMap(_.addScreenshot(runningScenario, "url", ON_EXIT_PAGE))
 

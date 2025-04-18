@@ -15,7 +15,7 @@ object Tests {
 
 case class Tests(tests: Map[String, Test]) {
 
-  def runningTest: Option[RunningScenario] = {
+  def runningTest: Either[String, RunningScenario] = {
     val result: Iterable[(Test, Feature, Scenario, Ordinal)] = for {
       test <- tests.values
       feature <- test.features.features.values
@@ -25,6 +25,7 @@ case class Tests(tests: Map[String, Test]) {
     result.toList
       .sortWith((l, r) => l._4 > r._4)
       .headOption
+      .toRight("There are not tests here dude")
       .map(result => {
         val (test, feature, scenario, ordinal) = result
         RunningScenario(ordinal, test.name, feature.description, scenario.description)
