@@ -21,13 +21,14 @@ class TestsCollectorImpSpec extends FunSuite {
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
-    testsCollectorImpl.addScreenshotOnEnterAt(Files.createTempFile("doesNotMatter", "png").toFile, "url1")
+    testsCollectorImpl.addScreenshotOnEnterAt(aDummyScreenshot, "url1")
     testsCollectorImpl.add(StateEvent.TestSucceeded(runningScenario = runningScenario, timestamp = 2L))
 
     val newRunningScenario = runningScenario.copy(test = "t1", ordinal = runningScenario.ordinal.next)
 
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = newRunningScenario, timestamp = 3L))
-    testsCollectorImpl.addScreenshotOnEnterAt(Files.createTempFile("doesNotMatter", "png").toFile, "url1")
+    testsCollectorImpl.addScreenshotOnEnterAt(aDummyScreenshot, "url1")
+    testsCollectorImpl.addScreenshotOnExitAt(aDummyScreenshot, "url2")
     testsCollectorImpl.add(StateEvent.TestSucceeded(runningScenario = newRunningScenario, timestamp = 4L))
 
     assertEquals(screenshotsRoot.exists(), true)
@@ -52,7 +53,10 @@ class TestsCollectorImpSpec extends FunSuite {
                             |            "finishedTimestamp" : 2,
                             |            "screenshots" : [
                             |              {
-                            |                "location" : "scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png"
+                            |                "location" : "scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png",
+                            |                "pageUrl" : "url1",
+                            |                "index" : 1,
+                            |                "screenshotMoment" : "ON_ENTER_PAGE"
                             |              }
                             |            ],
                             |            "testOutcome" : "succeeded"
@@ -74,7 +78,16 @@ class TestsCollectorImpSpec extends FunSuite {
                             |            "finishedTimestamp" : 4,
                             |            "screenshots" : [
                             |              {
-                            |                "location" : "scenario_ordinal_1_1/screenshot_1_ON_ENTER_PAGE.png"
+                            |                "location" : "scenario_ordinal_1_1/screenshot_2_ON_EXIT_PAGE.png",
+                            |                "pageUrl" : "url2",
+                            |                "index" : 2,
+                            |                "screenshotMoment" : "ON_EXIT_PAGE"
+                            |              },
+                            |              {
+                            |                "location" : "scenario_ordinal_1_1/screenshot_1_ON_ENTER_PAGE.png",
+                            |                "pageUrl" : "url1",
+                            |                "index" : 1,
+                            |                "screenshotMoment" : "ON_ENTER_PAGE"
                             |              }
                             |            ],
                             |            "testOutcome" : "succeeded"
@@ -89,8 +102,13 @@ class TestsCollectorImpSpec extends FunSuite {
 
     assertEquals(new File(screenshotsRoot.getAbsolutePath + replaceWithFileSeparator("/scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png")).exists(), true)
     assertEquals(new File(screenshotsRoot.getAbsolutePath + replaceWithFileSeparator("/scenario_ordinal_1_1/screenshot_1_ON_ENTER_PAGE.png")).exists(), true)
+    assertEquals(new File(screenshotsRoot.getAbsolutePath + replaceWithFileSeparator("/scenario_ordinal_1_1/screenshot_2_ON_EXIT_PAGE.png")).exists(), true)
 
   }
 
-  private def replaceWithFileSeparator(withForwardSlash: String): String = withForwardSlash.replaceAll("/",File.separator)
+  private def aDummyScreenshot = {
+    Files.createTempFile("doesNotMatter", "png").toFile
+  }
+
+  private def replaceWithFileSeparator(withForwardSlash: String): String = withForwardSlash.replaceAll("/", File.separator)
 }
