@@ -1,0 +1,45 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run Spec test to try the report generation" type="ScalaTestRunConfiguration" factoryName="ScalaTest" show_console_on_std_err="false" show_console_on_std_out="false">
+    <module name="scalatest-screenshot-investigation-web-app-example.test" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+      </ENTRIES>
+    </extension>
+    <option name="VMParameters" value="-DreportDestinationRoot=report-destination-root" />
+    <option name="allowRunningInParallel" value="false" />
+    <option name="alternativeJrePath" />
+    <option name="alternativeJrePathEnabled" value="false" />
+    <option name="classpathModifications">
+      <list />
+    </option>
+    <option name="envFilePaths">
+      <list />
+    </option>
+    <option name="envs">
+      <map />
+    </option>
+    <option name="passParentEnvs" value="true" />
+    <option name="programParameters" value="-C  org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
+    <option name="projectPathOnTarget" />
+    <option name="selectedOptions">
+      <list />
+    </option>
+    <option name="testKind" value="Class" />
+    <option name="workingDirectory" value="$PROJECT_DIR$" />
+    <option name="javaOptions" value="-DreportDestinationRoot=report-destination-root" />
+    <option name="programParameters" value="-C  org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
+    <option name="shortenClasspath" value="NONE" />
+    <option name="testArgs" value="-C  org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
+    <option name="testClassPath" value="org.binqua.examples.http4sapp.selenium.AppSpec1" />
+    <option name="workingDirectory" value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

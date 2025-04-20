@@ -5,28 +5,40 @@ import org.scalatest.events.Ordinal
 
 import java.io.File
 
-case class Features(features: Map[String, Feature]) {
+case class Features(featuresMap: Map[String, Feature]) {
 
   def testUpdated(featureDescription: String, scenarioDescription: String, updatedTimestamp: Long, newState: TestOutcome): Either[String, Features] =
-    features.get(featureDescription) match {
+    featuresMap.get(featureDescription) match {
       case Some(featureFound) =>
         featureFound.scenarios
           .testUpdate(scenarioDescription, updatedTimestamp, newState)
           .map((updatedScenario: Scenarios) => featureFound.copy(scenarios = updatedScenario))
-          .map(updatedFeature => Features(features = features.updated(featureDescription, updatedFeature)))
+          .map(updatedFeature => Features(featuresMap = featuresMap.updated(featureDescription, updatedFeature)))
       case None => Left(s"last feature does not have featureDescription equals to $featureDescription")
     }
 
   def newTestStarting(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Features] =
-    features.get(featureDescription) match {
+    featuresMap.get(featureDescription) match {
       case Some(featureFound) =>
         featureFound
           .withNewScenario(ordinal, scenarioDescription, timestamp)
-          .map(updatedFeature => Features(features = features.updated(featureDescription, updatedFeature)))
+          .map(updatedFeature => Features(featuresMap = featuresMap.updated(featureDescription, updatedFeature)))
       case None =>
         val newF = Feature(
           featureDescription,
-          Scenarios(Map(scenarioDescription -> Scenario(ordinal, scenarioDescription, timestamp, None, None, TestOutcome.STARTING)))
+          Scenarios(
+            Map(
+              scenarioDescription -> Scenario(
+                ordinal = ordinal,
+                description = scenarioDescription,
+                startedTimestamp = timestamp,
+                finishedTimestamp = None,
+                screenshots = None,
+                steps = None,
+                testOutcome = TestOutcome.STARTING
+              )
+            )
+          )
         )
         Features(Map(featureDescription -> newF)).asRight
     }
@@ -38,7 +50,7 @@ case class Features(features: Map[String, Feature]) {
       pageUrl: String,
       screenshotMoment: ScreenshotMoment
   ): Either[String, (Features, File)] =
-    features
+    featuresMap
       .get(featureDescription)
       .toRight("there are not features. I cannot add a screenshot")
       .flatMap(feature =>
@@ -46,15 +58,28 @@ case class Features(features: Map[String, Feature]) {
           .withNewScreenshot(ordinal, scenarioDescription, pageUrl, screenshotMoment)
           .map((result: (Feature, File)) => {
             val (updateFeature, screenshotLocation) = result
-            (Features(features.updated(featureDescription, updateFeature)), screenshotLocation)
+            (Features(featuresMap.updated(featureDescription, updateFeature)), screenshotLocation)
           })
       )
 }
 
 object Features {
   def starting(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Features = {
-    val newScenarios = Scenarios(scenarios = Map(scenarioDescription -> Scenario(ordinal, scenarioDescription, timestamp, None, None, TestOutcome.STARTING)))
+    val newScenarios =
+      Scenarios(scenariosMap =
+        Map(
+          scenarioDescription -> Scenario(
+            ordinal = ordinal,
+            description = scenarioDescription,
+            startedTimestamp = timestamp,
+            finishedTimestamp = None,
+            screenshots = None,
+            steps = None,
+            testOutcome = TestOutcome.STARTING
+          )
+        )
+      )
     val newFeature = Feature(description = featureDescription, scenarios = newScenarios)
-    Features(features = Map(featureDescription -> newFeature))
+    Features(featuresMap = Map(featureDescription -> newFeature))
   }
 }

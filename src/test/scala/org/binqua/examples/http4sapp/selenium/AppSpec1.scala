@@ -11,6 +11,17 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
 
   Feature("f1: Navigation bar should work") {
     Scenario("s1: we can go from home to page3") {
+      Given("1")
+      note("test")
+      When("2")
+      Then("3")
+      And("4")
+      note("5")
+      note("6")
+      Given("7")
+      When("8")
+      Then("9")
+
       go to (host + "home.html")
       pageTitle should be("Home")
 

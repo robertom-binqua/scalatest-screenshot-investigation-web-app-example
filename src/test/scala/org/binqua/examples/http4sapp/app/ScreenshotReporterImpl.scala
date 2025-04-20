@@ -1,5 +1,6 @@
 package org.binqua.examples.http4sapp.app
 
+import org.binqua.examples.http4sapp.util.utils.EitherOps
 import org.scalatest.Reporter
 import org.scalatest.events._
 
@@ -21,8 +22,14 @@ class ScreenshotReporterImpl(testsCollector: TestsCollector) extends Reporter {
       case TestSucceeded(ordinal, _, testName, _, feature, scenario, _, _, _, _, _, _, _, timestamp) =>
         testsCollector.add(StateEvent.TestSucceeded(RunningScenario(ordinal, testName, feature, scenario), timestamp))
 
-      case NoteProvided(ordinal, message, nameInfo, _, _, _, _, _, _) =>
-        println(s"NoteProvided $ordinal $message $nameInfo")
+      case NoteProvided(ordinal, message, Some(NameInfo(_, _, Some(suiteClassName), Some(testName))), throwable , _, _, _, _, timestamp) =>
+        org.binqua.examples.http4sapp.app.Utils
+          .toFeatureAndScenario(suiteClassName)
+          .map(input => {
+            val (featureName, scenarioName) = input
+            testsCollector.add(StateEvent.Note(RunningScenario(ordinal = ordinal, test = testName, featureName, scenarioName), message, throwable, timestamp))
+          })
+          .getOrThrow
 
       case e =>
         println(s"info $e}")

@@ -21,10 +21,11 @@ class TestsSpec extends FunSuite {
         startedTimestamp = 1L,
         finishedTimestamp = Option.empty,
         screenshots = Option.empty,
+        steps = Option.empty,
         testOutcome = STARTING
       )
-    val expFeature1 = Feature(description = "feature desc", scenarios = Scenarios(scenarios = Map(expScenario1.description -> expScenario1)))
-    val expTest1 = Test("test desc", Features(features = Map(expFeature1.description -> expFeature1)))
+    val expFeature1 = Feature(description = "feature desc", scenarios = Scenarios(scenariosMap = Map(expScenario1.description -> expScenario1)))
+    val expTest1 = Test("test desc", Features(featuresMap = Map(expFeature1.description -> expFeature1)))
     val expTests1: Tests = Tests(tests = Map(expTest1.name -> expTest1))
 
     val runningScenario = RunningScenario(expScenario1.ordinal, expTest1.name, feature = expFeature1.description, expScenario1.description)
@@ -35,8 +36,8 @@ class TestsSpec extends FunSuite {
     val secondActualTests: Either[String, (Tests, File)] = firstActualTests.flatMap(test => { test.addScreenshot(runningScenario, "url1", ON_ENTER_PAGE) })
 
     val expScenario2 = expScenario1.copy(screenshots = Some(List(Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1))))
-    val expFeature2 = expFeature1.copy(scenarios = Scenarios(scenarios = Map(expScenario2.description -> expScenario2)))
-    val expTest2 = expTest1.copy(features = Features(features = Map(expFeature2.description -> expFeature2)))
+    val expFeature2 = expFeature1.copy(scenarios = Scenarios(scenariosMap = Map(expScenario2.description -> expScenario2)))
+    val expTest2 = expTest1.copy(features = Features(featuresMap = Map(expFeature2.description -> expFeature2)))
     val expectedTests2: Tests = Tests(tests = Map(expTest2.name -> expTest2))
 
     assertEquals(secondActualTests.map(_._1), Right(expectedTests2))
@@ -52,8 +53,8 @@ class TestsSpec extends FunSuite {
         )
       )
     )
-    val expFeature3: Feature = expFeature2.copy(scenarios = Scenarios(scenarios = Map(expScenario3.description -> expScenario3)))
-    val expTest3: http4sapp.app.Test = expTest2.copy(features = Features(features = Map(expFeature3.description -> expFeature3)))
+    val expFeature3: Feature = expFeature2.copy(scenarios = Scenarios(scenariosMap = Map(expScenario3.description -> expScenario3)))
+    val expTest3: http4sapp.app.Test = expTest2.copy(features = Features(featuresMap = Map(expFeature3.description -> expFeature3)))
     val expectedTests3: Tests = Tests(tests = Map(expTest3.name -> expTest3))
 
     assertEquals(actualTest3.map(_._1), Right(expectedTests3))
@@ -132,10 +133,16 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "location" : "scenario_ordinal_1_0/screenshot_2_ON_EXIT_PAGE.png"
+        |                "location" : "scenario_ordinal_1_0/screenshot_2_ON_EXIT_PAGE.png",
+        |                "pageUrl" : "ulr21",
+        |                "index" : 2,
+        |                "screenshotMoment" : "ON_EXIT_PAGE"
         |              },
         |              {
-        |                "location" : "scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png"
+        |                "location" : "scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png",
+        |                "pageUrl" : "ulr11",
+        |                "index" : 1,
+        |                "screenshotMoment" : "ON_ENTER_PAGE"
         |              }
         |            ],
         |            "testOutcome" : "succeeded"
@@ -157,10 +164,16 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "location" : "scenario_ordinal_2_0/screenshot_2_ON_EXIT_PAGE.png"
+        |                "location" : "scenario_ordinal_2_0/screenshot_2_ON_EXIT_PAGE.png",
+        |                "pageUrl" : "ulr22",
+        |                "index" : 2,
+        |                "screenshotMoment" : "ON_EXIT_PAGE"
         |              },
         |              {
-        |                "location" : "scenario_ordinal_2_0/screenshot_1_ON_ENTER_PAGE.png"
+        |                "location" : "scenario_ordinal_2_0/screenshot_1_ON_ENTER_PAGE.png",
+        |                "pageUrl" : "ulr12",
+        |                "index" : 1,
+        |                "screenshotMoment" : "ON_ENTER_PAGE"
         |              }
         |            ],
         |            "testOutcome" : "failed"

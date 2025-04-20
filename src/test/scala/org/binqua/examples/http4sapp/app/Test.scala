@@ -11,8 +11,28 @@ object Test {
   implicit val encoder: Encoder[Test] = (test: Test) =>
     Json.obj(
       "name" -> Json.fromString(test.name),
-      "features" -> test.features.features.values.asJson
+      "features" -> test.features.featuresMap.values.asJson
     )
+
+  def addStep(
+      test: Test,
+      featureDescription: String,
+      scenarioDescription: String,
+      ordinal: Ordinal,
+      message: String,
+      throwable: Option[Throwable],
+      timestamp: Long
+  ): Either[String, Test] = {
+    test.features.featuresMap.get(featureDescription) match {
+      case Some(featureFound: Feature) =>
+        Scenarios
+          .withNewStep(featureFound.scenarios, scenarioDescription, ordinal, message, throwable, timestamp)
+          .map(updatedScenario => featureFound.copy(scenarios = updatedScenario))
+          .map(updatedFeature => Features(featuresMap = test.features.featuresMap.updated(featureDescription, updatedFeature)))
+          .map(updatedFeatures => test.copy(features = updatedFeatures))
+      case None => Left(s"feature does not have featureDescription equals to $featureDescription")
+    }
+  }
 
 }
 

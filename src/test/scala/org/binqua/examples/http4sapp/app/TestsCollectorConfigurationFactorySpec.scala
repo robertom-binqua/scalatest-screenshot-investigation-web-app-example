@@ -21,9 +21,9 @@ class TestsCollectorConfigurationFactorySpec extends FunSuite {
     val time = ZonedDateTime.of(2021, 2, 18, 13, 1, 2, 0, ZoneId.of("UTC"))
     val fixedClock: Clock = Clock.fixed(time.toInstant, time.getZone)
 
-    val actual: Either[String, TestsCollectorConfiguration] = TestsCollectorConfigurationFactory.create("exampleOfSystemPropertyKey", fixedClock)
+    val actual: Either[String, TestsCollectorConfiguration] = TestsCollectorConfigurationFactory.create("abc", fixedClock)
 
-    assertEquals(actual, "System property <exampleOfSystemPropertyKey> specifying the root dir of the report missing. I cannot proceed".asLeft)
+    assertEquals(actual, "The system property abc specifying the root dir of the report missing. I cannot proceed".asLeft)
 
   }
 

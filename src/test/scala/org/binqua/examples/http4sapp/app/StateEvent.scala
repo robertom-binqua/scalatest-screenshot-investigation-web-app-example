@@ -8,4 +8,6 @@ object StateEvent {
   case class TestFailed(runningScenario: RunningScenario, timestamp: Long) extends StateEvent
 
   case class TestSucceeded(runningScenario: RunningScenario, timestamp: Long) extends StateEvent
+
+  case class Note(runningScenario: RunningScenario, message: String, throwable: Option[Throwable], timestamp: Long) extends StateEvent
 }

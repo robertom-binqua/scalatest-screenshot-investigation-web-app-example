@@ -11,6 +11,23 @@ object Tests {
   implicit val encoder: Encoder[Tests] = (tests: Tests) => tests.tests.values.asJson
 
   val empty: Tests = Tests(Map.empty)
+
+  def addStep(
+      testsToBeUpdated: Tests,
+      runningScenario: RunningScenario,
+      message: String,
+      throwable: Option[Throwable],
+      timestamp: Long
+  ): Either[String, Tests] =
+    testsToBeUpdated.tests
+      .get(runningScenario.test)
+      .toRight(s"I was going to update test ${runningScenario.test} to succeeded but test ${runningScenario.test} does not exist")
+      .flatMap(test =>
+        Test
+          .addStep(test, runningScenario.feature, runningScenario.scenario, runningScenario.ordinal, message, throwable, timestamp)
+          .map(testsToBeUpdated.tests.updated(runningScenario.test, _))
+          .map(Tests(_))
+      )
 }
 
 case class Tests(tests: Map[String, Test]) {
@@ -18,8 +35,8 @@ case class Tests(tests: Map[String, Test]) {
   def runningTest: Either[String, RunningScenario] = {
     val result: Iterable[(Test, Feature, Scenario, Ordinal)] = for {
       test <- tests.values
-      feature <- test.features.features.values
-      scenario <- feature.scenarios.scenarios.values
+      feature <- test.features.featuresMap.values
+      scenario <- feature.scenarios.scenariosMap.values
     } yield (test, feature, scenario, scenario.ordinal)
 
     result.toList

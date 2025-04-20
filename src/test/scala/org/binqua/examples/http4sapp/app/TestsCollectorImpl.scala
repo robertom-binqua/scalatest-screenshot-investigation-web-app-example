@@ -27,7 +27,7 @@ trait TestsCollector {
 object TestsCollectorConfigurationFactory {
   def create(systemPropertyReportDestinationKey: String, fixedClock: Clock): Either[String, TestsCollectorConfiguration] =
     if (Strings.isNullOrEmpty(System.getProperty(systemPropertyReportDestinationKey)))
-      "System property <exampleOfSystemPropertyKey> specifying the root dir of the report missing. I cannot proceed".asLeft
+      s"The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed".asLeft
     else {
       val systemProperty = System.getProperty(systemPropertyReportDestinationKey)
       val root = new File(
@@ -92,6 +92,9 @@ class TestsCollectorImpl(testsCollectorConfiguration: TestsCollectorConfiguratio
 
       case StateEvent.TestSucceeded(runningScenario, timestamp) =>
         tests = tests.testSucceeded(runningScenario, timestamp).getOrThrow
+
+      case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
+        tests = Tests.addStep(tests, runningScenario, message, throwable, timestamp).getOrThrow
     }
 
   def createReport(): Unit = FileUtils.writeStringToFile(testsCollectorConfiguration.jsonReport, tests.asJson.spaces2, StandardCharsets.UTF_8)
