@@ -40,13 +40,17 @@ object Test {
 case class Test(name: String, features: Features) {
 
   def withNewFeatureOrScenario(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Test] =
-    features.newTestStarting(ordinal, featureDescription, scenarioDescription, timestamp).map(newFeatures => this.copy(features = newFeatures))
+    Features.newTestStarting(features, ordinal, featureDescription, scenarioDescription, timestamp).map(newFeatures => this.copy(features = newFeatures))
 
   def markAsFailed(featureDescription: String, scenarioDescription: String, recordedEvent: RecordedEvents, failedTimestamp: Long): Either[String, Test] =
-    features.testUpdated(featureDescription, scenarioDescription, recordedEvent, failedTimestamp, FAILED).map(newFeatures => this.copy(features = newFeatures))
+    Features
+      .testUpdated(features, featureDescription, scenarioDescription, recordedEvent, failedTimestamp, FAILED)
+      .map(newFeatures => this.copy(features = newFeatures))
 
   def markAsSucceeded(featureDescription: String, scenarioDescription: String, recordedEvent: RecordedEvents, timestamp: Long): Either[String, Test] =
-    features.testUpdated(featureDescription, scenarioDescription, recordedEvent, timestamp, SUCCEEDED).map(newFeatures => this.copy(features = newFeatures))
+    Features
+      .testUpdated(features, featureDescription, scenarioDescription, recordedEvent, timestamp, SUCCEEDED)
+      .map(newFeatures => this.copy(features = newFeatures))
 
   def addScreenshot(
       ordinal: Ordinal,
@@ -55,8 +59,8 @@ case class Test(name: String, features: Features) {
       pageUrl: String,
       screenshotMoment: ScreenshotMoment
   ): Either[String, (Test, File)] =
-    features
-      .addScreenshot(ordinal, featureDescription, scenarioDescription, pageUrl, screenshotMoment)
+    Features
+      .addScreenshot(features, ordinal, featureDescription, scenarioDescription, pageUrl, screenshotMoment)
       .map(result => {
         val (features, file) = result
         (this.copy(features = features), file)

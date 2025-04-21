@@ -6,58 +6,59 @@ import org.scalatest.events.Ordinal
 
 import java.io.File
 
-case class Features(featuresMap: Map[String, Feature]) {
+object Features {
+  def starting(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Features = {
+    val newScenarios =
+      Scenarios(scenariosMap = Map(scenarioDescription -> Scenario.starting(ordinal, scenarioDescription, timestamp)))
+    val newFeature = Feature(description = featureDescription, scenarios = newScenarios)
+    Features(featuresMap = Map(featureDescription -> newFeature))
+  }
 
   def testUpdated(
+      features: Features,
       featureDescription: String,
       scenarioDescription: String,
       recordedEvent: RecordedEvents,
       updatedTimestamp: Long,
       newState: TestOutcome
   ): Either[String, Features] =
-    featuresMap
+    features.featuresMap
       .get(featureDescription)
       .toRight(s"last feature does not have featureDescription equals to $featureDescription")
       .flatMap(featureFound =>
         featureFound.scenarios
           .testUpdate(scenarioDescription, updatedTimestamp, recordedEvent, newState)
           .map((updatedScenario: Scenarios) => featureFound.copy(scenarios = updatedScenario))
-          .map(updatedFeature => Features(featuresMap = featuresMap.updated(featureDescription, updatedFeature)))
+          .map(updatedFeature => Features(featuresMap = features.featuresMap.updated(featureDescription, updatedFeature)))
       )
 
-  def newTestStarting(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Features] =
-    featuresMap.get(featureDescription) match {
+  def newTestStarting(
+      features: Features,
+      ordinal: Ordinal,
+      featureDescription: String,
+      scenarioDescription: String,
+      timestamp: Long
+  ): Either[String, Features] =
+    features.featuresMap.get(featureDescription) match {
       case Some(featureFound) =>
         featureFound
           .withNewScenario(ordinal, scenarioDescription, timestamp)
-          .map(updatedFeature => Features(featuresMap = featuresMap.updated(featureDescription, updatedFeature)))
+          .map(updatedFeature => Features(featuresMap = features.featuresMap.updated(featureDescription, updatedFeature)))
       case None =>
-        val newScenarios =
-          Scenarios(scenariosMap =
-            Map(
-              scenarioDescription -> Scenario(
-                ordinal = ordinal,
-                description = scenarioDescription,
-                startedTimestamp = timestamp,
-                finishedTimestamp = None,
-                screenshots = None,
-                steps = None,
-                testOutcome = TestOutcome.STARTING
-              )
-            )
-          )
+        val newScenarios = Scenarios(scenariosMap = Map(scenarioDescription -> Scenario.starting(ordinal, scenarioDescription, timestamp)))
         val newFeature = Feature(description = featureDescription, scenarios = newScenarios)
-        Features(featuresMap =  featuresMap.updated(featureDescription, newFeature)).asRight
+        Features(featuresMap = features.featuresMap.updated(featureDescription, newFeature)).asRight
     }
 
   def addScreenshot(
+      features: Features,
       ordinal: Ordinal,
       featureDescription: String,
       scenarioDescription: String,
       pageUrl: String,
       screenshotMoment: ScreenshotMoment
   ): Either[String, (Features, File)] =
-    featuresMap
+    features.featuresMap
       .get(featureDescription)
       .toRight("there are not features. I cannot add a screenshot")
       .flatMap(feature =>
@@ -65,28 +66,9 @@ case class Features(featuresMap: Map[String, Feature]) {
           .withNewScreenshot(ordinal, scenarioDescription, pageUrl, screenshotMoment)
           .map((result: (Feature, File)) => {
             val (updateFeature, screenshotLocation) = result
-            (Features(featuresMap.updated(featureDescription, updateFeature)), screenshotLocation)
+            (Features(features.featuresMap.updated(featureDescription, updateFeature)), screenshotLocation)
           })
       )
 }
 
-object Features {
-  def starting(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Features = {
-    val newScenarios =
-      Scenarios(scenariosMap =
-        Map(
-          scenarioDescription -> Scenario(
-            ordinal = ordinal,
-            description = scenarioDescription,
-            startedTimestamp = timestamp,
-            finishedTimestamp = None,
-            screenshots = None,
-            steps = None,
-            testOutcome = TestOutcome.STARTING
-          )
-        )
-      )
-    val newFeature = Feature(description = featureDescription, scenarios = newScenarios)
-    Features(featuresMap = Map(featureDescription -> newFeature))
-  }
-}
+case class Features(featuresMap: Map[String, Feature])
