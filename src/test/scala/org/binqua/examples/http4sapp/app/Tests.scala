@@ -3,6 +3,7 @@ package org.binqua.examples.http4sapp.app
 import cats.implicits.catsSyntaxEitherId
 import io.circe.Encoder
 import io.circe.syntax.EncoderOps
+import org.binqua.examples.http4sapp.app.StateEvent.RecordedEvents
 import org.scalatest.events.Ordinal
 
 import java.io.File
@@ -22,7 +23,7 @@ object Tests {
     testsToBeUpdated.tests
       .get(runningScenario.test)
       .toRight(s"I was going to update test ${runningScenario.test} to succeeded but test ${runningScenario.test} does not exist")
-      .flatMap(test =>
+      .flatMap((test: Test) =>
         Test
           .addStep(test, runningScenario.feature, runningScenario.scenario, runningScenario.ordinal, message, throwable, timestamp)
           .map(testsToBeUpdated.tests.updated(runningScenario.test, _))
@@ -78,22 +79,22 @@ case class Tests(tests: Map[String, Test]) {
           .map((updatedTest: Test) => Tests(tests = tests.updated(runningScenario.test, updatedTest)))
       )
 
-  def testFailed(runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
+  def testFailed(runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long): Either[String, Tests] =
     tests
       .get(runningScenario.test)
       .toRight(s"I was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist")
       .flatMap(
-        _.markAsFailed(runningScenario.feature, runningScenario.scenario, timestamp)
+        _.markAsFailed(runningScenario.feature, runningScenario.scenario, recordedEvent, timestamp)
           .map(tests.updated(runningScenario.test, _))
           .map(Tests(_))
       )
 
-  def testSucceeded(runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
+  def testSucceeded(runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long): Either[String, Tests] =
     tests
       .get(runningScenario.test)
       .toRight(s"I was going to update test ${runningScenario.test} to succeeded but test ${runningScenario.test} does not exist")
       .flatMap(
-        _.markAsSucceeded(runningScenario.feature, runningScenario.scenario, timestamp)
+        _.markAsSucceeded(runningScenario.feature, runningScenario.scenario, recordedEvent, timestamp)
           .map(tests.updated(runningScenario.test, _))
           .map(Tests(_))
       )

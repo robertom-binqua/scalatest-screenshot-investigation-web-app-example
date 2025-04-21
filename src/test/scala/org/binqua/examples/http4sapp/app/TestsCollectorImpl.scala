@@ -87,17 +87,18 @@ class TestsCollectorImpl(testsCollectorConfiguration: TestsCollectorConfiguratio
       case StateEvent.TestStarting(runningScenario, timestamp) =>
         tests = tests.testStarting(runningScenario, timestamp).getOrThrow
 
-      case StateEvent.TestFailed(runningScenario, timestamp) =>
-        tests = tests.testFailed(runningScenario, timestamp).getOrThrow
+      case StateEvent.TestFailed(runningScenario, recordedEvent, timestamp) =>
+        tests = tests.testFailed(runningScenario, recordedEvent, timestamp).getOrThrow
 
-      case StateEvent.TestSucceeded(runningScenario, timestamp) =>
-        tests = tests.testSucceeded(runningScenario, timestamp).getOrThrow
+      case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
+        tests = tests.testSucceeded(runningScenario, recordedEvent, timestamp).getOrThrow
 
       case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
         tests = Tests.addStep(tests, runningScenario, message, throwable, timestamp).getOrThrow
     }
 
-  def createReport(): Unit = FileUtils.writeStringToFile(testsCollectorConfiguration.jsonReport, tests.asJson.spaces2, StandardCharsets.UTF_8)
+  def createReport(): Unit =
+    FileUtils.writeStringToFile(testsCollectorConfiguration.jsonReport, tests.asJson.spaces2, StandardCharsets.UTF_8)
 
   private def addScreenshot(scrFile: File, pageUrl: String, screenshotMoment: ScreenshotMoment): Unit = { //    tests
     val (newTests, screenshotSuffixLocation): (Tests, File) = tests.runningTest.flatMap(tests.addScreenshot(_, pageUrl, screenshotMoment)).getOrThrow

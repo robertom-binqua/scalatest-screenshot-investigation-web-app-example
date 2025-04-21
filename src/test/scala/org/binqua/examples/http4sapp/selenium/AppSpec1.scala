@@ -9,19 +9,15 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
 
   val host = "http://localhost:8081/"
 
-  Feature("f1: Navigation bar should work") {
-    Scenario("s1: we can go from home to page3") {
-      Given("1")
-      note("test")
-      When("2")
+  Feature("f1") {
+    Scenario("s11") {
+      info("1")
+      Given("2")
       Then("3")
-      And("4")
-      note("5")
-      note("6")
       Given("7")
       When("8")
       Then("9")
-
+      And("11")
       go to (host + "home.html")
       pageTitle should be("Home")
 
@@ -37,24 +33,9 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       click on linkText("Home")
       pageTitle should be("Home")
     }
-
-    Scenario("s2: we can go from page2 to home") {
-      go to (host + "page3.html")
-      pageTitle should be("Page 3")
-
-      click on linkText("Page2")
-      pageTitle should be("Page 2")
-
-      click on linkText("Page1")
-      pageTitle should be("Page 1")
-
-      click on linkText("Home")
-      pageTitle should be("Home")
-    }
-  }
-
-  Feature("f2: Navigation bar should work:2") {
-    Scenario("s1: we can go from home to page2") {
+    Scenario("s12") {
+      Given("1")
+      Then("3")
       go to (host + "home.html")
       pageTitle should be("Home")
 
@@ -63,18 +44,155 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
 
       click on linkText("Page2")
       pageTitle should be("Page 2")
-    }
 
-    Scenario("s2: we can go from page2 to home") {
-      go to (host + "page2.html")
-      pageTitle should be("Page 2")
+      click on linkText("Page3")
+      pageTitle should be("Page 3")
+
+      click on linkText("Home")
+      pageTitle should be("Home")
+    }
+    Scenario("s13") {
+      Given("1")
+      Then("2")
+      And("3")
+      go to (host + "home.html")
+      pageTitle should be("Home")
 
       click on linkText("Page1")
       pageTitle should be("Page 1")
 
+      click on linkText("Page2")
+      pageTitle should be("Page 2")
+
+      click on linkText("Page3")
+      pageTitle should be("Page 3")
+
       click on linkText("Home")
       pageTitle should be("Home")
+    }
+  }
+  Feature("f2") {
+    Scenario("s11") {
+      Given("1")
+      Then("3")
+      And("4")
+      Given("7")
+      When("8")
+      Then("9")
+      And("11")
+      go to (host + "home.html")
+      pageTitle should be("Home")
 
+      click on linkText("Page1")
+      pageTitle should be("Page 1")
+
+      click on linkText("Page2")
+      pageTitle should be("Page 2")
+
+      click on linkText("Page3")
+      pageTitle should be("Page 3")
+
+      click on linkText("Home")
+      pageTitle should be("Home")
+    }
+    Scenario("s12") {
+      Given("1")
+      Then("3")
+      go to (host + "home.html")
+      pageTitle should be("Home")
+
+      click on linkText("Page1")
+      pageTitle should be("Page 1")
+
+      click on linkText("Page2")
+      pageTitle should be("Page 2")
+
+      click on linkText("Page3")
+      pageTitle should be("Page 3")
+
+      click on linkText("Home")
+      pageTitle should be("Home")
+    }
+    Scenario("s13") {
+      Given("1")
+      Then("2")
+      And("3")
+      go to (host + "home.html")
+      pageTitle should be("Home")
+
+      click on linkText("Page1")
+      pageTitle should be("Page 1")
+
+      click on linkText("Page2")
+      pageTitle should be("Page 2")
+
+      click on linkText("Page3")
+      pageTitle should be("Page 3")
+
+      click on linkText("Home")
+      pageTitle should be("Home")
+    }
+  }
+  Feature("f3") {
+    Scenario("s11") {
+      Given("1")
+      Then("3")
+      And("4")
+      Given("7")
+      When("8")
+      Then("9")
+      And("11")
+      go to (host + "home.html")
+      pageTitle should be("Home")
+
+      click on linkText("Page1")
+      pageTitle should be("Page 1")
+
+      click on linkText("Page2")
+      pageTitle should be("Page 2")
+
+      click on linkText("Page3")
+      pageTitle should be("Page 3")
+
+      click on linkText("Home")
+      pageTitle should be("Home")
+    }
+    Scenario("s12") {
+      Given("1")
+      Then("3")
+      go to (host + "home.html")
+      pageTitle should be("Home")
+
+      click on linkText("Page1")
+      pageTitle should be("Page 1")
+
+      click on linkText("Page2")
+      pageTitle should be("Page 2")
+
+      click on linkText("Page3")
+      pageTitle should be("Page 3")
+
+      click on linkText("Home")
+      pageTitle should be("Home")
+    }
+    Scenario("s13") {
+      Given("1")
+      Then("2")
+      And("3")
+      go to (host + "home.html")
+      pageTitle should be("Home")
+
+      click on linkText("Page1")
+      pageTitle should be("Page 1")
+
+      click on linkText("Page2")
+      pageTitle should be("Page 2")
+
+      click on linkText("Page3")
+      pageTitle should be("Page 3")
+
+      click on linkText("Home")
+      pageTitle should be("Home")
     }
   }
 

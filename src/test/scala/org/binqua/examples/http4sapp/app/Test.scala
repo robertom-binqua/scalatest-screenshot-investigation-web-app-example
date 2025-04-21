@@ -2,6 +2,7 @@ package org.binqua.examples.http4sapp.app
 
 import io.circe.syntax.EncoderOps
 import io.circe.{Encoder, Json}
+import org.binqua.examples.http4sapp.app.StateEvent.RecordedEvents
 import org.binqua.examples.http4sapp.app.TestOutcome.{FAILED, SUCCEEDED}
 import org.scalatest.events.Ordinal
 
@@ -41,11 +42,11 @@ case class Test(name: String, features: Features) {
   def withNewFeatureOrScenario(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Test] =
     features.newTestStarting(ordinal, featureDescription, scenarioDescription, timestamp).map(newFeatures => this.copy(features = newFeatures))
 
-  def markAsFailed(featureDescription: String, scenarioDescription: String, failedTimestamp: Long): Either[String, Test] =
-    features.testUpdated(featureDescription, scenarioDescription, failedTimestamp, FAILED).map(newFeatures => this.copy(features = newFeatures))
+  def markAsFailed(featureDescription: String, scenarioDescription: String, recordedEvent: RecordedEvents, failedTimestamp: Long): Either[String, Test] =
+    features.testUpdated(featureDescription, scenarioDescription, recordedEvent, failedTimestamp, FAILED).map(newFeatures => this.copy(features = newFeatures))
 
-  def markAsSucceeded(featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Test] =
-    features.testUpdated(featureDescription, scenarioDescription, timestamp, SUCCEEDED).map(newFeatures => this.copy(features = newFeatures))
+  def markAsSucceeded(featureDescription: String, scenarioDescription: String, recordedEvent: RecordedEvents, timestamp: Long): Either[String, Test] =
+    features.testUpdated(featureDescription, scenarioDescription, recordedEvent, timestamp, SUCCEEDED).map(newFeatures => this.copy(features = newFeatures))
 
   def addScreenshot(
       ordinal: Ordinal,

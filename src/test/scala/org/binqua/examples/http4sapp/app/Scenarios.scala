@@ -3,6 +3,7 @@ package org.binqua.examples.http4sapp.app
 import cats.implicits.catsSyntaxEitherId
 import io.circe.Encoder
 import io.circe.syntax.EncoderOps
+import org.binqua.examples.http4sapp.app.StateEvent.RecordedEvents
 import org.scalatest.events.Ordinal
 
 import java.io.File
@@ -19,28 +20,26 @@ object Scenarios {
       throwable: Option[Throwable],
       timestamp: Long
   ): Either[String, Scenarios] =
-    destination.scenariosMap
-      .get(scenarioDescription)
-      .toRight(s"no scenario with description $scenarioDescription")
-      .map(scenarioFound =>
-        destination
-          .copy(scenariosMap = destination.scenariosMap.updated(scenarioDescription, Scenario.addStep(scenarioFound, ordinal, message, throwable, timestamp)))
-      )
+    for {
+      scenarioFound <- destination.scenariosMap
+        .get(scenarioDescription)
+        .toRight(s"no scenario with description $scenarioDescription")
+      scenarioWithNewStep <- Scenario.addAStep(scenarioFound, ordinal, message, throwable, timestamp)
+    } yield destination.copy(scenariosMap = destination.scenariosMap.updated(scenarioDescription, scenarioWithNewStep))
 
 }
 
 case class Scenarios(scenariosMap: Map[String, Scenario]) {
-  def testUpdate(scenarioDescription: String, timestamp: Long, newState: TestOutcome): Either[String, Scenarios] =
+  def testUpdate(scenarioDescription: String, timestamp: Long, recordedEvent: RecordedEvents, newState: TestOutcome): Either[String, Scenarios] =
     scenariosMap
       .get(scenarioDescription)
       .toRight(s"no scenario with description $scenarioDescription")
-      .flatMap(scenarioFound =>
-        if (scenarioFound.testOutcome != TestOutcome.STARTING)
-          s"lastScenario testOutcome is ${scenarioFound.testOutcome} and should be ${TestOutcome.STARTING}".asLeft
-        else
-          this
-            .copy(scenariosMap = scenariosMap.updated(scenarioDescription, scenarioFound.copy(finishedTimestamp = Some(timestamp), testOutcome = newState)))
-            .asRight
+      .flatMap((scenarioFound: Scenario) =>
+        Scenario
+          .update(scenarioFound, recordedEvent: RecordedEvents, newState: TestOutcome, timestamp)
+          .map(scenarioUpdated => {
+            this.copy(scenariosMap = scenariosMap.updated(scenarioDescription, scenarioUpdated))
+          })
       )
 
   def testStarting(ordinal: Ordinal, scenarioDescription: String, timestamp: Long): Either[String, Scenarios] =

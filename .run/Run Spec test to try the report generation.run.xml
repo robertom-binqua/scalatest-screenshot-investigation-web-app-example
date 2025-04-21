@@ -30,13 +30,19 @@
     <option name="selectedOptions">
       <list />
     </option>
-    <option name="testKind" value="Class" />
+    <option name="testKind" value="All in package" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
+    <option name="classBuf">
+      <list>
+        <option value="org.binqua.examples.http4sapp.selenium.AppSpec1" />
+        <option value="org.binqua.examples.http4sapp.selenium.AppSpec2" />
+      </list>
+    </option>
     <option name="javaOptions" value="-DreportDestinationRoot=report-destination-root" />
     <option name="programParameters" value="-C  org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
     <option name="shortenClasspath" value="NONE" />
     <option name="testArgs" value="-C  org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
-    <option name="testClassPath" value="org.binqua.examples.http4sapp.selenium.AppSpec1" />
+    <option name="testPackagePath" value="org.binqua.examples.http4sapp.selenium" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />

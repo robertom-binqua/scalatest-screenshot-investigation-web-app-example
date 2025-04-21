@@ -1,6 +1,8 @@
 package org.binqua.examples.http4sapp.app
 
 import munit.FunSuite
+import org.binqua.examples.http4sapp.app.StateEvent.{RecordedEvent, RecordedEvents}
+import org.binqua.examples.http4sapp.util.utils.EitherOps
 import org.scalatest.events.Ordinal
 
 import java.io.File
@@ -22,14 +24,21 @@ class TestsCollectorImpSpec extends FunSuite {
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
     testsCollectorImpl.addScreenshotOnEnterAt(aDummyScreenshot, "url1")
-    testsCollectorImpl.add(StateEvent.TestSucceeded(runningScenario = runningScenario, timestamp = 2L))
+    testsCollectorImpl.add(
+      StateEvent.TestSucceeded(
+        runningScenario = runningScenario,
+        RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow,
+        timestamp = 2L
+      )
+    )
 
     val newRunningScenario = runningScenario.copy(test = "t1", ordinal = runningScenario.ordinal.next)
 
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = newRunningScenario, timestamp = 3L))
     testsCollectorImpl.addScreenshotOnEnterAt(aDummyScreenshot, "url1")
     testsCollectorImpl.addScreenshotOnExitAt(aDummyScreenshot, "url2")
-    testsCollectorImpl.add(StateEvent.TestSucceeded(runningScenario = newRunningScenario, timestamp = 4L))
+    val stringOrEvents = RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow
+    testsCollectorImpl.add(StateEvent.TestSucceeded(runningScenario = newRunningScenario, stringOrEvents, timestamp = 4L))
 
     assertEquals(screenshotsRoot.exists(), true)
 
@@ -57,6 +66,13 @@ class TestsCollectorImpSpec extends FunSuite {
                             |                "pageUrl" : "url1",
                             |                "index" : 1,
                             |                "screenshotMoment" : "ON_ENTER_PAGE"
+                            |              }
+                            |            ],
+                            |            "steps" : [
+                            |              {
+                            |                "message" : "m",
+                            |                "timestamp" : 5,
+                            |                "ordinal" : "122_0"
                             |              }
                             |            ],
                             |            "testOutcome" : "succeeded"
@@ -90,6 +106,13 @@ class TestsCollectorImpSpec extends FunSuite {
                             |                "screenshotMoment" : "ON_ENTER_PAGE"
                             |              }
                             |            ],
+                            |            "steps" : [
+                            |              {
+                            |                "message" : "m",
+                            |                "timestamp" : 5,
+                            |                "ordinal" : "122_0"
+                            |              }
+                            |            ],
                             |            "testOutcome" : "succeeded"
                             |          }
                             |        ]
@@ -105,7 +128,8 @@ class TestsCollectorImpSpec extends FunSuite {
     assertEquals(new File(screenshotsRoot.getAbsolutePath + replaceWithFileSeparator("/scenario_ordinal_1_1/screenshot_2_ON_EXIT_PAGE.png")).exists(), true)
 
   }
-  test("we can add 1 test with 2 notes e 2 re....") {
+
+  test("we can add 1 test with 2 notes e 2 recorded events ....") {
 
     // tempDir/report
     // tempDir/screenshotsRoot
@@ -123,7 +147,13 @@ class TestsCollectorImpSpec extends FunSuite {
     testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "this is a note 1", None, timestamp = 2L))
     testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "this is a note 2", None, timestamp = 3L))
 
-    testsCollectorImpl.add(StateEvent.TestSucceeded(runningScenario = runningScenario, timestamp = 2L))
+    testsCollectorImpl.add(
+      StateEvent.TestSucceeded(
+        runningScenario = runningScenario,
+        RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow,
+        timestamp = 2L
+      )
+    )
 
     assertEquals(screenshotsRoot.exists(), true)
 
@@ -163,6 +193,11 @@ class TestsCollectorImpSpec extends FunSuite {
                             |                "message" : "this is a note 1",
                             |                "timestamp" : 2,
                             |                "ordinal" : "1_0"
+                            |              },
+                            |              {
+                            |                "message" : "m",
+                            |                "timestamp" : 5,
+                            |                "ordinal" : "122_0"
                             |              }
                             |            ],
                             |            "testOutcome" : "succeeded"

@@ -8,8 +8,8 @@ class AppSpec2 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
 
   val host = "http://localhost:8081/"
 
-  Feature("Navigation bar should work:1") {
-    Scenario("we can go from home to page2") {
+  Feature("f1") {
+    Scenario("s1-f1") {
       go to (host + "home.html")
       pageTitle should be("Home")
 
@@ -20,7 +20,7 @@ class AppSpec2 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       pageTitle should be("Page 2")
     }
 
-    Scenario("we can go from page2 to home") {
+    Scenario("s2-f1") {
       go to (host + "page2.html")
       pageTitle should be("Page 2")
 
@@ -31,8 +31,8 @@ class AppSpec2 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       pageTitle should be("Home")
     }
   }
-  Feature("Navigation bar should work:2") {
-    Scenario("we can go from home to page2") {
+  Feature("f2") {
+    Scenario("s1-f2") {
       go to (host + "home.html")
       pageTitle should be("Home")
 
@@ -43,7 +43,7 @@ class AppSpec2 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       pageTitle should be("Page 2")
     }
 
-    Scenario("we can go from page2 to home") {
+    Scenario("s2-f2") {
       go to (host + "page2.html")
       pageTitle should be("Page 2")
 

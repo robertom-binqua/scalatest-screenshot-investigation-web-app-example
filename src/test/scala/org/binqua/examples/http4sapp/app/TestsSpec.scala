@@ -5,7 +5,9 @@ import io.circe.syntax.EncoderOps
 import munit.FunSuite
 import org.binqua.examples.http4sapp
 import org.binqua.examples.http4sapp.app.ScreenshotMoment._
+import org.binqua.examples.http4sapp.app.StateEvent.{RecordedEvent, RecordedEvents}
 import org.binqua.examples.http4sapp.app.TestOutcome._
+import org.binqua.examples.http4sapp.util.utils.EitherOps
 import org.scalatest.events.Ordinal
 
 import java.io.File
@@ -74,7 +76,7 @@ class TestsSpec extends FunSuite {
 
     val actualTests: Either[String, Tests] = Tests(Map.empty)
       .testStarting(runningScenario, timestamp = 1L)
-      .flatMap(_.testSucceeded(runningScenario, timestamp = 2L))
+      .flatMap(_.testSucceeded(runningScenario, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow, timestamp = 2L))
 
     assertEquals(actualTests.flatMap(_.runningTest), runningScenario.asRight)
 
@@ -90,7 +92,7 @@ class TestsSpec extends FunSuite {
 
     val actualTests: Either[String, Tests] = Tests(Map.empty)
       .testStarting(runningScenario, timestamp = 1L)
-      .flatMap(_.testFailed(runningScenario, timestamp = 2L))
+      .flatMap(_.testFailed(runningScenario, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow, timestamp = 2L))
 
     assertEquals(actualTests.flatMap(_.runningTest), Right(runningScenario))
 
@@ -100,23 +102,23 @@ class TestsSpec extends FunSuite {
 
   }
 
-  test("a tests with 1 success with 2 screenshots and 1 failure with 2 screenshots can be converted to json") {
-    val runningScenario1 = RunningScenario(new Ordinal(1), "t1", "f1", "s1")
-    val runningScenario2 = RunningScenario(new Ordinal(2), "t2", "f2", "s2")
+  test("we can have a test suite with 2 different tests: t1->f1->s1 and t2->f2->s2 with screenshots and recorded events") {
+    val t1f1s1 = RunningScenario(new Ordinal(1), "t1", "f1", "s1")
+    val t2f2s2 = RunningScenario(new Ordinal(2), "t2", "f2", "s2")
 
     val actualTests: Either[String, Tests] = for {
-      test <- Tests(Map.empty).asRight
+      tests <- Tests(Map.empty).asRight
 
-      test11 <- test.testStarting(runningScenario = runningScenario1, timestamp = 1L)
-      test21 <- test11.addScreenshot(runningScenario1, "ulr11", ON_ENTER_PAGE).map(_._1)
-      test31 <- test21.addScreenshot(runningScenario1, "ulr21", ON_EXIT_PAGE).map(_._1)
-      test41 <- test31.testSucceeded(runningScenario1, timestamp = 3L)
+      test11 <- tests.testStarting(runningScenario = t1f1s1, timestamp = 1L)
+      test21 <- test11.addScreenshot(t1f1s1, "ulr11", ON_ENTER_PAGE).map(_._1)
+      test31 <- test21.addScreenshot(t1f1s1, "ulr21", ON_EXIT_PAGE).map(_._1)
+      test51 <- test31.testSucceeded(t1f1s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
 
-      test12 <- test41.testStarting(runningScenario = runningScenario2, timestamp = 1L)
-      test22 <- test12.addScreenshot(runningScenario2, "ulr12", ON_ENTER_PAGE).map(_._1)
-      test32 <- test22.addScreenshot(runningScenario2, "ulr22", ON_EXIT_PAGE).map(_._1)
-      test42 <- test32.testFailed(runningScenario2, timestamp = 3L)
-    } yield test42
+      test12 <- test51.testStarting(runningScenario = t2f2s2, timestamp = 1L)
+      test22 <- test12.addScreenshot(t2f2s2, "ulr12", ON_ENTER_PAGE).map(_._1)
+      test32 <- test22.addScreenshot(t2f2s2, "ulr22", ON_EXIT_PAGE).map(_._1)
+      test52 <- test32.testFailed(t2f2s2, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, timestamp = 3L)
+    } yield test52
 
     val expectedJson =
       """[
@@ -143,6 +145,13 @@ class TestsSpec extends FunSuite {
         |                "pageUrl" : "ulr11",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |              }
+        |            ],
+        |            "steps" : [
+        |              {
+        |                "message" : "given",
+        |                "timestamp" : 5,
+        |                "ordinal" : "122_0"
         |              }
         |            ],
         |            "testOutcome" : "succeeded"
@@ -176,6 +185,13 @@ class TestsSpec extends FunSuite {
         |                "screenshotMoment" : "ON_ENTER_PAGE"
         |              }
         |            ],
+        |            "steps" : [
+        |              {
+        |                "message" : "and",
+        |                "timestamp" : 5,
+        |                "ordinal" : "122_0"
+        |              }
+        |            ],
         |            "testOutcome" : "failed"
         |          }
         |        ]
@@ -185,6 +201,101 @@ class TestsSpec extends FunSuite {
         |]""".stripMargin
 
     assertEquals(actualTests.map(_.asJson.spaces2), expectedJson.asRight)
+
+  }
+
+  test("we can have a test suite with 1 test t1 with multiple features: t1->f1->s1 and t1->f2->s2 with screenshots and recorded events") {
+    val t1_f1_s1 = RunningScenario(new Ordinal(1), "t1", "f1", "s1")
+    val t1_f2_s1 = RunningScenario(new Ordinal(2), "t1", "f2", "s1")
+
+    val actualTests: Either[String, Tests] = for {
+      test <- Tests(Map.empty).asRight
+
+      test11 <- test.testStarting(runningScenario = t1_f1_s1, timestamp = 1L)
+      test21 <- test11.addScreenshot(t1_f1_s1, "ulr-f1-s1-1", ON_ENTER_PAGE).map(_._1)
+      test31 <- Tests.addStep(testsToBeUpdated = test21, runningScenario = t1_f1_s1, message = "m1-f1-s1", throwable = None, timestamp = 1L)
+      test41 <- test31.testSucceeded(t1_f1_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
+
+      test12 <- test41.testStarting(runningScenario = t1_f2_s1, timestamp = 1L)
+      test22 <- test12.addScreenshot(t1_f2_s1, "ulr-f2-s1-1", ON_ENTER_PAGE).map(_._1)
+      test42 <- Tests.addStep(testsToBeUpdated = test22, runningScenario = t1_f2_s1, message = "m1-f2-s1", throwable = None, timestamp = 1L)
+      test52 <- test42.testFailed(t1_f2_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, timestamp = 3L)
+    } yield test52
+
+    val expectedJson =
+      """[
+        |  {
+        |    "name" : "t1",
+        |    "features" : [
+        |      {
+        |        "description" : "f1",
+        |        "scenarios" : [
+        |          {
+        |            "ordinal" : "1_0",
+        |            "description" : "s1",
+        |            "startedTimestamp" : 1,
+        |            "finishedTimestamp" : 3,
+        |            "screenshots" : [
+        |              {
+        |                "location" : "scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png",
+        |                "pageUrl" : "ulr-f1-s1-1",
+        |                "index" : 1,
+        |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |              }
+        |            ],
+        |            "steps" : [
+        |              {
+        |                "message" : "m1-f1-s1",
+        |                "timestamp" : 1,
+        |                "ordinal" : "1_0"
+        |              },
+        |              {
+        |                "message" : "given",
+        |                "timestamp" : 5,
+        |                "ordinal" : "122_0"
+        |              }
+        |            ],
+        |            "testOutcome" : "succeeded"
+        |          }
+        |        ]
+        |      },
+        |      {
+        |        "description" : "f2",
+        |        "scenarios" : [
+        |          {
+        |            "ordinal" : "2_0",
+        |            "description" : "s1",
+        |            "startedTimestamp" : 1,
+        |            "finishedTimestamp" : 3,
+        |            "screenshots" : [
+        |              {
+        |                "location" : "scenario_ordinal_2_0/screenshot_1_ON_ENTER_PAGE.png",
+        |                "pageUrl" : "ulr-f2-s1-1",
+        |                "index" : 1,
+        |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |              }
+        |            ],
+        |            "steps" : [
+        |              {
+        |                "message" : "m1-f2-s1",
+        |                "timestamp" : 1,
+        |                "ordinal" : "2_0"
+        |              },
+        |              {
+        |                "message" : "and",
+        |                "timestamp" : 5,
+        |                "ordinal" : "122_0"
+        |              }
+        |            ],
+        |            "testOutcome" : "failed"
+        |          }
+        |        ]
+        |      }
+        |    ]
+        |  }
+        |]""".stripMargin
+
+    assertEquals(obtained = actualTests.map(_.asJson.spaces2), expected = expectedJson.asRight)
 
   }
 
