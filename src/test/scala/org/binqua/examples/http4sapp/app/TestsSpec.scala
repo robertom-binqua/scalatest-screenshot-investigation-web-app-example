@@ -23,10 +23,12 @@ class TestsSpec extends FunSuite {
 
     val runningScenario = RunningScenario(expScenario1.ordinal, expTest1.name, feature = expFeature1.description, expScenario1.description)
 
-    val firstActualTests: Either[String, Tests] = Tests(Map.empty).testStarting(runningScenario, 1L)
+    val firstActualTests: Either[String, Tests] = Tests.testStarting(Tests(Map.empty), runningScenario, 1L)
     assertEquals(firstActualTests, Right(expTests1))
 
-    val secondActualTests: Either[String, (Tests, File)] = firstActualTests.flatMap(test => { test.addScreenshot(runningScenario, "url1", ON_ENTER_PAGE) })
+    val secondActualTests: Either[String, (Tests, File)] = firstActualTests.flatMap(tests => {
+      Tests.addScreenshot(tests, runningScenario, "url1", ON_ENTER_PAGE)
+    })
 
     val expScenario2 = expScenario1.copy(screenshots = Some(List(Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1))))
     val expFeature2 = expFeature1.copy(scenarios = Scenarios(scenariosMap = Map(expScenario2.description -> expScenario2)))
@@ -36,7 +38,7 @@ class TestsSpec extends FunSuite {
     assertEquals(secondActualTests.map(_._1), Right(expectedTests2))
 
     val actualTest3: Either[String, (Tests, File)] =
-      secondActualTests.flatMap((test: (Tests, File)) => test._1.addScreenshot(runningScenario, "url2", ON_EXIT_PAGE))
+      secondActualTests.flatMap((test: (Tests, File)) => Tests.addScreenshot(test._1, runningScenario, "url2", ON_EXIT_PAGE))
 
     val expScenario3 = expScenario1.copy(screenshots =
       Some(
@@ -52,7 +54,7 @@ class TestsSpec extends FunSuite {
 
     assertEquals(actualTest3.map(_._1), Right(expectedTests3))
 
-    val result: Either[String, RunningScenario] = actualTest3.flatMap(_._1.runningTest)
+    val result: Either[String, RunningScenario] = actualTest3.flatMap((t: (Tests, File)) => Tests.runningTest(t._1))
 
     assertEquals(
       obtained = result,
@@ -65,13 +67,13 @@ class TestsSpec extends FunSuite {
 
     val runningScenario = RunningScenario(new Ordinal(1), "test desc", "feature desc", "scenario desc")
 
-    val actualTests: Either[String, Tests] = Tests(Map.empty)
-      .testStarting(runningScenario, timestamp = 1L)
-      .flatMap(_.testSucceeded(runningScenario, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow, timestamp = 2L))
+    val actualTests: Either[String, Tests] = Tests
+      .testStarting(Tests(Map.empty), runningScenario, timestamp = 1L)
+      .flatMap(Tests.testSucceeded(_, runningScenario, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow, timestamp = 2L))
 
-    assertEquals(actualTests.flatMap(_.runningTest), runningScenario.asRight)
+    assertEquals(actualTests.flatMap(Tests.runningTest), runningScenario.asRight)
 
-    val invalidTests: Either[String, (Tests, File)] = actualTests.flatMap(_.addScreenshot(runningScenario, "url", ON_EXIT_PAGE))
+    val invalidTests: Either[String, (Tests, File)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_EXIT_PAGE))
 
     assertEquals(invalidTests, Left("Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED"))
 
@@ -81,13 +83,13 @@ class TestsSpec extends FunSuite {
 
     val runningScenario = RunningScenario(new Ordinal(1), "test desc", "feature desc", "scenario desc")
 
-    val actualTests: Either[String, Tests] = Tests(Map.empty)
-      .testStarting(runningScenario, timestamp = 1L)
-      .flatMap(_.testFailed(runningScenario, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow, None, timestamp = 2L))
+    val actualTests: Either[String, Tests] = Tests
+      .testStarting(Tests(Map.empty), runningScenario, timestamp = 1L)
+      .flatMap(Tests.testFailed(_, runningScenario, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow, None, timestamp = 2L))
 
-    assertEquals(actualTests.flatMap(_.runningTest), Right(runningScenario))
+    assertEquals(actualTests.flatMap(Tests.runningTest), Right(runningScenario))
 
-    val invalidTests: Either[String, (Tests, File)] = actualTests.flatMap(_.addScreenshot(runningScenario, "url", ON_EXIT_PAGE))
+    val invalidTests: Either[String, (Tests, File)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_EXIT_PAGE))
 
     assertEquals(invalidTests, Left("Sorry last scenario does not have testOutcome equal to STARTING but FAILED"))
 
@@ -100,15 +102,15 @@ class TestsSpec extends FunSuite {
     val actualTests: Either[String, Tests] = for {
       tests <- Tests(Map.empty).asRight
 
-      test11 <- tests.testStarting(runningScenario = t1f1s1, timestamp = 1L)
-      test21 <- test11.addScreenshot(t1f1s1, "ulr11", ON_ENTER_PAGE).map(_._1)
-      test31 <- test21.addScreenshot(t1f1s1, "ulr21", ON_EXIT_PAGE).map(_._1)
-      test51 <- test31.testSucceeded(t1f1s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
+      test11 <- Tests.testStarting(tests, runningScenario = t1f1s1, timestamp = 1L)
+      test21 <- Tests.addScreenshot(test11, t1f1s1, "ulr11", ON_ENTER_PAGE).map(_._1)
+      test31 <- Tests.addScreenshot(test21, t1f1s1, "ulr21", ON_EXIT_PAGE).map(_._1)
+      test51 <- Tests.testSucceeded(test31, t1f1s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
 
-      test12 <- test51.testStarting(runningScenario = t2f2s2, timestamp = 1L)
-      test22 <- test12.addScreenshot(t2f2s2, "ulr12", ON_ENTER_PAGE).map(_._1)
-      test32 <- test22.addScreenshot(t2f2s2, "ulr22", ON_EXIT_PAGE).map(_._1)
-      test52 <- test32.testFailed(t2f2s2, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
+      test12 <- Tests.testStarting(test51, runningScenario = t2f2s2, timestamp = 1L)
+      test22 <- Tests.addScreenshot(test12, t2f2s2, "ulr12", ON_ENTER_PAGE).map(_._1)
+      test32 <- Tests.addScreenshot(test22, t2f2s2, "ulr22", ON_EXIT_PAGE).map(_._1)
+      test52 <- Tests.testFailed(test32, t2f2s2, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
     } yield test52
 
     val expectedJson =
@@ -202,15 +204,15 @@ class TestsSpec extends FunSuite {
     val actualTests: Either[String, Tests] = for {
       test <- Tests(Map.empty).asRight
 
-      test11 <- test.testStarting(runningScenario = t1_f1_s1, timestamp = 1L)
-      test21 <- test11.addScreenshot(t1_f1_s1, "ulr-f1-s1-1", ON_ENTER_PAGE).map(_._1)
+      test11 <- Tests.testStarting(test, runningScenario = t1_f1_s1, timestamp = 1L)
+      test21 <- Tests.addScreenshot(test11, t1_f1_s1, "ulr-f1-s1-1", ON_ENTER_PAGE).map(_._1)
       test31 <- Tests.addStep(testsToBeUpdated = test21, runningScenario = t1_f1_s1, message = "m1-f1-s1", throwable = None, timestamp = 1L)
-      test41 <- test31.testSucceeded(t1_f1_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
+      test41 <- Tests.testSucceeded(test31, t1_f1_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
 
-      test12 <- test41.testStarting(runningScenario = t1_f2_s1, timestamp = 1L)
-      test22 <- test12.addScreenshot(t1_f2_s1, "ulr-f2-s1-1", ON_ENTER_PAGE).map(_._1)
+      test12 <- Tests.testStarting(test41, runningScenario = t1_f2_s1, timestamp = 1L)
+      test22 <- Tests.addScreenshot(test12, t1_f2_s1, "ulr-f2-s1-1", ON_ENTER_PAGE).map(_._1)
       test42 <- Tests.addStep(testsToBeUpdated = test22, runningScenario = t1_f2_s1, message = "m1-f2-s1", throwable = None, timestamp = 1L)
-      test52 <- test42.testFailed(t1_f2_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
+      test52 <- Tests.testFailed(test42, t1_f2_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
     } yield test52
 
     val expectedJson =

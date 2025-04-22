@@ -85,13 +85,13 @@ class TestsCollectorImpl(testsCollectorConfiguration: TestsCollectorConfiguratio
   def add(event: StateEvent): Unit =
     event match {
       case StateEvent.TestStarting(runningScenario, timestamp) =>
-        tests = tests.testStarting(runningScenario, timestamp).getOrThrow
+        tests = Tests.testStarting(tests, runningScenario, timestamp).getOrThrow
 
       case StateEvent.TestFailed(runningScenario, recordedEvent, throwable, timestamp) =>
-        tests = tests.testFailed(runningScenario, recordedEvent, throwable, timestamp).getOrThrow
+        tests = Tests.testFailed(tests, runningScenario, recordedEvent, throwable, timestamp).getOrThrow
 
       case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
-        tests = tests.testSucceeded(runningScenario, recordedEvent, timestamp).getOrThrow
+        tests = Tests.testSucceeded(tests, runningScenario, recordedEvent, timestamp).getOrThrow
 
       case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
         tests = Tests.addStep(tests, runningScenario, message, throwable, timestamp).getOrThrow
@@ -101,7 +101,7 @@ class TestsCollectorImpl(testsCollectorConfiguration: TestsCollectorConfiguratio
     FileUtils.writeStringToFile(testsCollectorConfiguration.jsonReport, tests.asJson.spaces2, StandardCharsets.UTF_8)
 
   private def addScreenshot(scrFile: File, pageUrl: String, screenshotMoment: ScreenshotMoment): Unit = { //    tests
-    val (newTests, screenshotSuffixLocation): (Tests, File) = tests.runningTest.flatMap(tests.addScreenshot(_, pageUrl, screenshotMoment)).getOrThrow
+    val (newTests, screenshotSuffixLocation): (Tests, File) = Tests.runningTest(tests).flatMap(Tests.addScreenshot(tests, _, pageUrl, screenshotMoment)).getOrThrow
     tests = newTests
     FileUtils.copyFile(scrFile, new File(testsCollectorConfiguration.screenshotsRootLocation + File.separator + screenshotSuffixLocation))
   }
