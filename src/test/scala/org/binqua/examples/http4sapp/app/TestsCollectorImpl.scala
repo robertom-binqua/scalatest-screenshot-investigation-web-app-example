@@ -1,6 +1,7 @@
 package org.binqua.examples.http4sapp.app
 
-import cats.implicits.catsSyntaxEitherId
+import cats.effect.IO.catsSyntaxTuple2Parallel
+import cats.implicits.{catsSyntaxEitherId, toBifunctorOps}
 import com.google.common.base.Strings
 import io.circe.syntax.EncoderOps
 import org.apache.commons.io.FileUtils
@@ -57,17 +58,33 @@ object TestsCollector {
 }
 
 object TestsCollectorConfiguration {
-  def from(reportLocationFile: File, screenshotsRoot: File): Either[String, TestsCollectorConfiguration] = {
-    if (!reportLocationFile.exists())
-      ???
-    else if (!screenshotsRoot.exists())
-      ???
-    else
-      new TestsCollectorConfiguration {
-        override def reportRootLocation: File = reportLocationFile
-        override def jsonReport: File = new File(reportLocationFile.getAbsolutePath + File.separator + "report.json")
-        override def screenshotsRootLocation: File = screenshotsRoot
-      }.asRight
+
+  /*
+   * Playing a little bit with cats ... https://typelevel.org/cats/typeclasses/parallel.html
+   */
+
+  def from(reportLocationRoot: File, screenshotsRoot: File): Either[String, TestsCollectorConfiguration] = {
+    val reportLocationRootValidated: Either[List[String], File] =
+      if (!reportLocationRoot.exists())
+        List(s"reportLocationRoot dir $reportLocationRoot has to exist but it does not").asLeft
+      else reportLocationRoot.asRight
+
+    val screenshotsRootValidated: Either[List[String], File] =
+      if (!screenshotsRoot.exists())
+        List(s"screenshotsRoot dir $screenshotsRoot has to exist but it does not").asLeft
+      else screenshotsRoot.asRight
+
+    (reportLocationRootValidated, screenshotsRootValidated)
+      .parMapN((reportLocationRoot, screenshotsRoot) => {
+        new TestsCollectorConfiguration {
+          override def reportRootLocation: File = reportLocationRoot
+
+          override def jsonReport: File = new File(reportLocationRoot.getAbsolutePath + File.separator + "report.json")
+
+          override def screenshotsRootLocation: File = screenshotsRoot
+        }
+      })
+      .leftMap(_.mkString(" - "))
   }
   def unsafeFrom(reportLocation: File, screenshotLocation: File): TestsCollectorConfiguration = from(reportLocation, screenshotLocation).getOrThrow
 }
@@ -101,7 +118,8 @@ class TestsCollectorImpl(testsCollectorConfiguration: TestsCollectorConfiguratio
     FileUtils.writeStringToFile(testsCollectorConfiguration.jsonReport, tests.asJson.spaces2, StandardCharsets.UTF_8)
 
   private def addScreenshot(scrFile: File, pageUrl: String, screenshotMoment: ScreenshotMoment): Unit = { //    tests
-    val (newTests, screenshotSuffixLocation): (Tests, File) = Tests.runningTest(tests).flatMap(Tests.addScreenshot(tests, _, pageUrl, screenshotMoment)).getOrThrow
+    val (newTests, screenshotSuffixLocation): (Tests, File) =
+      Tests.runningTest(tests).flatMap(Tests.addScreenshot(tests, _, pageUrl, screenshotMoment)).getOrThrow
     tests = newTests
     FileUtils.copyFile(scrFile, new File(testsCollectorConfiguration.screenshotsRootLocation + File.separator + screenshotSuffixLocation))
   }

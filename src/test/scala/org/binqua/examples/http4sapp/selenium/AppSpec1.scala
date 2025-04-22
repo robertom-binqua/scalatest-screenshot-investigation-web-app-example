@@ -138,25 +138,7 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
     Scenario("s11") {
       Given("1")
       Then("3")
-      And("4")
-      Given("7")
-      When("8")
-      Then("9")
-      And("11")
-      go to (host + "home.html")
-      pageTitle should be("Home")
-
-      click on linkText("Page1")
-      pageTitle should be("Page 1")
-
-      click on linkText("Page2")
-      pageTitle should be("Page 2")
-
-      click on linkText("Page3")
-      pageTitle should be("Page 3")
-
-      click on linkText("Home")
-      pageTitle should be("Home")
+      throw new RuntimeException("f3 s11 fails")
     }
     Scenario("s12") {
       Given("1")

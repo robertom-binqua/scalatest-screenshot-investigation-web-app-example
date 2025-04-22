@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run Spec test to try the report generation" type="ScalaTestRunConfiguration" factoryName="ScalaTest" show_console_on_std_err="false" show_console_on_std_out="false">
-    <module name="scalatest-screenshot-investigation-web-app-example.test" />
+    <module name="scalatest-screenshot-investigation-web-app-example" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />
       <option name="IS_SUBST" value="false" />
@@ -25,7 +25,7 @@
       <map />
     </option>
     <option name="passParentEnvs" value="true" />
-    <option name="programParameters" value="-C  org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
+    <option name="programParameters" value="-C org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
     <option name="projectPathOnTarget" />
     <option name="selectedOptions">
       <list />
@@ -39,9 +39,10 @@
       </list>
     </option>
     <option name="javaOptions" value="-DreportDestinationRoot=report-destination-root" />
-    <option name="programParameters" value="-C  org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
+    <option name="programParameters" value="-C org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
+    <option name="searchTest" value="In whole project" />
     <option name="shortenClasspath" value="NONE" />
-    <option name="testArgs" value="-C  org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
+    <option name="testArgs" value="-C org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
     <option name="testPackagePath" value="org.binqua.examples.http4sapp.selenium" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
     <method v="2">
