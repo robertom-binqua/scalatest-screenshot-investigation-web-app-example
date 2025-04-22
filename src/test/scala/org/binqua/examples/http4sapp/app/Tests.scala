@@ -21,9 +21,7 @@ object Tests {
       pageUrl: String,
       screenshotMoment: ScreenshotMoment
   ): Either[String, (Tests, File)] =
-    testsToBeUpdated.tests
-      .get(runningScenario.test)
-      .toRight("I cannot add screenshots because there are no tests")
+    findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot add a screenshot")
       .flatMap((runningTest: Test) =>
         runningTest
           .addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, pageUrl, screenshotMoment)
@@ -40,9 +38,7 @@ object Tests {
       throwable: Option[Throwable],
       timestamp: Long
   ): Either[String, Tests] =
-    testsToBeUpdated.tests
-      .get(runningScenario.test)
-      .toRight(s"I was going to update test ${runningScenario.test} to succeeded but test ${runningScenario.test} does not exist")
+    findTestToBeUpdated(testsToBeUpdated, runningScenario, "I cannot add a step.")
       .flatMap((test: Test) =>
         Test
           .addStep(test, runningScenario.feature, runningScenario.scenario, runningScenario.ordinal, message, throwable, timestamp)
@@ -57,9 +53,7 @@ object Tests {
       throwable: Option[Throwable],
       timestamp: Long
   ): Either[String, Tests] =
-    testsToBeUpdated.tests
-      .get(runningScenario.test)
-      .toRight(s"I was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist")
+    findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot set the test to failed")
       .flatMap(
         _.markAsFailed(runningScenario.feature, runningScenario.scenario, recordedEvent, throwable, timestamp)
           .map(testsToBeUpdated.tests.updated(runningScenario.test, _))
@@ -67,19 +61,20 @@ object Tests {
       )
 
   def testSucceeded(testsToBeUpdated: Tests, runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long): Either[String, Tests] =
-    testsToBeUpdated.tests
-      .get(runningScenario.test)
-      .toRight(s"I was going to update test ${runningScenario.test} to succeeded but test ${runningScenario.test} does not exist")
+    findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot set the test to succeeded")
       .flatMap(
         _.markAsSucceeded(runningScenario.feature, runningScenario.scenario, recordedEvent, timestamp)
           .map(testsToBeUpdated.tests.updated(runningScenario.test, _))
           .map(Tests(_))
       )
 
+  private def findTestToBeUpdated(tests: Tests, runningScenario: RunningScenario, details: String): Either[String, Test] =
+    tests.tests
+      .get(runningScenario.test)
+      .toRight(s"I was going to update test ${runningScenario.test} but test ${runningScenario.test} does not exist.$details")
 
-  def testStarting(testsToBeUpdated: Tests,runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
-    testsToBeUpdated
-      .tests
+  def testStarting(testsToBeUpdated: Tests, runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
+    testsToBeUpdated.tests
       .get(runningScenario.test)
       .fold[Either[String, Tests]](
         ifEmpty = Tests(tests =
