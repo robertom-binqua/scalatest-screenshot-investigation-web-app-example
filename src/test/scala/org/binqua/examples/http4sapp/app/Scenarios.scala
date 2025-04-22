@@ -62,7 +62,7 @@ case class Scenarios(scenariosMap: Map[String, Scenario]) {
       .toRight("last scenario does not have testOutcome == STARTING")
       .flatMap(lastScenario =>
         if (lastScenario.testOutcome == TestOutcome.STARTING && lastScenario.ordinal == ordinal) {
-          val (updatedScenario, screenshotFile) = lastScenario.withNewScreenshot(pageUrl, screenshotMoment)
+          val (updatedScenario, screenshotFile) = Scenario.addScreenshot(lastScenario, pageUrl, screenshotMoment)
           val scenarios = this.copy(scenariosMap = this.scenariosMap.updated(scenarioDescription, updatedScenario))
           (scenarios, screenshotFile).asRight
         } else

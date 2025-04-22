@@ -7,6 +7,17 @@ import org.scalatest.events.Ordinal
 
 import java.io.File
 
+case class Scenario(
+    ordinal: Ordinal,
+    description: String,
+    startedTimestamp: Long,
+    finishedTimestamp: Option[Long],
+    screenshots: Option[List[Screenshot]],
+    steps: Option[Steps],
+    testOutcome: TestOutcome,
+    throwable: Option[Throwable]
+)
+
 object Scenario {
   implicit val ordinalEncoder: Encoder[Ordinal] = (ordinal: Ordinal) => Json.fromString(ordinal.toList.mkString("_"))
   implicit val encoder: Encoder[Scenario] = deriveEncoder[Scenario].mapJson(_.dropNullValues)
@@ -50,23 +61,11 @@ object Scenario {
           scenarioFound.copy(steps = validSteps, testOutcome = outcome, finishedTimestamp = timestamp.some, throwable = throwable)
         })
   }
-}
 
-case class Scenario(
-    ordinal: Ordinal,
-    description: String,
-    startedTimestamp: Long,
-    finishedTimestamp: Option[Long],
-    screenshots: Option[List[Screenshot]],
-    steps: Option[Steps],
-    testOutcome: TestOutcome,
-    throwable: Option[Throwable]
-) {
-
-  def withNewScreenshot(pageUrl: String, screenshotMoment: ScreenshotMoment): (Scenario, File) = {
-    val maybeScreenshots: Option[List[Screenshot]] = screenshots
-      .map(s => Screenshot(pageUrl, screenshotMoment, ordinal, s.size + 1) :: s)
-      .orElse(Some(List(Screenshot(pageUrl, screenshotMoment, ordinal, 1))))
-    (this.copy(screenshots = maybeScreenshots), maybeScreenshots.get.head.toFile)
+  def addScreenshot(scenario: Scenario, pageUrl: String, screenshotMoment: ScreenshotMoment): (Scenario, File) = {
+    val maybeScreenshots: Option[List[Screenshot]] = scenario.screenshots
+      .map(s => Screenshot(pageUrl, screenshotMoment, scenario.ordinal, s.size + 1) :: s)
+      .orElse(Some(List(Screenshot(pageUrl, screenshotMoment, scenario.ordinal, 1))))
+    (scenario.copy(screenshots = maybeScreenshots), maybeScreenshots.get.head.toFile)
   }
 }
