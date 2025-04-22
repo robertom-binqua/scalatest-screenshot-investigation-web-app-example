@@ -21,13 +21,14 @@ class ScreenshotReporterImpl(testsCollector: TestsCollector) extends Reporter {
           .getOrThrow
         testsCollector.add(testStarting)
 
-      case TestFailed(ordinal, _, _, testName, _, featureAndScenario, _, recordedEvents, _, _, _, _, _, _, _, _, timestamp) =>
+      case TestFailed(ordinal, _, _, testName, _, featureAndScenario, _, recordedEvents, _, throwable, _, _, _, _, _, _, timestamp) =>
         val failed = org.binqua.examples.http4sapp.app.Utils
           .createARunningScenario(ordinal, testName, featureAndScenario)
           .map(rs =>
             StateEvent.TestFailed(
               runningScenario = rs,
               recordedEvent = RecordedEvents.from(recordedEvents.map((i: RecordableEvent) => RecordedEvent.from(i)).toList).getOrThrow,
+              throwable,
               timestamp = timestamp
             )
           )

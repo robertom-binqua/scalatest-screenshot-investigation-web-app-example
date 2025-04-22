@@ -18,7 +18,8 @@ class ScenarioSpec extends FunSuite {
       finishedTimestamp = Some(111L),
       screenshots = None,
       steps = None,
-      testOutcome = STARTING
+      testOutcome = STARTING,
+      throwable = None
     )
 
     val actual1: (Scenario, File) = startingScenario.withNewScreenshot("url1", ON_EXIT_PAGE)

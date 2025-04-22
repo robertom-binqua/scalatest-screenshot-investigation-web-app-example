@@ -10,6 +10,12 @@ import java.io.File
 object Scenario {
   implicit val ordinalEncoder: Encoder[Ordinal] = (ordinal: Ordinal) => Json.fromString(ordinal.toList.mkString("_"))
   implicit val encoder: Encoder[Scenario] = deriveEncoder[Scenario].mapJson(_.dropNullValues)
+  implicit val throwableEncoder: Encoder[Throwable] = (a: Throwable) => {
+    Json.obj(
+      "exception-message" -> Json.fromString(a.getMessage)
+    )
+
+  }
 
   def starting(ordinal: Ordinal, name: String, timestamp: Long): Scenario =
     Scenario(
@@ -19,7 +25,8 @@ object Scenario {
       finishedTimestamp = None,
       screenshots = None,
       steps = None,
-      testOutcome = TestOutcome.STARTING
+      testOutcome = TestOutcome.STARTING,
+      throwable = None
     )
 
   def addAStep(scenario: Scenario, ordinal: Ordinal, message: String, throwable: Option[Throwable], timestamp: Long): Either[String, Scenario] =
@@ -27,14 +34,20 @@ object Scenario {
       .fromOtherSteps(otherSteps = scenario.steps, newOrdinal = ordinal, message = message, throwable = throwable, timestamp = timestamp)
       .map((newSteps: Option[Steps]) => scenario.copy(steps = newSteps))
 
-  def update(scenarioFound: Scenario, events: StateEvent.RecordedEvents, outcome: TestOutcome, timestamp: Long): Either[String, Scenario] = {
+  def update(
+      scenarioFound: Scenario,
+      events: StateEvent.RecordedEvents,
+      outcome: TestOutcome,
+      throwable: Option[Throwable],
+      timestamp: Long
+  ): Either[String, Scenario] = {
     if (scenarioFound.testOutcome != TestOutcome.STARTING)
       s"Scenario ${scenarioFound.description}has to have status equals to starting but it was ${scenarioFound.testOutcome}".asLeft
     else
       Steps
         .merge(events, scenarioFound.steps)
         .map(validSteps => {
-          scenarioFound.copy(steps = validSteps, testOutcome = outcome, finishedTimestamp = timestamp.some)
+          scenarioFound.copy(steps = validSteps, testOutcome = outcome, finishedTimestamp = timestamp.some, throwable = throwable)
         })
   }
 }
@@ -46,7 +59,8 @@ case class Scenario(
     finishedTimestamp: Option[Long],
     screenshots: Option[List[Screenshot]],
     steps: Option[Steps],
-    testOutcome: TestOutcome
+    testOutcome: TestOutcome,
+    throwable: Option[Throwable]
 ) {
 
   def withNewScreenshot(pageUrl: String, screenshotMoment: ScreenshotMoment): (Scenario, File) = {

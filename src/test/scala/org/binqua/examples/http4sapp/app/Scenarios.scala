@@ -30,13 +30,19 @@ object Scenarios {
 }
 
 case class Scenarios(scenariosMap: Map[String, Scenario]) {
-  def testUpdate(scenarioDescription: String, timestamp: Long, recordedEvent: RecordedEvents, newState: TestOutcome): Either[String, Scenarios] =
+  def testUpdate(
+      scenarioDescription: String,
+      timestamp: Long,
+      recordedEvent: RecordedEvents,
+      throwable: Option[Throwable],
+      newState: TestOutcome
+  ): Either[String, Scenarios] =
     scenariosMap
       .get(scenarioDescription)
       .toRight(s"no scenario with description $scenarioDescription")
       .flatMap((scenarioFound: Scenario) =>
         Scenario
-          .update(scenarioFound, recordedEvent: RecordedEvents, newState: TestOutcome, timestamp)
+          .update(scenarioFound, recordedEvent: RecordedEvents, newState: TestOutcome, throwable, timestamp)
           .map(scenarioUpdated => {
             this.copy(scenariosMap = scenariosMap.updated(scenarioDescription, scenarioUpdated))
           })

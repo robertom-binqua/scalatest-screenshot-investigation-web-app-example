@@ -12,7 +12,7 @@ class ScenariosSpec extends FunSuite {
 
   test("we can add 2 screenshots to a scenario that is in STARTING state") {
 
-    val scenario: Scenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, None, STARTING)
+    val scenario: Scenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, None, STARTING, None)
 
     val actual1: Either[String, (Scenarios, File)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
@@ -47,7 +47,7 @@ class ScenariosSpec extends FunSuite {
 
   test("we cannot add screenshots to a scenario that is in FAILED state") {
 
-    val scenario: Scenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, None, FAILED)
+    val scenario: Scenario =ReferenceData.startingScenario.copy(testOutcome = FAILED)
 
     val actual1: Either[String, (Scenarios, File)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
@@ -58,7 +58,7 @@ class ScenariosSpec extends FunSuite {
 
   test("we cannot add screenshots to a scenario that is in SUCCEEDED state") {
 
-    val scenario: Scenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, None, SUCCEEDED)
+    val scenario: Scenario = ReferenceData.startingScenario.copy(testOutcome = SUCCEEDED)
 
     val actual1: Either[String, (Scenarios, File)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)

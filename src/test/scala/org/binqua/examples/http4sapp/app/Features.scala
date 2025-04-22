@@ -20,6 +20,7 @@ object Features {
       scenarioDescription: String,
       recordedEvent: RecordedEvents,
       updatedTimestamp: Long,
+      throwable: Option[Throwable],
       newState: TestOutcome
   ): Either[String, Features] =
     features.featuresMap
@@ -27,7 +28,7 @@ object Features {
       .toRight(s"last feature does not have featureDescription equals to $featureDescription")
       .flatMap(featureFound =>
         featureFound.scenarios
-          .testUpdate(scenarioDescription, updatedTimestamp, recordedEvent, newState)
+          .testUpdate(scenarioDescription, updatedTimestamp, recordedEvent, throwable,newState)
           .map((updatedScenario: Scenarios) => featureFound.copy(scenarios = updatedScenario))
           .map(updatedFeature => Features(featuresMap = features.featuresMap.updated(featureDescription, updatedFeature)))
       )

@@ -87,8 +87,8 @@ class TestsCollectorImpl(testsCollectorConfiguration: TestsCollectorConfiguratio
       case StateEvent.TestStarting(runningScenario, timestamp) =>
         tests = tests.testStarting(runningScenario, timestamp).getOrThrow
 
-      case StateEvent.TestFailed(runningScenario, recordedEvent, timestamp) =>
-        tests = tests.testFailed(runningScenario, recordedEvent, timestamp).getOrThrow
+      case StateEvent.TestFailed(runningScenario, recordedEvent, throwable, timestamp) =>
+        tests = tests.testFailed(runningScenario, recordedEvent, throwable, timestamp).getOrThrow
 
       case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
         tests = tests.testSucceeded(runningScenario, recordedEvent, timestamp).getOrThrow

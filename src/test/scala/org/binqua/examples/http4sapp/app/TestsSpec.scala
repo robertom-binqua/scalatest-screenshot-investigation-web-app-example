@@ -6,7 +6,6 @@ import munit.FunSuite
 import org.binqua.examples.http4sapp
 import org.binqua.examples.http4sapp.app.ScreenshotMoment._
 import org.binqua.examples.http4sapp.app.StateEvent.{RecordedEvent, RecordedEvents}
-import org.binqua.examples.http4sapp.app.TestOutcome._
 import org.binqua.examples.http4sapp.util.utils.EitherOps
 import org.scalatest.events.Ordinal
 
@@ -16,16 +15,8 @@ class TestsSpec extends FunSuite {
 
   test("we can start a test and add 2 screenshots to it.") {
 
-    val expScenario1 =
-      Scenario(
-        ordinal = new Ordinal(1).next,
-        description = "desc",
-        startedTimestamp = 1L,
-        finishedTimestamp = Option.empty,
-        screenshots = Option.empty,
-        steps = Option.empty,
-        testOutcome = STARTING
-      )
+    val expScenario1 = ReferenceData.startingScenario
+
     val expFeature1 = Feature(description = "feature desc", scenarios = Scenarios(scenariosMap = Map(expScenario1.description -> expScenario1)))
     val expTest1 = Test("test desc", Features(featuresMap = Map(expFeature1.description -> expFeature1)))
     val expTests1: Tests = Tests(tests = Map(expTest1.name -> expTest1))
@@ -92,7 +83,7 @@ class TestsSpec extends FunSuite {
 
     val actualTests: Either[String, Tests] = Tests(Map.empty)
       .testStarting(runningScenario, timestamp = 1L)
-      .flatMap(_.testFailed(runningScenario, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow, timestamp = 2L))
+      .flatMap(_.testFailed(runningScenario, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow, None, timestamp = 2L))
 
     assertEquals(actualTests.flatMap(_.runningTest), Right(runningScenario))
 
@@ -117,7 +108,7 @@ class TestsSpec extends FunSuite {
       test12 <- test51.testStarting(runningScenario = t2f2s2, timestamp = 1L)
       test22 <- test12.addScreenshot(t2f2s2, "ulr12", ON_ENTER_PAGE).map(_._1)
       test32 <- test22.addScreenshot(t2f2s2, "ulr22", ON_EXIT_PAGE).map(_._1)
-      test52 <- test32.testFailed(t2f2s2, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, timestamp = 3L)
+      test52 <- test32.testFailed(t2f2s2, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
     } yield test52
 
     val expectedJson =
@@ -219,7 +210,7 @@ class TestsSpec extends FunSuite {
       test12 <- test41.testStarting(runningScenario = t1_f2_s1, timestamp = 1L)
       test22 <- test12.addScreenshot(t1_f2_s1, "ulr-f2-s1-1", ON_ENTER_PAGE).map(_._1)
       test42 <- Tests.addStep(testsToBeUpdated = test22, runningScenario = t1_f2_s1, message = "m1-f2-s1", throwable = None, timestamp = 1L)
-      test52 <- test42.testFailed(t1_f2_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, timestamp = 3L)
+      test52 <- test42.testFailed(t1_f2_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
     } yield test52
 
     val expectedJson =

@@ -18,6 +18,7 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       When("8")
       Then("9")
       And("11")
+      throw new RuntimeException("test")
       go to (host + "home.html")
       pageTitle should be("Home")
 

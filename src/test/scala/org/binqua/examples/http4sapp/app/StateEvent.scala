@@ -8,7 +8,7 @@ trait StateEvent
 object StateEvent {
   case class TestStarting(runningScenario: RunningScenario, timestamp: Long) extends StateEvent
 
-  case class TestFailed(runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long) extends StateEvent
+  case class TestFailed(runningScenario: RunningScenario, recordedEvent: RecordedEvents, throwable: Option[Throwable], timestamp: Long) extends StateEvent
 
   case class TestSucceeded(runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long) extends StateEvent
 

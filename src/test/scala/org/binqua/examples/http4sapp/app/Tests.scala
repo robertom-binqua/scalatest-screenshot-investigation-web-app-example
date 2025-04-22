@@ -79,12 +79,12 @@ case class Tests(tests: Map[String, Test]) {
           .map((updatedTest: Test) => Tests(tests = tests.updated(runningScenario.test, updatedTest)))
       )
 
-  def testFailed(runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long): Either[String, Tests] =
+  def testFailed(runningScenario: RunningScenario, recordedEvent: RecordedEvents,  throwable: Option[Throwable],timestamp: Long): Either[String, Tests] =
     tests
       .get(runningScenario.test)
       .toRight(s"I was going to update test ${runningScenario.test} to failed but test ${runningScenario.test} does not exist")
       .flatMap(
-        _.markAsFailed(runningScenario.feature, runningScenario.scenario, recordedEvent, timestamp)
+        _.markAsFailed(runningScenario.feature, runningScenario.scenario, recordedEvent, throwable,timestamp)
           .map(tests.updated(runningScenario.test, _))
           .map(Tests(_))
       )

@@ -42,14 +42,20 @@ case class Test(name: String, features: Features) {
   def withNewFeatureOrScenario(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Test] =
     Features.newTestStarting(features, ordinal, featureDescription, scenarioDescription, timestamp).map(newFeatures => this.copy(features = newFeatures))
 
-  def markAsFailed(featureDescription: String, scenarioDescription: String, recordedEvent: RecordedEvents, failedTimestamp: Long): Either[String, Test] =
+  def markAsFailed(
+      featureDescription: String,
+      scenarioDescription: String,
+      recordedEvent: RecordedEvents,
+      throwable: Option[Throwable],
+      failedTimestamp: Long
+  ): Either[String, Test] =
     Features
-      .testUpdated(features, featureDescription, scenarioDescription, recordedEvent, failedTimestamp, FAILED)
+      .testUpdated(features, featureDescription, scenarioDescription, recordedEvent, failedTimestamp, throwable, FAILED)
       .map(newFeatures => this.copy(features = newFeatures))
 
   def markAsSucceeded(featureDescription: String, scenarioDescription: String, recordedEvent: RecordedEvents, timestamp: Long): Either[String, Test] =
     Features
-      .testUpdated(features, featureDescription, scenarioDescription, recordedEvent, timestamp, SUCCEEDED)
+      .testUpdated(features, featureDescription, scenarioDescription, recordedEvent, timestamp, None, SUCCEEDED)
       .map(newFeatures => this.copy(features = newFeatures))
 
   def addScreenshot(
