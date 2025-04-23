@@ -3,6 +3,8 @@ package org.binqua.examples.http4sapp.app
 import org.binqua.examples.http4sapp.app.TestOutcome.STARTING
 import org.scalatest.events.Ordinal
 
+import java.nio.file.Files
+
 object ReferenceData {
 
   val startingScenario: Scenario =  Scenario(
@@ -15,5 +17,11 @@ object ReferenceData {
     testOutcome = STARTING,
     throwable = None
   )
+
+  def screenshotDriverData: ScreenshotDriverData = ScreenshotDriverData(screenshotImage = aDummyScreenshot, pageSource = "source", pageUrl = "url1")
+
+  private def aDummyScreenshot =
+    Files.createTempFile("doesNotMatter", "png").toFile
+
 
 }

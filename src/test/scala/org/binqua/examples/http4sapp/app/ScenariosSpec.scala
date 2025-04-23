@@ -14,7 +14,7 @@ class ScenariosSpec extends FunSuite {
 
     val scenario: Scenario = Scenario(new Ordinal(1).next, "desc", 122L, Some(111L), None, None, STARTING, None)
 
-    val actual1: Either[String, (Scenarios, File)] =
+    val actual1: Either[String, (Scenarios, Screenshot)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
 
     val expected1: Scenarios = Scenarios(
@@ -23,7 +23,7 @@ class ScenariosSpec extends FunSuite {
 
     assertEquals(actual1.map(_._1), Right(expected1))
 
-    val actual2: Either[String, (Scenarios, File)] =
+    val actual2: Either[String, (Scenarios, Screenshot)] =
       actual1.flatMap(result =>
         result._1.withNewScreenshot(ordinal = scenario.ordinal, scenarioDescription = scenario.description, pageUrl = "url2", screenshotMoment = ON_EXIT_PAGE)
       )
@@ -49,7 +49,7 @@ class ScenariosSpec extends FunSuite {
 
     val scenario: Scenario =ReferenceData.startingScenario.copy(testOutcome = FAILED)
 
-    val actual1: Either[String, (Scenarios, File)] =
+    val actual1: Either[String, (Scenarios, Screenshot)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
 
     assertEquals(actual1.map(_._1), "Sorry last scenario does not have testOutcome equal to STARTING but FAILED".asLeft)
@@ -60,7 +60,7 @@ class ScenariosSpec extends FunSuite {
 
     val scenario: Scenario = ReferenceData.startingScenario.copy(testOutcome = SUCCEEDED)
 
-    val actual1: Either[String, (Scenarios, File)] =
+    val actual1: Either[String, (Scenarios, Screenshot)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)
 
     assertEquals(actual1.map(_._1), "Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED".asLeft)

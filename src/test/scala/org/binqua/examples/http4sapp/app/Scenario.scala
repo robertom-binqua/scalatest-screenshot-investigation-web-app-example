@@ -5,8 +5,6 @@ import io.circe.generic.semiauto.deriveEncoder
 import io.circe.{Encoder, Json}
 import org.scalatest.events.Ordinal
 
-import java.io.File
-
 case class Scenario(
     ordinal: Ordinal,
     description: String,
@@ -62,10 +60,10 @@ object Scenario {
         })
   }
 
-  def addScreenshot(scenario: Scenario, pageUrl: String, screenshotMoment: ScreenshotMoment): (Scenario, File) = {
+  def addScreenshot(scenario: Scenario, pageUrl: String, screenshotMoment: ScreenshotMoment): (Scenario, Screenshot) = {
     val maybeScreenshots: Option[List[Screenshot]] = scenario.screenshots
       .map(s => Screenshot(pageUrl, screenshotMoment, scenario.ordinal, s.size + 1) :: s)
       .orElse(Some(List(Screenshot(pageUrl, screenshotMoment, scenario.ordinal, 1))))
-    (scenario.copy(screenshots = maybeScreenshots), maybeScreenshots.get.head.toFile)
+    (scenario.copy(screenshots = maybeScreenshots), maybeScreenshots.get.head)
   }
 }

@@ -3,6 +3,10 @@ package org.binqua.examples.http4sapp.app
 import cats.implicits.catsSyntaxOptionId
 import org.scalatest.events.{InfoProvided, Ordinal, RecordableEvent}
 
+import java.io.File
+
+final case class ScreenshotDriverData(screenshotImage: File, pageSource: String, pageUrl: String)
+
 trait StateEvent
 
 object StateEvent {

@@ -35,30 +35,32 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
     override def beforeAnyCall(target: AnyRef, method: Method, args: Array[AnyRef]): Unit = {
       //      val driver = target.asInstanceOf[ChromeDriver]
       //      println(s"driver $driver")
-      println(s"beforeAnyCall ${target.getClass}")
-      println(s"method $method")
+//      println(s"beforeAnyCall ${target.getClass}")
+//      println(s"method $method")
 
       if (target.isInstanceOf[WebElement]) {
         // (target.asInstanceOf[RemoteWebElement]).getTagName
         val element = target.asInstanceOf[RemoteWebElement]
-        println(s"(target.asInstanceOf[RemoteWebElement]).getTagName ${element.getTagName}")
-        println(s"type ${element.getAttribute("type")}")
-        println(s"value ${element.getAttribute("value")}")
-        println(s"text ${element.getText}")
+//        println(s"(target.asInstanceOf[RemoteWebElement]).getTagName ${element.getTagName}")
+//        println(s"type ${element.getAttribute("type")}")
+//        println(s"value ${element.getAttribute("value")}")
+//        println(s"text ${element.getText}")
       }
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
         testsCollector
           .addScreenshotOnEnterAt(
-            scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
-            pageUrl = driver.getCurrentUrl)
+            ScreenshotDriverData(driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), driver.getPageSource, driver.getCurrentUrl)
+          )
       }
     }
 
     override def afterAnyCall(target: AnyRef, method: Method, args: Array[AnyRef], result: AnyRef): Unit = {
-      println(s"afterAnyCall ${target.getClass} ")
+//      println(s"afterAnyCall ${target.getClass} ")
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
         testsCollector
-          .addScreenshotOnExitAt(scrFile = driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), pageUrl = driver.getCurrentUrl)
+          .addScreenshotOnExitAt(
+            ScreenshotDriverData(driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), driver.getPageSource, driver.getCurrentUrl)
+          )
       }
     }
   }

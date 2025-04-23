@@ -23,7 +23,8 @@ class TestsCollectorImpSpec extends FunSuite {
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
-    testsCollectorImpl.addScreenshotOnEnterAt(aDummyScreenshot, "url1")
+
+    testsCollectorImpl.addScreenshotOnEnterAt(ReferenceData.screenshotDriverData)
     testsCollectorImpl.add(
       StateEvent.TestSucceeded(
         runningScenario = runningScenario,
@@ -35,8 +36,8 @@ class TestsCollectorImpSpec extends FunSuite {
     val newRunningScenario = runningScenario.copy(test = "t1", ordinal = runningScenario.ordinal.next)
 
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = newRunningScenario, timestamp = 3L))
-    testsCollectorImpl.addScreenshotOnEnterAt(aDummyScreenshot, "url1")
-    testsCollectorImpl.addScreenshotOnExitAt(aDummyScreenshot, "url2")
+    testsCollectorImpl.addScreenshotOnEnterAt(ReferenceData.screenshotDriverData)
+    testsCollectorImpl.addScreenshotOnExitAt(ReferenceData.screenshotDriverData)
     val stringOrEvents = RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow
     testsCollectorImpl.add(StateEvent.TestSucceeded(runningScenario = newRunningScenario, stringOrEvents, timestamp = 4L))
 
@@ -142,7 +143,7 @@ class TestsCollectorImpSpec extends FunSuite {
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
-    testsCollectorImpl.addScreenshotOnEnterAt(aDummyScreenshot, "url1")
+    testsCollectorImpl.addScreenshotOnEnterAt(ReferenceData.screenshotDriverData)
 
     testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "this is a note 1", None, timestamp = 2L))
     testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "this is a note 2", None, timestamp = 3L))
@@ -213,9 +214,6 @@ class TestsCollectorImpSpec extends FunSuite {
     assertEquals(new File(screenshotsRoot.getAbsolutePath + replaceWithFileSeparator("/scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png")).exists(), true)
 
   }
-
-  private def aDummyScreenshot =
-    Files.createTempFile("doesNotMatter", "png").toFile
 
   private def replaceWithFileSeparator(withForwardSlash: String): String = withForwardSlash.replaceAll("/", File.separator)
 }

@@ -22,11 +22,11 @@ class ScenarioSpec extends FunSuite {
       throwable = None
     )
 
-    val actual1: (Scenario, File) = Scenario.addScreenshot(startingScenario, "url1", ON_EXIT_PAGE)
+    val actual1: (Scenario, Screenshot) = Scenario.addScreenshot(startingScenario, "url1", ON_EXIT_PAGE)
 
     assertEquals(actual1._1, startingScenario.copy(screenshots = Some(List(Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1)))))
 
-    val actual2: (Scenario, File) = Scenario.addScreenshot(scenario = actual1._1, pageUrl = "url2", screenshotMoment = ON_ENTER_PAGE)
+    val actual2: (Scenario, Screenshot) = Scenario.addScreenshot(scenario = actual1._1, pageUrl = "url2", screenshotMoment = ON_ENTER_PAGE)
 
     assertEquals(
       actual2._1,
@@ -40,7 +40,7 @@ class ScenarioSpec extends FunSuite {
       )
     )
 
-    val actual3: (Scenario, File) = Scenario.addScreenshot(actual2._1,"url3", ON_EXIT_PAGE)
+    val actual3: (Scenario, Screenshot) = Scenario.addScreenshot(actual2._1,"url3", ON_EXIT_PAGE)
 
     assertEquals(
       actual3._1,

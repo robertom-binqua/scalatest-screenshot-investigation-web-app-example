@@ -6,8 +6,6 @@ import io.circe.syntax.EncoderOps
 import org.binqua.examples.http4sapp.app.StateEvent.RecordedEvents
 import org.scalatest.events.Ordinal
 
-import java.io.File
-
 case class Tests(tests: Map[String, Test])
 
 object Tests {
@@ -20,12 +18,12 @@ object Tests {
       runningScenario: RunningScenario,
       pageUrl: String,
       screenshotMoment: ScreenshotMoment
-  ): Either[String, (Tests, File)] =
+  ): Either[String, (Tests, Screenshot)] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot add a screenshot")
       .flatMap((runningTest: Test) =>
         runningTest
           .addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, pageUrl, screenshotMoment)
-          .map((updatedTest: (Test, File)) => {
+          .map((updatedTest: (Test, Screenshot)) => {
             val newTests = Tests(tests = testsToBeUpdated.tests.updated(runningScenario.test, updatedTest._1))
             (newTests, updatedTest._2)
           })

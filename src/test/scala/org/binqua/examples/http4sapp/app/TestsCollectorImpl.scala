@@ -5,6 +5,7 @@ import cats.implicits.{catsSyntaxEitherId, toBifunctorOps}
 import com.google.common.base.Strings
 import io.circe.syntax.EncoderOps
 import org.apache.commons.io.FileUtils
+import org.binqua.examples.http4sapp.ImageResizer
 import org.binqua.examples.http4sapp.app.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.binqua.examples.http4sapp.util.utils.EitherOps
 
@@ -19,9 +20,9 @@ trait TestsCollector {
 
   def createReport(): Unit
 
-  def addScreenshotOnEnterAt(scrFile: File, pageUrl: String): Unit
+  def addScreenshotOnEnterAt(screenshotDriverData: ScreenshotDriverData): Unit
 
-  def addScreenshotOnExitAt(scrFile: File, pageUrl: String): Unit
+  def addScreenshotOnExitAt(screenshotDriverData: ScreenshotDriverData): Unit
 
 }
 
@@ -117,14 +118,30 @@ class TestsCollectorImpl(testsCollectorConfiguration: TestsCollectorConfiguratio
   def createReport(): Unit =
     FileUtils.writeStringToFile(testsCollectorConfiguration.jsonReport, tests.asJson.spaces2, StandardCharsets.UTF_8)
 
-  private def addScreenshot(scrFile: File, pageUrl: String, screenshotMoment: ScreenshotMoment): Unit = { //    tests
-    val (newTests, screenshotSuffixLocation): (Tests, File) =
-      Tests.runningTest(tests).flatMap(Tests.addScreenshot(tests, _, pageUrl, screenshotMoment)).getOrThrow
+  private def addScreenshot(screenshotDriverData: ScreenshotDriverData, screenshotMoment: ScreenshotMoment): Unit = {
+    val (newTests, screenshot): (Tests, Screenshot) =
+      Tests.runningTest(tests).flatMap(Tests.addScreenshot(tests, _, screenshotDriverData.pageUrl, screenshotMoment)).getOrThrow
     tests = newTests
-    FileUtils.copyFile(scrFile, new File(testsCollectorConfiguration.screenshotsRootLocation + File.separator + screenshotSuffixLocation))
+    FileUtils.copyFile(
+      screenshotDriverData.screenshotImage,
+      new File(testsCollectorConfiguration.screenshotsRootLocation + File.separator + screenshot.originalFileLocation)
+    )
+    FileUtils.writeStringToFile(
+      new File(testsCollectorConfiguration.screenshotsRootLocation + File.separator + screenshot.source),
+      screenshotDriverData.pageSource,
+      StandardCharsets.UTF_8
+    )
+
+    val resizedFile = new File(testsCollectorConfiguration.screenshotsRootLocation + File.separator + screenshot.resizeFileLocation)
+    FileUtils.createParentDirectories(resizedFile)
+
+    ImageResizer.resizeImage(
+      inputPath = screenshotDriverData.screenshotImage,
+      outputPath = resizedFile
+    )
   }
 
-  override def addScreenshotOnExitAt(scrFile: File, pageUrl: String): Unit = addScreenshot(scrFile, pageUrl, ON_EXIT_PAGE)
+  override def addScreenshotOnExitAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_EXIT_PAGE)
 
-  override def addScreenshotOnEnterAt(scrFile: File, pageUrl: String): Unit = addScreenshot(scrFile, pageUrl, ON_ENTER_PAGE)
+  override def addScreenshotOnEnterAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_ENTER_PAGE)
 }

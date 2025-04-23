@@ -58,14 +58,14 @@ object Features {
       scenarioDescription: String,
       pageUrl: String,
       screenshotMoment: ScreenshotMoment
-  ): Either[String, (Features, File)] =
+  ): Either[String, (Features, Screenshot)] =
     features.featuresMap
       .get(featureDescription)
       .toRight("there are not features. I cannot add a screenshot")
       .flatMap(feature =>
         feature
           .withNewScreenshot(ordinal, scenarioDescription, pageUrl, screenshotMoment)
-          .map((result: (Feature, File)) => {
+          .map((result: (Feature, Screenshot)) => {
             val (updateFeature, screenshotLocation) = result
             (Features(features.featuresMap.updated(featureDescription, updateFeature)), screenshotLocation)
           })

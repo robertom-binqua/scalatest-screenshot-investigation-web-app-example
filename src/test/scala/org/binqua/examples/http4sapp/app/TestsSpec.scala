@@ -26,7 +26,7 @@ class TestsSpec extends FunSuite {
     val firstActualTests: Either[String, Tests] = Tests.testStarting(Tests(Map.empty), runningScenario, 1L)
     assertEquals(firstActualTests, Right(expTests1))
 
-    val secondActualTests: Either[String, (Tests, File)] = firstActualTests.flatMap(tests => {
+    val secondActualTests: Either[String, (Tests, Screenshot)] = firstActualTests.flatMap(tests => {
       Tests.addScreenshot(tests, runningScenario, "url1", ON_ENTER_PAGE)
     })
 
@@ -37,8 +37,8 @@ class TestsSpec extends FunSuite {
 
     assertEquals(secondActualTests.map(_._1), Right(expectedTests2))
 
-    val actualTest3: Either[String, (Tests, File)] =
-      secondActualTests.flatMap((test: (Tests, File)) => Tests.addScreenshot(test._1, runningScenario, "url2", ON_EXIT_PAGE))
+    val actualTest3: Either[String, (Tests, Screenshot)] =
+      secondActualTests.flatMap((test: (Tests, Screenshot)) => Tests.addScreenshot(test._1, runningScenario, "url2", ON_EXIT_PAGE))
 
     val expScenario3 = expScenario1.copy(screenshots =
       Some(
@@ -54,7 +54,7 @@ class TestsSpec extends FunSuite {
 
     assertEquals(actualTest3.map(_._1), Right(expectedTests3))
 
-    val result: Either[String, RunningScenario] = actualTest3.flatMap((t: (Tests, File)) => Tests.runningTest(t._1))
+    val result: Either[String, RunningScenario] = actualTest3.flatMap((t: (Tests, Screenshot)) => Tests.runningTest(t._1))
 
     assertEquals(
       obtained = result,
@@ -73,7 +73,7 @@ class TestsSpec extends FunSuite {
 
     assertEquals(actualTests.flatMap(Tests.runningTest), runningScenario.asRight)
 
-    val invalidTests: Either[String, (Tests, File)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_EXIT_PAGE))
+    val invalidTests: Either[String, (Tests, Screenshot)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_EXIT_PAGE))
 
     assertEquals(invalidTests, Left("Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED"))
 
@@ -89,7 +89,7 @@ class TestsSpec extends FunSuite {
 
     assertEquals(actualTests.flatMap(Tests.runningTest), Right(runningScenario))
 
-    val invalidTests: Either[String, (Tests, File)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_EXIT_PAGE))
+    val invalidTests: Either[String, (Tests, Screenshot)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_EXIT_PAGE))
 
     assertEquals(invalidTests, Left("Sorry last scenario does not have testOutcome equal to STARTING but FAILED"))
 
@@ -128,13 +128,17 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "location" : "scenario_ordinal_1_0/screenshot_2_ON_EXIT_PAGE.png",
+        |                "original-location" : "scenario_ordinal_1_0/original/2_ON_EXIT_PAGE.png",
+        |                "resized-location" : "scenario_ordinal_1_0/resized/2_ON_EXIT_PAGE.png",
+        |                "source-location" : "scenario_ordinal_1_0/sources/2_ON_EXIT_PAGE.txt",
         |                "pageUrl" : "ulr21",
         |                "index" : 2,
         |                "screenshotMoment" : "ON_EXIT_PAGE"
         |              },
         |              {
-        |                "location" : "scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png",
+        |                "original-location" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
+        |                "resized-location" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
+        |                "source-location" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr11",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
@@ -166,13 +170,17 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "location" : "scenario_ordinal_2_0/screenshot_2_ON_EXIT_PAGE.png",
+        |                "original-location" : "scenario_ordinal_2_0/original/2_ON_EXIT_PAGE.png",
+        |                "resized-location" : "scenario_ordinal_2_0/resized/2_ON_EXIT_PAGE.png",
+        |                "source-location" : "scenario_ordinal_2_0/sources/2_ON_EXIT_PAGE.txt",
         |                "pageUrl" : "ulr22",
         |                "index" : 2,
         |                "screenshotMoment" : "ON_EXIT_PAGE"
         |              },
         |              {
-        |                "location" : "scenario_ordinal_2_0/screenshot_1_ON_ENTER_PAGE.png",
+        |                "original-location" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
+        |                "resized-location" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
+        |                "source-location" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr12",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
@@ -230,7 +238,9 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "location" : "scenario_ordinal_1_0/screenshot_1_ON_ENTER_PAGE.png",
+        |                "original-location" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
+        |                "resized-location" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
+        |                "source-location" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr-f1-s1-1",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
@@ -262,7 +272,9 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "location" : "scenario_ordinal_2_0/screenshot_1_ON_ENTER_PAGE.png",
+        |                "original-location" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
+        |                "resized-location" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
+        |                "source-location" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr-f2-s1-1",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"

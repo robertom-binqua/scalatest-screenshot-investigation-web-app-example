@@ -56,7 +56,7 @@ case class Scenarios(scenariosMap: Map[String, Scenario]) {
         this.copy(scenariosMap = this.scenariosMap.updated(scenarioDescription, Scenario.starting(ordinal, scenarioDescription, timestamp))).asRight
     }
 
-  def withNewScreenshot(ordinal: Ordinal, scenarioDescription: String, pageUrl: String, screenshotMoment: ScreenshotMoment): Either[String, (Scenarios, File)] =
+  def withNewScreenshot(ordinal: Ordinal, scenarioDescription: String, pageUrl: String, screenshotMoment: ScreenshotMoment): Either[String, (Scenarios, Screenshot)] =
     scenariosMap
       .get(scenarioDescription)
       .toRight("last scenario does not have testOutcome == STARTING")

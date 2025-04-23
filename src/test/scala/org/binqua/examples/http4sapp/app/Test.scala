@@ -64,12 +64,12 @@ case class Test(name: String, features: Features) {
       scenarioDescription: String,
       pageUrl: String,
       screenshotMoment: ScreenshotMoment
-  ): Either[String, (Test, File)] =
+  ): Either[String, (Test, Screenshot)] =
     Features
       .addScreenshot(features, ordinal, featureDescription, scenarioDescription, pageUrl, screenshotMoment)
       .map(result => {
-        val (features, file) = result
-        (this.copy(features = features), file)
+        val (features, screenshot) = result
+        (this.copy(features = features), screenshot)
       })
 
 }
