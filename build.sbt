@@ -40,7 +40,4 @@ lazy val root = (project in file("."))
   )
   .enablePlugins(JavaAppPackaging, SbtTwirl)
 
-
-Compile / mainClass := Some("com.recommender.Main")
-
 Compile / run / fork := true

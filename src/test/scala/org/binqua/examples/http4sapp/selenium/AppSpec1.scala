@@ -11,14 +11,13 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
 
   Feature("f1") {
     Scenario("s11") {
-      info("1")
-      Given("2")
-      Then("3")
-      Given("7")
-      When("8")
-      Then("9")
-      And("11")
-      throw new RuntimeException("test")
+      info("when we login into the app")
+      info("given the db is down")
+      info("we can retry 3 time")
+      info("and the second time we succedeed")
+      info("Given we enter our credentials")
+      info("we receive a nice welcome page")
+      info("and the user is happy")
       go to (host + "home.html")
       pageTitle should be("Home")
 
@@ -32,6 +31,7 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       pageTitle should be("Page 3")
 
       click on linkText("Home")
+      info("test finished")
       pageTitle should be("Home")
     }
     Scenario("s12") {
@@ -139,6 +139,13 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       Given("1")
       Then("3")
       throw new RuntimeException("f3 s11 fails")
+      And("4")
+    }
+    Scenario("s1111") {
+      info("1")
+      info("3")
+      throw new RuntimeException("f3 s1111 fails")
+      info("4")
     }
     Scenario("s12") {
       Given("1")

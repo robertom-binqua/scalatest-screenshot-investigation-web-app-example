@@ -8,9 +8,9 @@ import java.io.File
 object Screenshot {
   implicit val encoder: Encoder[Screenshot] = (screenshot: Screenshot) =>
     Json.obj(
-      "original-location" -> Json.fromString(screenshot.originalFileLocation.toString),
-      "resized-location" -> Json.fromString(screenshot.resizeFileLocation.toString),
-      "source-location" -> Json.fromString(screenshot.source.toString),
+      "originalLocation" -> Json.fromString(screenshot.originalFileLocation.toString),
+      "resizedLocation" -> Json.fromString(screenshot.resizeFileLocation.toString),
+      "sourceLocation" -> Json.fromString(screenshot.sourceCode.toString),
       "pageUrl" -> Json.fromString(screenshot.pageUrl),
       "index" -> Json.fromInt(screenshot.index),
       "screenshotMoment" -> Json.fromString(screenshot.screenshotMoment.toString)
@@ -28,7 +28,7 @@ case class Screenshot(pageUrl: String, screenshotMoment: ScreenshotMoment, ordin
     root + File.separator + "resized" + File.separator + s"${index}_$screenshotMoment.png"
   )
 
-  def source: File = new File(
+  def sourceCode: File = new File(
     root + File.separator + "sources" + File.separator + s"${index}_$screenshotMoment.txt"
   )
 

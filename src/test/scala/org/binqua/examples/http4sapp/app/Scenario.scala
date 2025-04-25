@@ -23,7 +23,6 @@ object Scenario {
     Json.obj(
       "exception-message" -> Json.fromString(a.getMessage)
     )
-
   }
 
   def starting(ordinal: Ordinal, name: String, timestamp: Long): Scenario =

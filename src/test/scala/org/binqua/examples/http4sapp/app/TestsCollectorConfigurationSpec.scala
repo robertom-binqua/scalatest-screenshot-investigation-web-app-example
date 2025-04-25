@@ -4,11 +4,22 @@ import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
 
 import java.io.File
+import java.nio.file.{Files, Path}
 
 class TestsCollectorConfigurationSpec extends FunSuite {
 
-  test("reportLocationFile and screenshotsRoot have to exist otherwise we cannot proceed") {
-    assertEquals(TestsCollectorConfiguration.from(reportLocationRoot = new File("1"), screenshotsRoot = new File("2")),"reportLocationRoot dir 1 has to exist but it does not - screenshotsRoot dir 2 has to exist but it does not".asLeft)
+  test("given reportDirParent does not exist TestsCollectorConfiguration cannot be created") {
+
+    val tempDir: Path = Files.createTempDirectory("TestsCollectorConfigurationSpec")
+
+    def toString(prefix: Path, suffix: String) =
+      prefix.toFile.getAbsolutePath + File.separator + suffix.replaceAll("/", File.separator)
+
+    assertEquals(
+      TestsCollectorConfiguration.from(reportDirParent = tempDir.resolve("IDoNotExist").toFile),
+      (s"ReportDir ${toString(tempDir, "IDoNotExist/report")} should exist but it does not - " +
+        s"ScreenshotsDir ${toString(tempDir, "IDoNotExist/report/screenshots")} should exist but it does not").asLeft
+    )
   }
 
 }

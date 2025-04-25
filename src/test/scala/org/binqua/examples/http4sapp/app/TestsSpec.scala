@@ -128,17 +128,17 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "original-location" : "scenario_ordinal_1_0/original/2_ON_EXIT_PAGE.png",
-        |                "resized-location" : "scenario_ordinal_1_0/resized/2_ON_EXIT_PAGE.png",
-        |                "source-location" : "scenario_ordinal_1_0/sources/2_ON_EXIT_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_1_0/original/2_ON_EXIT_PAGE.png",
+        |                "resizedLocation" : "scenario_ordinal_1_0/resized/2_ON_EXIT_PAGE.png",
+        |                "sourceLocation" : "scenario_ordinal_1_0/sources/2_ON_EXIT_PAGE.txt",
         |                "pageUrl" : "ulr21",
         |                "index" : 2,
         |                "screenshotMoment" : "ON_EXIT_PAGE"
         |              },
         |              {
-        |                "original-location" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-        |                "resized-location" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
-        |                "source-location" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
+        |                "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
+        |                "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr11",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
@@ -170,17 +170,17 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "original-location" : "scenario_ordinal_2_0/original/2_ON_EXIT_PAGE.png",
-        |                "resized-location" : "scenario_ordinal_2_0/resized/2_ON_EXIT_PAGE.png",
-        |                "source-location" : "scenario_ordinal_2_0/sources/2_ON_EXIT_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_2_0/original/2_ON_EXIT_PAGE.png",
+        |                "resizedLocation" : "scenario_ordinal_2_0/resized/2_ON_EXIT_PAGE.png",
+        |                "sourceLocation" : "scenario_ordinal_2_0/sources/2_ON_EXIT_PAGE.txt",
         |                "pageUrl" : "ulr22",
         |                "index" : 2,
         |                "screenshotMoment" : "ON_EXIT_PAGE"
         |              },
         |              {
-        |                "original-location" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
-        |                "resized-location" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
-        |                "source-location" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
+        |                "resizedLocation" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
+        |                "sourceLocation" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr12",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
@@ -238,9 +238,9 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "original-location" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-        |                "resized-location" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
-        |                "source-location" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
+        |                "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
+        |                "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr-f1-s1-1",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
@@ -272,9 +272,9 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "original-location" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
-        |                "resized-location" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
-        |                "source-location" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
+        |                "resizedLocation" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
+        |                "sourceLocation" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr-f2-s1-1",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"

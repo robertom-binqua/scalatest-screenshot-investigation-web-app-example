@@ -41,7 +41,7 @@ class TestsCollectorConfigurationFactorySpec extends FunSuite {
       new File(new File(System.getProperty("user.dir")).getAbsoluteFile + File.separator + "tests_reports" + File.separator + "at_18_Feb_2021_at_13_01_02")
 
     val expectedReportDir = new File(expRoot.getAbsoluteFile + File.separator + "report")
-    val expectedScreenshotDir = new File(expRoot.getAbsoluteFile + File.separator + "screenshots")
+    val expectedScreenshotDir = new File(expectedReportDir.getAbsoluteFile + File.separator + "screenshots")
 
     assertEquals(actual.map(_.reportRootLocation), expectedReportDir.asRight)
     assertEquals(actual.map(_.screenshotsRootLocation), expectedScreenshotDir.asRight)
