@@ -15,7 +15,8 @@ class TestsSpec extends FunSuite {
 
     val expScenario1 = ReferenceData.startingScenario
 
-    val expFeature1 = Feature(description = "feature desc", scenarios = Scenarios(scenariosMap = Map(expScenario1.description -> expScenario1)))
+    val expFeature1 =
+      Feature(description = "feature desc", ordinal = expScenario1.ordinal, scenarios = Scenarios(scenariosMap = Map(expScenario1.description -> expScenario1)))
     val expTest1 = Test("test desc", Features(featuresMap = Map(expFeature1.description -> expFeature1)), expScenario1.ordinal)
     val expTests1: Tests = Tests(tests = Map(expTest1.name -> expTest1))
 
@@ -119,6 +120,7 @@ class TestsSpec extends FunSuite {
         |    "features" : [
         |      {
         |        "description" : "f1",
+        |        "id" : "f_1_0",
         |        "scenarios" : [
         |          {
         |            "ordinal" : "1_0",
@@ -162,6 +164,7 @@ class TestsSpec extends FunSuite {
         |    "features" : [
         |      {
         |        "description" : "f2",
+        |        "id" : "f_2_0",
         |        "scenarios" : [
         |          {
         |            "ordinal" : "2_0",
@@ -231,6 +234,7 @@ class TestsSpec extends FunSuite {
         |    "features" : [
         |      {
         |        "description" : "f1",
+        |        "id" : "f_1_0",
         |        "scenarios" : [
         |          {
         |            "ordinal" : "1_0",
@@ -265,6 +269,7 @@ class TestsSpec extends FunSuite {
         |      },
         |      {
         |        "description" : "f2",
+        |        "id" : "f_2_0",
         |        "scenarios" : [
         |          {
         |            "ordinal" : "2_0",

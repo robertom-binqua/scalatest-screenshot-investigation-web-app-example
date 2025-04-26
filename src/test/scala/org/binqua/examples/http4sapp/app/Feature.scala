@@ -11,12 +11,13 @@ object Feature {
   implicit val featureEncoder: Encoder[Feature] = Encoder.instance { feature =>
     Json.obj(
       "description" -> Json.fromString(feature.description),
+      "id" -> Json.fromString(Utils.ordinalToString("f", feature.ordinal)),
       "scenarios" -> feature.scenarios.asJson
     )
   }
 }
 
-case class Feature(description: String, scenarios: Scenarios) {
+case class Feature(description: String, scenarios: Scenarios, ordinal: Ordinal) {
   def withNewScenario(ordinal: Ordinal, scenarioDescription: String, timestamp: Long): Either[String, Feature] = scenarios
     .testStarting(ordinal, scenarioDescription, timestamp)
     .map(newScenarios => this.copy(scenarios = newScenarios))

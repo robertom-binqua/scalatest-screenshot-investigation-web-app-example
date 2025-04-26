@@ -10,7 +10,7 @@ object Features {
   def starting(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Features = {
     val newScenarios =
       Scenarios(scenariosMap = Map(scenarioDescription -> Scenario.starting(ordinal, scenarioDescription, timestamp)))
-    val newFeature = Feature(description = featureDescription, scenarios = newScenarios)
+    val newFeature = Feature(description = featureDescription, scenarios = newScenarios, ordinal)
     Features(featuresMap = Map(featureDescription -> newFeature))
   }
 
@@ -47,7 +47,7 @@ object Features {
           .map(updatedFeature => Features(featuresMap = features.featuresMap.updated(featureDescription, updatedFeature)))
       case None =>
         val newScenarios = Scenarios(scenariosMap = Map(scenarioDescription -> Scenario.starting(ordinal, scenarioDescription, timestamp)))
-        val newFeature = Feature(description = featureDescription, scenarios = newScenarios)
+        val newFeature = Feature(description = featureDescription, scenarios = newScenarios, ordinal)
         Features(featuresMap = features.featuresMap.updated(featureDescription, newFeature)).asRight
     }
 

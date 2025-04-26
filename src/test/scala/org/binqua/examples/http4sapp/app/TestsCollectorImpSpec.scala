@@ -94,6 +94,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |      "features" : [
                             |        {
                             |          "description" : "f",
+                            |          "id" : "f_1_0",
                             |          "scenarios" : [
                             |            {
                             |              "ordinal" : "1_0",
@@ -129,6 +130,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |      "features" : [
                             |        {
                             |          "description" : "f",
+                            |          "id" : "f_1_1",
                             |          "scenarios" : [
                             |            {
                             |              "ordinal" : "1_1",
@@ -221,6 +223,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |      "features" : [
                             |        {
                             |          "description" : "f",
+                            |          "id" : "f_1_0",
                             |          "scenarios" : [
                             |            {
                             |              "ordinal" : "1_0",

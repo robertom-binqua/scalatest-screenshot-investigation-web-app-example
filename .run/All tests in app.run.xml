@@ -32,6 +32,17 @@
     </option>
     <option name="testKind" value="All in package" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
+    <option name="classBuf">
+      <list>
+        <option value="org.binqua.examples.http4sapp.app.TestsSpec" />
+        <option value="org.binqua.examples.http4sapp.app.ScenarioSpec" />
+        <option value="org.binqua.examples.http4sapp.app.ScenariosSpec" />
+        <option value="org.binqua.examples.http4sapp.app.TestsCollectorImpSpec" />
+        <option value="org.binqua.examples.http4sapp.app.ScreenshotReporterImplSpec" />
+        <option value="org.binqua.examples.http4sapp.app.TestsCollectorConfigurationSpec" />
+        <option value="org.binqua.examples.http4sapp.app.TestsCollectorConfigurationFactorySpec" />
+      </list>
+    </option>
     <option name="shortenClasspath" value="NONE" />
     <option name="testPackagePath" value="org.binqua.examples.http4sapp.app" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
