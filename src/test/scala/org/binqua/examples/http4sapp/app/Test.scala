@@ -6,12 +6,11 @@ import org.binqua.examples.http4sapp.app.StateEvent.RecordedEvents
 import org.binqua.examples.http4sapp.app.TestOutcome.{FAILED, SUCCEEDED}
 import org.scalatest.events.Ordinal
 
-import java.io.File
-
 object Test {
   implicit val encoder: Encoder[Test] = (test: Test) =>
     Json.obj(
       "name" -> Json.fromString(test.name),
+      "id" -> Json.fromString(Utils.ordinalToString("t", test.ordinal)),
       "features" -> test.features.featuresMap.values.asJson
     )
 
@@ -37,7 +36,7 @@ object Test {
 
 }
 
-case class Test(name: String, features: Features) {
+case class Test(name: String, features: Features, ordinal: Ordinal) {
 
   def withNewFeatureOrScenario(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Test] =
     Features.newTestStarting(features, ordinal, featureDescription, scenarioDescription, timestamp).map(newFeatures => this.copy(features = newFeatures))

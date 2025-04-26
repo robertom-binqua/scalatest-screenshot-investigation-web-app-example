@@ -90,6 +90,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |  "testsReport" : [
                             |    {
                             |      "name" : "t",
+                            |      "id" : "t_1_0",
                             |      "features" : [
                             |        {
                             |          "description" : "f",
@@ -124,6 +125,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |    },
                             |    {
                             |      "name" : "t1",
+                            |      "id" : "t_1_1",
                             |      "features" : [
                             |        {
                             |          "description" : "f",
@@ -215,6 +217,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |  "testsReport" : [
                             |    {
                             |      "name" : "t",
+                            |      "id" : "t_1_0",
                             |      "features" : [
                             |        {
                             |          "description" : "f",

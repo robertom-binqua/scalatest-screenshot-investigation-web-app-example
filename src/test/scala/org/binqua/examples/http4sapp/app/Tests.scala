@@ -78,7 +78,11 @@ object Tests {
         ifEmpty = Tests(tests =
           testsToBeUpdated.tests.updated(
             runningScenario.test,
-            Test(runningScenario.test, Features.starting(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp))
+            Test(
+              name = runningScenario.test,
+              features = Features.starting(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp),
+              ordinal = runningScenario.ordinal
+            )
           )
         ).asRight
       )(testAlreadyPresent =>
