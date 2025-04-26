@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Spec test to try the report generation" type="ScalaTestRunConfiguration" factoryName="ScalaTest" show_console_on_std_err="false" show_console_on_std_out="false">
-    <module name="scalatest-screenshot-investigation-web-app-example" />
+  <configuration default="false" name="All tests in app" type="MUnitRunConfiguration" factoryName="MUnit" show_console_on_std_err="false" show_console_on_std_out="false">
+    <module name="scalatest-screenshot-investigation-web-app-example.test" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />
       <option name="IS_SUBST" value="false" />
@@ -11,7 +11,7 @@
         <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
       </ENTRIES>
     </extension>
-    <option name="VMParameters" value="-DreportDestinationRoot=report-destination-root" />
+    <option name="VMParameters" value="" />
     <option name="allowRunningInParallel" value="false" />
     <option name="alternativeJrePath" />
     <option name="alternativeJrePathEnabled" value="false" />
@@ -25,7 +25,7 @@
       <map />
     </option>
     <option name="passParentEnvs" value="true" />
-    <option name="programParameters" value="-C org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
+    <option name="programParameters" value="" />
     <option name="projectPathOnTarget" />
     <option name="selectedOptions">
       <list />
@@ -34,16 +34,17 @@
     <option name="workingDirectory" value="$PROJECT_DIR$" />
     <option name="classBuf">
       <list>
-        <option value="org.binqua.examples.http4sapp.selenium.AppSpec1" />
-        <option value="org.binqua.examples.http4sapp.selenium.AppSpec2" />
+        <option value="org.binqua.examples.http4sapp.app.TestsSpec" />
+        <option value="org.binqua.examples.http4sapp.app.ScenarioSpec" />
+        <option value="org.binqua.examples.http4sapp.app.ScenariosSpec" />
+        <option value="org.binqua.examples.http4sapp.app.TestsCollectorImpSpec" />
+        <option value="org.binqua.examples.http4sapp.app.ScreenshotReporterImplSpec" />
+        <option value="org.binqua.examples.http4sapp.app.TestsCollectorConfigurationSpec" />
+        <option value="org.binqua.examples.http4sapp.app.TestsCollectorConfigurationFactorySpec" />
       </list>
     </option>
-    <option name="javaOptions" value="-DreportDestinationRoot=report-destination-root" />
-    <option name="programParameters" value="-C org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
-    <option name="searchTest" value="In whole project" />
     <option name="shortenClasspath" value="NONE" />
-    <option name="testArgs" value="-C org.binqua.examples.http4sapp.app.ScreenshotReporterRunner" />
-    <option name="testPackagePath" value="org.binqua.examples.http4sapp.selenium" />
+    <option name="testPackagePath" value="org.binqua.examples.http4sapp.app" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />

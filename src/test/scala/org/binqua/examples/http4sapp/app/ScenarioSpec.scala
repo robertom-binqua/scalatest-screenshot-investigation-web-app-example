@@ -5,8 +5,6 @@ import org.binqua.examples.http4sapp.app.ScreenshotMoment._
 import org.binqua.examples.http4sapp.app.TestOutcome._
 import org.scalatest.events.Ordinal
 
-import java.io.File
-
 class ScenarioSpec extends FunSuite {
 
   test("withNewScreenshot should work") {
@@ -33,23 +31,23 @@ class ScenarioSpec extends FunSuite {
       startingScenario.copy(screenshots =
         Some(
           List(
-            Screenshot("url2", ON_ENTER_PAGE, startingScenario.ordinal, 2),
-            Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1)
+            Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1),
+            Screenshot("url2", ON_ENTER_PAGE, startingScenario.ordinal, 2)
           )
         )
       )
     )
 
-    val actual3: (Scenario, Screenshot) = Scenario.addScreenshot(actual2._1,"url3", ON_EXIT_PAGE)
+    val actual3: (Scenario, Screenshot) = Scenario.addScreenshot(actual2._1, "url3", ON_EXIT_PAGE)
 
     assertEquals(
       actual3._1,
       startingScenario.copy(screenshots =
         Some(
           List(
-            Screenshot("url3", ON_EXIT_PAGE, startingScenario.ordinal, 3),
+            Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1),
             Screenshot("url2", ON_ENTER_PAGE, startingScenario.ordinal, 2),
-            Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1)
+            Screenshot("url3", ON_EXIT_PAGE, startingScenario.ordinal, 3)
           )
         )
       )

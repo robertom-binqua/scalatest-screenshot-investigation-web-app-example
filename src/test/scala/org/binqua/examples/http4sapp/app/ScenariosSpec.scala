@@ -6,8 +6,6 @@ import org.binqua.examples.http4sapp.app.ScreenshotMoment._
 import org.binqua.examples.http4sapp.app.TestOutcome._
 import org.scalatest.events.Ordinal
 
-import java.io.File
-
 class ScenariosSpec extends FunSuite {
 
   test("we can add 2 screenshots to a scenario that is in STARTING state") {
@@ -33,8 +31,8 @@ class ScenariosSpec extends FunSuite {
         "desc" -> scenario.copy(screenshots =
           Some(
             List(
-              Screenshot(pageUrl = "url2", screenshotMoment = ON_EXIT_PAGE, ordinal = scenario.ordinal, index = 2),
-              Screenshot(pageUrl = "url", screenshotMoment = ON_ENTER_PAGE, ordinal = scenario.ordinal, index = 1)
+              Screenshot(pageUrl = "url", screenshotMoment = ON_ENTER_PAGE, ordinal = scenario.ordinal, index = 1),
+              Screenshot(pageUrl = "url2", screenshotMoment = ON_EXIT_PAGE, ordinal = scenario.ordinal, index = 2)
             )
           )
         )
@@ -47,7 +45,7 @@ class ScenariosSpec extends FunSuite {
 
   test("we cannot add screenshots to a scenario that is in FAILED state") {
 
-    val scenario: Scenario =ReferenceData.startingScenario.copy(testOutcome = FAILED)
+    val scenario: Scenario = ReferenceData.startingScenario.copy(testOutcome = FAILED)
 
     val actual1: Either[String, (Scenarios, Screenshot)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.ordinal, scenario.description, "url", ON_ENTER_PAGE)

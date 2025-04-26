@@ -52,6 +52,7 @@ class TestsCollectorImpSpec extends FunSuite {
   test("we can add 2 tests with 1 screenshot each") {
 
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
+
     val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
 
     val testsCollectorImpl = new TestsCollectorImpl(
@@ -65,6 +66,7 @@ class TestsCollectorImpSpec extends FunSuite {
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
 
     testsCollectorImpl.addScreenshotOnEnterAt(ReferenceData.screenshotDriverData)
+
     testsCollectorImpl.add(
       StateEvent.TestSucceeded(
         runningScenario = runningScenario,
@@ -133,20 +135,20 @@ class TestsCollectorImpSpec extends FunSuite {
                             |              "finishedTimestamp" : 4,
                             |              "screenshots" : [
                             |                {
-                            |                  "originalLocation" : "scenario_ordinal_1_1/original/2_ON_EXIT_PAGE.png",
-                            |                  "resizedLocation" : "scenario_ordinal_1_1/resized/2_ON_EXIT_PAGE.png",
-                            |                  "sourceLocation" : "scenario_ordinal_1_1/sources/2_ON_EXIT_PAGE.txt",
-                            |                  "pageUrl" : "url1",
-                            |                  "index" : 2,
-                            |                  "screenshotMoment" : "ON_EXIT_PAGE"
-                            |                },
-                            |                {
                             |                  "originalLocation" : "scenario_ordinal_1_1/original/1_ON_ENTER_PAGE.png",
                             |                  "resizedLocation" : "scenario_ordinal_1_1/resized/1_ON_ENTER_PAGE.png",
                             |                  "sourceLocation" : "scenario_ordinal_1_1/sources/1_ON_ENTER_PAGE.txt",
                             |                  "pageUrl" : "url1",
                             |                  "index" : 1,
                             |                  "screenshotMoment" : "ON_ENTER_PAGE"
+                            |                },
+                            |                {
+                            |                  "originalLocation" : "scenario_ordinal_1_1/original/2_ON_EXIT_PAGE.png",
+                            |                  "resizedLocation" : "scenario_ordinal_1_1/resized/2_ON_EXIT_PAGE.png",
+                            |                  "sourceLocation" : "scenario_ordinal_1_1/sources/2_ON_EXIT_PAGE.txt",
+                            |                  "pageUrl" : "url1",
+                            |                  "index" : 2,
+                            |                  "screenshotMoment" : "ON_EXIT_PAGE"
                             |                }
                             |              ],
                             |              "steps" : [

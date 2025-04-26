@@ -60,9 +60,13 @@ object Scenario {
   }
 
   def addScreenshot(scenario: Scenario, pageUrl: String, screenshotMoment: ScreenshotMoment): (Scenario, Screenshot) = {
+    def newScreenshot(existingScreenshots: List[Screenshot]): List[Screenshot] =
+      List(Screenshot(pageUrl, screenshotMoment, scenario.ordinal, existingScreenshots.size + 1))
+
     val maybeScreenshots: Option[List[Screenshot]] = scenario.screenshots
-      .map(s => Screenshot(pageUrl, screenshotMoment, scenario.ordinal, s.size + 1) :: s)
-      .orElse(Some(List(Screenshot(pageUrl, screenshotMoment, scenario.ordinal, 1))))
-    (scenario.copy(screenshots = maybeScreenshots), maybeScreenshots.get.head)
+      .map(existingScreenshots => existingScreenshots ::: newScreenshot(existingScreenshots))
+      .orElse(newScreenshot(existingScreenshots = Nil).some)
+
+    (scenario.copy(screenshots = maybeScreenshots), maybeScreenshots.get.last)
   }
 }

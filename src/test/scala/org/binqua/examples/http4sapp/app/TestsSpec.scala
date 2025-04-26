@@ -9,8 +9,6 @@ import org.binqua.examples.http4sapp.app.StateEvent.{RecordedEvent, RecordedEven
 import org.binqua.examples.http4sapp.util.utils.EitherOps
 import org.scalatest.events.Ordinal
 
-import java.io.File
-
 class TestsSpec extends FunSuite {
 
   test("we can start a test and add 2 screenshots to it.") {
@@ -43,8 +41,8 @@ class TestsSpec extends FunSuite {
     val expScenario3 = expScenario1.copy(screenshots =
       Some(
         List(
-          Screenshot("url2", ON_EXIT_PAGE, expScenario1.ordinal, 2),
-          Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1)
+          Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1),
+          Screenshot("url2", ON_EXIT_PAGE, expScenario1.ordinal, 2)
         )
       )
     )
@@ -128,20 +126,20 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "originalLocation" : "scenario_ordinal_1_0/original/2_ON_EXIT_PAGE.png",
-        |                "resizedLocation" : "scenario_ordinal_1_0/resized/2_ON_EXIT_PAGE.png",
-        |                "sourceLocation" : "scenario_ordinal_1_0/sources/2_ON_EXIT_PAGE.txt",
-        |                "pageUrl" : "ulr21",
-        |                "index" : 2,
-        |                "screenshotMoment" : "ON_EXIT_PAGE"
-        |              },
-        |              {
         |                "originalLocation" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
         |                "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
         |                "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr11",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |              },
+        |              {
+        |                "originalLocation" : "scenario_ordinal_1_0/original/2_ON_EXIT_PAGE.png",
+        |                "resizedLocation" : "scenario_ordinal_1_0/resized/2_ON_EXIT_PAGE.png",
+        |                "sourceLocation" : "scenario_ordinal_1_0/sources/2_ON_EXIT_PAGE.txt",
+        |                "pageUrl" : "ulr21",
+        |                "index" : 2,
+        |                "screenshotMoment" : "ON_EXIT_PAGE"
         |              }
         |            ],
         |            "steps" : [
@@ -170,20 +168,20 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "originalLocation" : "scenario_ordinal_2_0/original/2_ON_EXIT_PAGE.png",
-        |                "resizedLocation" : "scenario_ordinal_2_0/resized/2_ON_EXIT_PAGE.png",
-        |                "sourceLocation" : "scenario_ordinal_2_0/sources/2_ON_EXIT_PAGE.txt",
-        |                "pageUrl" : "ulr22",
-        |                "index" : 2,
-        |                "screenshotMoment" : "ON_EXIT_PAGE"
-        |              },
-        |              {
         |                "originalLocation" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
         |                "resizedLocation" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
         |                "sourceLocation" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
         |                "pageUrl" : "ulr12",
         |                "index" : 1,
         |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |              },
+        |              {
+        |                "originalLocation" : "scenario_ordinal_2_0/original/2_ON_EXIT_PAGE.png",
+        |                "resizedLocation" : "scenario_ordinal_2_0/resized/2_ON_EXIT_PAGE.png",
+        |                "sourceLocation" : "scenario_ordinal_2_0/sources/2_ON_EXIT_PAGE.txt",
+        |                "pageUrl" : "ulr22",
+        |                "index" : 2,
+        |                "screenshotMoment" : "ON_EXIT_PAGE"
         |              }
         |            ],
         |            "steps" : [
