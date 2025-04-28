@@ -1,10 +1,8 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import io.circe.syntax.EncoderOps
 import io.circe.{Encoder, Json}
 import org.scalatest.events.Ordinal
-
-import java.io.File
 
 
 object Feature {

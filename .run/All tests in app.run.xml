@@ -43,6 +43,7 @@
         <option value="org.binqua.examples.http4sapp.app.TestsCollectorConfigurationFactorySpec" />
       </list>
     </option>
+    <option name="searchTest" value="In single module" />
     <option name="shortenClasspath" value="NONE" />
     <option name="testPackagePath" value="org.binqua.examples.http4sapp.app" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />

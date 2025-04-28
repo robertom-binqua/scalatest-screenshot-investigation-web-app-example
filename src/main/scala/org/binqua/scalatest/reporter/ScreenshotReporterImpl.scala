@@ -1,9 +1,9 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
-import org.binqua.examples.http4sapp.app.StateEvent.{RecordedEvent, RecordedEvents}
-import org.binqua.examples.http4sapp.util.utils.EitherOps
+import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
+import org.binqua.scalatest.reporter.util.utils.EitherOps
 import org.scalatest.Reporter
-import org.scalatest.events._
+import org.scalatest.events.{Event, NameInfo, NoteProvided, RecordableEvent, RunCompleted, TestFailed, TestStarting, TestSucceeded}
 
 class ScreenshotReporterRunner extends Reporter {
   val reporter = new ScreenshotReporterImpl(TestsCollector.testsCollector)
@@ -15,14 +15,14 @@ class ScreenshotReporterImpl(testsCollector: TestsCollector) extends Reporter {
   override def apply(event: Event): Unit = {
     event match {
       case TestStarting(ordinal, _, testName, _, featureAndScenario, _, _, _, _, _, _, timestamp) =>
-        val testStartingEvent = org.binqua.examples.http4sapp.app.Utils
+        val testStartingEvent = Utils
           .createARunningScenario(ordinal, testName, featureAndScenario)
           .map(rs => StateEvent.TestStarting(rs, timestamp))
           .getOrThrow
         testsCollector.add(testStartingEvent)
 
       case TestFailed(ordinal, _, _, testName, _, featureAndScenario, _, recordedEvents, _, throwable, _, _, _, _, _, _, timestamp) =>
-        val failedEvent = org.binqua.examples.http4sapp.app.Utils
+        val failedEvent = Utils
           .createARunningScenario(ordinal, testName, featureAndScenario)
           .map(rs =>
             StateEvent.TestFailed(
@@ -48,7 +48,7 @@ class ScreenshotReporterImpl(testsCollector: TestsCollector) extends Reporter {
         testsCollector.add(succeededEvent)
 
       case NoteProvided(ordinal, message, Some(NameInfo(_, _, Some(suiteClassName), Some(testName))), throwable, _, _, _, _, timestamp) =>
-        val newNoteEvent = org.binqua.examples.http4sapp.app.Utils
+        val newNoteEvent = Utils
           .createARunningScenario(ordinal, suiteClassName, testName)
           .map(rs => StateEvent.Note(rs, message, throwable, timestamp))
           .getOrThrow

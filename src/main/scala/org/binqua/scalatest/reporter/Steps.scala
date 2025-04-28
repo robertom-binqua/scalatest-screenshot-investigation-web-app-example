@@ -1,4 +1,4 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import cats.implicits.{catsSyntaxEitherId, catsSyntaxOptionId}
 import io.circe.Encoder

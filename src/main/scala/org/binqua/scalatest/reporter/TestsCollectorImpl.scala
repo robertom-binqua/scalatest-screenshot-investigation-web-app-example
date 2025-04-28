@@ -1,14 +1,12 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import cats.effect.IO.catsSyntaxTuple2Parallel
 import cats.implicits.{catsSyntaxEitherId, toBifunctorOps}
-import com.google.common.base.Strings
-import io.circe.{Json, JsonObject}
 import io.circe.syntax.EncoderOps
+import io.circe.{Json, JsonObject}
 import org.apache.commons.io.FileUtils
-import org.binqua.examples.http4sapp.app.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
-import org.binqua.examples.http4sapp.util.utils.EitherOps
-import org.binqua.examples.http4sapp.{ImageResizer, ImageResizerImpl}
+import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
+import org.binqua.scalatest.reporter.util.utils.EitherOps
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -29,17 +27,25 @@ trait TestsCollector {
 
 object TestsCollectorConfigurationFactory {
   def create(systemPropertyReportDestinationKey: String, fixedClock: Clock): Either[String, TestsCollectorConfiguration] =
-    if (Strings.isNullOrEmpty(System.getProperty(systemPropertyReportDestinationKey)))
-      s"The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed".asLeft
-    else {
-      val systemProperty = System.getProperty(systemPropertyReportDestinationKey)
-      val reportRoot = new File(
-        new File(System.getProperty("user.dir")).getAbsoluteFile + File.separator + systemProperty + File.separator + formatDateTimeFrom(fixedClock)
+    for {
+      sp <- Option(System.getProperty(systemPropertyReportDestinationKey))
+        .toRight(s"The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed")
+      validSP <- Either.cond(
+        sp.trim.nonEmpty,
+        sp,
+        "The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed"
       )
-      reportRoot.mkdirs()
+      result <- {
+        val reportRoot = calculateFullReportRoot(fixedClock, validSP)
+        reportRoot.mkdirs()
+        TestsCollectorConfiguration.from(reportRoot)
+      }
+    } yield result
 
-      TestsCollectorConfiguration.from(reportRoot)
-    }
+  private def calculateFullReportRoot(fixedClock: Clock, validSP: String): File =
+    new File(
+      new File(System.getProperty("user.dir")).getAbsoluteFile + File.separator + validSP + File.separator + formatDateTimeFrom(fixedClock)
+    )
 
   private def formatDateTimeFrom(fixedClock: Clock): String =
     ZonedDateTime.ofInstant(fixedClock.instant, ZoneId.of("UTC")).format(DateTimeFormatter.ofPattern("'at_'dd_MMM_yyyy_'at_'HH_mm_ss"))
@@ -49,7 +55,7 @@ object TestsCollector {
 
   val testsCollector: TestsCollector = TestsCollectorConfigurationFactory
     .create(systemPropertyReportDestinationKey = "reportDestinationRoot", fixedClock = Clock.systemUTC())
-    .map(config => new TestsCollectorImpl(new ReportFileUtilsImpl(config, ImageResizerImpl)))
+    .map(config => new TestsCollectorImpl(new ReportFileUtilsImpl(config)))
     .getOrThrow
 
 }
@@ -91,9 +97,9 @@ object TestsCollectorConfiguration {
     else reportDir.asRight
 
   private def validateScreenshotsDir(screenshotsDir: File): Either[List[String], File] = {
-      if (!screenshotsDir.exists())
-        List(s"ScreenshotsDir $screenshotsDir should exist but it does not").asLeft
-      else screenshotsDir.asRight
+    if (!screenshotsDir.exists())
+      List(s"ScreenshotsDir $screenshotsDir should exist but it does not").asLeft
+    else screenshotsDir.asRight
   }
 
   def unsafeFrom(reportRootParent: File): TestsCollectorConfiguration = from(reportRootParent).getOrThrow
@@ -103,7 +109,7 @@ sealed trait TestsCollectorConfiguration {
   def reportRootLocation: File
   def jsonReportLocation: File
   def screenshotsRootLocation: File
-  def screenshotsLocationPrefix:String
+  def screenshotsLocationPrefix: String
 }
 
 class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollector {
@@ -145,10 +151,6 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
       toSuffix = screenshot.sourceCode
     )
 
-    reportFileUtils.resizeImage(
-      original = screenshotDriverData.screenshotImage,
-      toSuffix = screenshot.resizeFileLocation
-    )
   }
 
   override def addScreenshotOnExitAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_EXIT_PAGE)
@@ -156,7 +158,7 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
   override def addScreenshotOnEnterAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_ENTER_PAGE)
 }
 
-class ReportFileUtilsImpl(config: TestsCollectorConfiguration, imageResizer: ImageResizer) extends ReportFileUtils {
+class ReportFileUtilsImpl(config: TestsCollectorConfiguration) extends ReportFileUtils {
   override def copyFile(from: File, toSuffix: File): Unit =
     FileUtils.copyFile(
       from,
@@ -169,16 +171,6 @@ class ReportFileUtilsImpl(config: TestsCollectorConfiguration, imageResizer: Ima
       stringToBeWritten,
       StandardCharsets.UTF_8
     )
-
-  override def resizeImage(original: File, toSuffix: File): Unit = {
-    val resizedFileDestination = new File(config.screenshotsRootLocation + File.separator + toSuffix)
-    FileUtils.createParentDirectories(resizedFileDestination)
-    imageResizer.resizeImage(
-      inputPath = original,
-      outputPath = resizedFileDestination,
-      scale = 7
-    )
-  }
 
   override def writeReport(tests: Tests): Unit = {
     val json: JsonObject = JsonObject(
@@ -198,8 +190,6 @@ trait ReportFileUtils {
   def copyFile(from: File, toSuffix: File): Unit
 
   def writeStringToFile(stringToBeWritten: String, toSuffix: File): Unit
-
-  def resizeImage(original: File, toSuffix: File): Unit
 
   def writeReport(tests: Tests): Unit
 

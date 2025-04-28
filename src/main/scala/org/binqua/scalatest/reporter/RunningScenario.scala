@@ -1,4 +1,4 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import org.scalatest.events.Ordinal
 

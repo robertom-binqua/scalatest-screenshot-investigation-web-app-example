@@ -1,7 +1,7 @@
 package org.binqua.examples.http4sapp.app
 
+import org.binqua.scalatest.reporter.{ScreenshotDriverData, TestsCollector}
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
-import org.openqa.selenium.remote.RemoteWebElement
 import org.openqa.selenium.support.events.{EventFiringDecorator, WebDriverListener}
 import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebElement}
 import org.scalatest.{BeforeAndAfterAll, Suite}
@@ -40,7 +40,7 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
 
       if (target.isInstanceOf[WebElement]) {
         // (target.asInstanceOf[RemoteWebElement]).getTagName
-        val element = target.asInstanceOf[RemoteWebElement]
+//        val element = target.asInstanceOf[RemoteWebElement]
 //        println(s"(target.asInstanceOf[RemoteWebElement]).getTagName ${element.getTagName}")
 //        println(s"type ${element.getAttribute("type")}")
 //        println(s"value ${element.getAttribute("value")}")

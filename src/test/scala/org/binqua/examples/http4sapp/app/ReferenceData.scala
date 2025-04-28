@@ -1,6 +1,7 @@
 package org.binqua.examples.http4sapp.app
 
-import org.binqua.examples.http4sapp.app.TestOutcome.STARTING
+import org.binqua.scalatest.reporter.{Scenario, ScreenshotDriverData}
+import org.binqua.scalatest.reporter.TestOutcome.STARTING
 import org.scalatest.events.Ordinal
 
 import java.nio.file.Files

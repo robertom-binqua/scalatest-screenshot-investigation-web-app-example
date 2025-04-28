@@ -1,11 +1,6 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import io.circe.{Encoder, Json}
-import org.apache.commons.io.FileUtils
-import org.binqua.examples.http4sapp.app.ScreenshotMoment._
-import org.binqua.examples.http4sapp.util.utils.EitherOps
-
-import java.io.File
 
 sealed trait TestOutcome
 object TestOutcome {

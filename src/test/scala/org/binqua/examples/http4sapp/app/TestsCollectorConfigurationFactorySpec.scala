@@ -2,6 +2,7 @@ package org.binqua.examples.http4sapp.app
 
 import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
+import org.binqua.scalatest.reporter.{TestsCollectorConfiguration, TestsCollectorConfigurationFactory}
 
 import java.io.File
 import java.time.{Clock, ZoneId, ZonedDateTime}
@@ -18,13 +19,19 @@ class TestsCollectorConfigurationFactorySpec extends FunSuite {
 
   test("given system property does not exist, we cannot proceed") {
 
-    val time = ZonedDateTime.of(2021, 2, 18, 13, 1, 2, 0, ZoneId.of("UTC"))
-    val fixedClock: Clock = Clock.fixed(time.toInstant, time.getZone)
-
-    val actual: Either[String, TestsCollectorConfiguration] = TestsCollectorConfigurationFactory.create("abc", fixedClock)
+    val actual: Either[String, TestsCollectorConfiguration] = TestsCollectorConfigurationFactory.create("abc", Clock.systemUTC())
 
     assertEquals(actual, "The system property abc specifying the root dir of the report missing. I cannot proceed".asLeft)
+  }
 
+  test("given system property is empty, we cannot proceed") {
+
+    System.setProperty(systemPropertyForTest, "  ")
+
+    val actual: Either[String, TestsCollectorConfiguration] =
+      TestsCollectorConfigurationFactory.create(systemPropertyReportDestinationKey = "abc", fixedClock = Clock.systemUTC())
+
+    assertEquals(actual, "The system property abc specifying the root dir of the report missing. I cannot proceed".asLeft)
   }
 
   test("given a valid systemProperty reportDestinationKey, TestsCollectorConfigurationFactory creates dirs for report and screenshots with a valid prefix") {

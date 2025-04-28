@@ -2,6 +2,7 @@ package org.binqua.examples.http4sapp.app
 
 import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
+import org.binqua.scalatest.reporter.TestsCollectorConfiguration
 
 import java.io.File
 import java.nio.file.{Files, Path}

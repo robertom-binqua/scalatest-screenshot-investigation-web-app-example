@@ -3,10 +3,10 @@ package org.binqua.examples.http4sapp.app
 import cats.implicits.catsSyntaxEitherId
 import io.circe.syntax.EncoderOps
 import munit.FunSuite
-import org.binqua.examples.http4sapp
-import org.binqua.examples.http4sapp.app.ScreenshotMoment._
-import org.binqua.examples.http4sapp.app.StateEvent.{RecordedEvent, RecordedEvents}
-import org.binqua.examples.http4sapp.util.utils.EitherOps
+import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
+import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
+import org.binqua.scalatest.reporter.util.utils.EitherOps
+import org.binqua.scalatest.reporter._
 import org.scalatest.events.Ordinal
 
 class TestsSpec extends FunSuite {
@@ -46,7 +46,7 @@ class TestsSpec extends FunSuite {
       )
     )
     val expFeature3: Feature = expFeature2.copy(scenarios = Scenarios(scenariosMap = Map(expScenario3.description -> expScenario3)))
-    val expTest3: http4sapp.app.Test = expTest2.copy(features = Features(featuresMap = Map(expFeature3.description -> expFeature3)))
+    val expTest3 = expTest2.copy(features = Features(featuresMap = Map(expFeature3.description -> expFeature3)))
     val expectedTests3: Tests = Tests(tests = Map(expTest3.name -> expTest3))
 
     assertEquals(actualTest3.map(_._1), Right(expectedTests3))

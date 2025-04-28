@@ -1,7 +1,7 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import cats.implicits.catsSyntaxEitherId
-import org.binqua.examples.http4sapp.app.StateEvent.RecordedEvents
+import org.binqua.scalatest.reporter.StateEvent.RecordedEvents
 import org.scalatest.events.Ordinal
 
 object Features {

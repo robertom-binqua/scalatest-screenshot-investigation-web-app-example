@@ -1,18 +1,15 @@
 package org.binqua.examples.http4sapp.app
 
 import munit.FunSuite
-import org.binqua.examples.http4sapp.ImageResizer
-import org.binqua.examples.http4sapp.app.StateEvent.{RecordedEvent, RecordedEvents}
 import org.binqua.examples.http4sapp.app.TestUtil.assertPathExist
-import org.binqua.examples.http4sapp.util.utils.EitherOps
+import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
+import org.binqua.scalatest.reporter.util.utils.EitherOps
+import org.binqua.scalatest.reporter._
 import org.scalatest.events.Ordinal
 
-import java.io.File
 import java.nio.file.{Files, Path}
 
 class TestsCollectorImpSpec extends FunSuite {
-
-  val dummyResizer: ImageResizer = (inputPath: File, outputPath: File, _: Int) => Files.copy(inputPath.toPath, outputPath.toPath)
 
   test("testsCollector create report dir, screenshots dir and testsReport.js") {
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
@@ -20,8 +17,7 @@ class TestsCollectorImpSpec extends FunSuite {
 
     val testsCollectorImpl = new TestsCollectorImpl(
       new ReportFileUtilsImpl(
-        config = configuration,
-        imageResizer = dummyResizer
+        config = configuration
       )
     )
 
@@ -56,8 +52,7 @@ class TestsCollectorImpSpec extends FunSuite {
 
     val testsCollectorImpl = new TestsCollectorImpl(
       new ReportFileUtilsImpl(
-        config = configuration,
-        imageResizer = dummyResizer
+        config = configuration
       )
     )
 
@@ -175,13 +170,10 @@ class TestsCollectorImpSpec extends FunSuite {
 
     List(
       "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-      "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
       "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
       "scenario_ordinal_1_1/original/2_ON_EXIT_PAGE.png",
-      "scenario_ordinal_1_1/resized/2_ON_EXIT_PAGE.png",
       "scenario_ordinal_1_1/sources/2_ON_EXIT_PAGE.txt",
       "scenario_ordinal_1_1/original/1_ON_ENTER_PAGE.png",
-      "scenario_ordinal_1_1/resized/1_ON_ENTER_PAGE.png",
       "scenario_ordinal_1_1/sources/1_ON_ENTER_PAGE.txt"
     )
       .map(suffix => s"report/screenshots/$suffix")
@@ -194,7 +186,7 @@ class TestsCollectorImpSpec extends FunSuite {
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
     val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
 
-    val testsCollectorImpl = new TestsCollectorImpl(new ReportFileUtilsImpl(configuration, dummyResizer))
+    val testsCollectorImpl = new TestsCollectorImpl(new ReportFileUtilsImpl(configuration))
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
@@ -270,7 +262,6 @@ class TestsCollectorImpSpec extends FunSuite {
 
     List(
       "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-      "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
       "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt"
     ).map(suffix => s"report/screenshots/$suffix")
       .foreach(f => assertPathExist(reportParentDir.resolve(f)))
@@ -281,7 +272,7 @@ class TestsCollectorImpSpec extends FunSuite {
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
     val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
 
-    val testsCollectorImpl = new TestsCollectorImpl(new ReportFileUtilsImpl(configuration, dummyResizer))
+    val testsCollectorImpl = new TestsCollectorImpl(new ReportFileUtilsImpl(configuration))
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))

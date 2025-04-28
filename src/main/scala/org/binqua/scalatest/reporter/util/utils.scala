@@ -1,4 +1,4 @@
-package org.binqua.examples.http4sapp.util
+package org.binqua.scalatest.reporter.util
 
 object utils {
 
