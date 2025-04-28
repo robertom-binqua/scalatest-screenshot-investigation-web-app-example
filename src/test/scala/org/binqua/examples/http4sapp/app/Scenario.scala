@@ -10,7 +10,7 @@ case class Scenario(
     description: String,
     startedTimestamp: Long,
     finishedTimestamp: Option[Long],
-    screenshots: Option[List[Screenshot]],
+    screenshots: List[Screenshot],
     steps: Option[Steps],
     testOutcome: TestOutcome,
     throwable: Option[Throwable]
@@ -31,7 +31,7 @@ object Scenario {
       description = name,
       startedTimestamp = timestamp,
       finishedTimestamp = None,
-      screenshots = None,
+      screenshots = Nil,
       steps = None,
       testOutcome = TestOutcome.STARTING,
       throwable = None
@@ -63,10 +63,10 @@ object Scenario {
     def newScreenshot(existingScreenshots: List[Screenshot]): List[Screenshot] =
       List(Screenshot(pageUrl, screenshotMoment, scenario.ordinal, existingScreenshots.size + 1))
 
-    val maybeScreenshots: Option[List[Screenshot]] = scenario.screenshots
-      .map(existingScreenshots => existingScreenshots ::: newScreenshot(existingScreenshots))
-      .orElse(newScreenshot(existingScreenshots = Nil).some)
+    val screenshot = newScreenshot(scenario.screenshots)
 
-    (scenario.copy(screenshots = maybeScreenshots), maybeScreenshots.get.last)
+    val newScreenshots =  scenario.screenshots ::: screenshot
+
+    (scenario.copy(screenshots = newScreenshots), screenshot.head)
   }
 }

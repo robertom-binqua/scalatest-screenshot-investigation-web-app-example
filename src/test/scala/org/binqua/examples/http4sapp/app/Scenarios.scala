@@ -6,8 +6,6 @@ import io.circe.syntax.EncoderOps
 import org.binqua.examples.http4sapp.app.StateEvent.RecordedEvents
 import org.scalatest.events.Ordinal
 
-import java.io.File
-
 object Scenarios {
   implicit val encoder: Encoder[Scenarios] = Encoder.instance { scenario =>
     scenario.scenariosMap.values.asJson

@@ -12,7 +12,7 @@ object ReferenceData {
     description = "desc",
     startedTimestamp = 1L,
     finishedTimestamp = Option.empty,
-    screenshots = Option.empty,
+    screenshots = Nil,
     steps = Option.empty,
     testOutcome = STARTING,
     throwable = None

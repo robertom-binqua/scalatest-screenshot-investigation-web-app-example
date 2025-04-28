@@ -134,8 +134,8 @@ class AppSpec1 extends AnyFeatureSpec with should.Matchers with ConfiguredChrome
       pageTitle should be("Home")
     }
   }
-  Feature("f3") {
-    Scenario("s11") {
+  Feature("this is a feature with no screenshots and a long name") {
+    Scenario("no screenshots here but a  throw new RuntimeException...") {
       Given("1")
       Then("3")
       throw new RuntimeException("f3 s11 fails")

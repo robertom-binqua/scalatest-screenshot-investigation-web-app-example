@@ -4,8 +4,6 @@ import cats.implicits.catsSyntaxEitherId
 import org.binqua.examples.http4sapp.app.StateEvent.RecordedEvents
 import org.scalatest.events.Ordinal
 
-import java.io.File
-
 object Features {
   def starting(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Features = {
     val newScenarios =

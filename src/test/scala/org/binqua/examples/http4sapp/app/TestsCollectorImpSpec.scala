@@ -14,7 +14,6 @@ class TestsCollectorImpSpec extends FunSuite {
 
   val dummyResizer: ImageResizer = (inputPath: File, outputPath: File, _: Int) => Files.copy(inputPath.toPath, outputPath.toPath)
 
-
   test("testsCollector create report dir, screenshots dir and testsReport.js") {
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
     val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
@@ -275,6 +274,76 @@ class TestsCollectorImpSpec extends FunSuite {
       "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt"
     ).map(suffix => s"report/screenshots/$suffix")
       .foreach(f => assertPathExist(reportParentDir.resolve(f)))
+  }
+
+  test("we can add 1 test with no screenshot, and the report json it will be correct") {
+
+    val reportParentDir: Path = Files.createTempDirectory("tempDir")
+    val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
+
+    val testsCollectorImpl = new TestsCollectorImpl(new ReportFileUtilsImpl(configuration, dummyResizer))
+
+    val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
+    testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
+    testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "this is a note 1", None, timestamp = 2L))
+    testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "this is a note 2", None, timestamp = 3L))
+
+    testsCollectorImpl.add(
+      StateEvent.TestSucceeded(
+        runningScenario = runningScenario,
+        RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow,
+        timestamp = 2L
+      )
+    )
+
+    testsCollectorImpl.createReport()
+
+    val expectedContent = """window.testsReport = {
+                            |  "screenshotsLocationPrefix" : "report/screenshots/",
+                            |  "testsReport" : [
+                            |    {
+                            |      "name" : "t",
+                            |      "id" : "t_1_0",
+                            |      "features" : [
+                            |        {
+                            |          "description" : "f",
+                            |          "id" : "f_1_0",
+                            |          "scenarios" : [
+                            |            {
+                            |              "ordinal" : "1_0",
+                            |              "description" : "s",
+                            |              "startedTimestamp" : 1,
+                            |              "finishedTimestamp" : 2,
+                            |              "screenshots" : [
+                            |              ],
+                            |              "steps" : [
+                            |                {
+                            |                  "message" : "this is a note 2",
+                            |                  "timestamp" : 3,
+                            |                  "ordinal" : "1_0"
+                            |                },
+                            |                {
+                            |                  "message" : "this is a note 1",
+                            |                  "timestamp" : 2,
+                            |                  "ordinal" : "1_0"
+                            |                },
+                            |                {
+                            |                  "message" : "m",
+                            |                  "timestamp" : 5,
+                            |                  "ordinal" : "122_0"
+                            |                }
+                            |              ],
+                            |              "testOutcome" : "succeeded"
+                            |            }
+                            |          ]
+                            |        }
+                            |      ]
+                            |    }
+                            |  ]
+                            |}""".stripMargin
+
+    val actualReportJsFile = Path.of(reportParentDir.toFile.getAbsolutePath, "report/testsReport.js").toFile
+    assertEquals(Files.readString(actualReportJsFile.toPath), expectedContent)
   }
 
 }

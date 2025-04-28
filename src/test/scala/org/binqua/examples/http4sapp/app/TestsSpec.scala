@@ -29,7 +29,7 @@ class TestsSpec extends FunSuite {
       Tests.addScreenshot(tests, runningScenario, "url1", ON_ENTER_PAGE)
     })
 
-    val expScenario2 = expScenario1.copy(screenshots = Some(List(Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1))))
+    val expScenario2 = expScenario1.copy(screenshots = List(Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1)))
     val expFeature2 = expFeature1.copy(scenarios = Scenarios(scenariosMap = Map(expScenario2.description -> expScenario2)))
     val expTest2 = expTest1.copy(features = Features(featuresMap = Map(expFeature2.description -> expFeature2)))
     val expectedTests2: Tests = Tests(tests = Map(expTest2.name -> expTest2))
@@ -40,11 +40,9 @@ class TestsSpec extends FunSuite {
       secondActualTests.flatMap((test: (Tests, Screenshot)) => Tests.addScreenshot(test._1, runningScenario, "url2", ON_EXIT_PAGE))
 
     val expScenario3 = expScenario1.copy(screenshots =
-      Some(
         List(
           Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1),
           Screenshot("url2", ON_EXIT_PAGE, expScenario1.ordinal, 2)
-        )
       )
     )
     val expFeature3: Feature = expFeature2.copy(scenarios = Scenarios(scenariosMap = Map(expScenario3.description -> expScenario3)))
