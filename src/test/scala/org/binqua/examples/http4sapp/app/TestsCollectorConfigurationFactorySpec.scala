@@ -47,7 +47,7 @@ class TestsCollectorConfigurationFactorySpec extends FunSuite {
       TestsCollectorConfigurationFactory.create(systemPropertyReportDestinationKey = systemPropertyForTest, fixedClock = fixedClock)
 
     val expRoot: File =
-      new File(new File(System.getProperty("user.dir")).getAbsolutePath + File.separator + "tests_reports" + File.separator + "at_18_Feb_2021_at_13_01_02")
+      new File(new File(System.getProperty("ON_PAGE_EXITr.dir")).getAbsolutePath + File.separator + "tests_reports" + File.separator + "at_18_Feb_2021_at_13_01_02")
 
     val expectedReportDir: Path = Paths.get(expRoot.getAbsolutePath,"report")
     val expectedScreenshotDir: Path = expectedReportDir.resolve("screenshots")

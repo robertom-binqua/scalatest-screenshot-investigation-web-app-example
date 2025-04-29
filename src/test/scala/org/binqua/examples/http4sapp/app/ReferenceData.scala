@@ -1,14 +1,14 @@
 package org.binqua.examples.http4sapp.app
 
-import org.binqua.scalatest.reporter.{Scenario, ScreenshotDriverData}
 import org.binqua.scalatest.reporter.TestOutcome.STARTING
+import org.binqua.scalatest.reporter.{Scenario, ScreenshotDriverData}
 import org.scalatest.events.Ordinal
 
 import java.nio.file.Files
 
-object ReferenceData {
+object ReferenceData:
 
-  val startingScenario: Scenario =  Scenario(
+  val startingScenario: Scenario = Scenario(
     ordinal = new Ordinal(1).next,
     description = "desc",
     startedTimestamp = 1L,
@@ -21,8 +21,4 @@ object ReferenceData {
 
   def screenshotDriverData: ScreenshotDriverData = ScreenshotDriverData(screenshotImage = aDummyScreenshot, pageSource = "source", pageUrl = "url1")
 
-  private def aDummyScreenshot =
-    Files.createTempFile("doesNotMatter", "png").toFile
-
-
-}
+  private def aDummyScreenshot = Files.createTempFile("doesNotMatter", "png").toFile

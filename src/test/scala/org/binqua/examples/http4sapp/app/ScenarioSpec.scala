@@ -8,7 +8,7 @@ import org.scalatest.events.Ordinal
 
 class ScenarioSpec extends FunSuite {
 
-  test("withNewScreenshot should work") {
+  test("addScreenshot should work") {
 
     val startingScenario = Scenario(
       ordinal = new Ordinal(1),

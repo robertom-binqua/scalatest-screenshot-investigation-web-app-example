@@ -33,6 +33,7 @@ lazy val root = (project in file("."))
       "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0" % Test,
       "org.scalatest" %% "scalatest-core" % Scalatest,
       "org.scalatest" %% "scalatest-flatspec" % Scalatest % Test,
+      "org.scalatest" %% "scalatest-funsuite" % Scalatest % Test,
       "org.scalatest" %% "scalatest-shouldmatchers" % Scalatest % Test,
       "org.scalatest" %% "scalatest-featurespec" % Scalatest % Test
     ),
