@@ -97,12 +97,12 @@ class TestsCollectorImpSpec extends FunSuite {
                             |              "finishedTimestamp" : 2,
                             |              "screenshots" : [
                             |                {
-                            |                  "originalLocation" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-                            |                  "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
-                            |                  "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
+                            |                  "originalLocation" : "scenario_ordinal_1_0/original/1_ON_PAGE_ENTER.png",
+                            |                  "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_PAGE_ENTER.png",
+                            |                  "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_PAGE_ENTER.txt",
                             |                  "pageUrl" : "url1",
                             |                  "index" : 1,
-                            |                  "screenshotMoment" : "ON_ENTER_PAGE"
+                            |                  "screenshotMoment" : "ON_PAGE_ENTER"
                             |                }
                             |              ],
                             |              "steps" : [
@@ -133,20 +133,20 @@ class TestsCollectorImpSpec extends FunSuite {
                             |              "finishedTimestamp" : 4,
                             |              "screenshots" : [
                             |                {
-                            |                  "originalLocation" : "scenario_ordinal_1_1/original/1_ON_ENTER_PAGE.png",
-                            |                  "resizedLocation" : "scenario_ordinal_1_1/resized/1_ON_ENTER_PAGE.png",
-                            |                  "sourceLocation" : "scenario_ordinal_1_1/sources/1_ON_ENTER_PAGE.txt",
+                            |                  "originalLocation" : "scenario_ordinal_1_1/original/1_ON_PAGE_ENTER.png",
+                            |                  "resizedLocation" : "scenario_ordinal_1_1/resized/1_ON_PAGE_ENTER.png",
+                            |                  "sourceLocation" : "scenario_ordinal_1_1/sources/1_ON_PAGE_ENTER.txt",
                             |                  "pageUrl" : "url1",
                             |                  "index" : 1,
-                            |                  "screenshotMoment" : "ON_ENTER_PAGE"
+                            |                  "screenshotMoment" : "ON_PAGE_ENTER"
                             |                },
                             |                {
-                            |                  "originalLocation" : "scenario_ordinal_1_1/original/2_ON_EXIT_PAGE.png",
-                            |                  "resizedLocation" : "scenario_ordinal_1_1/resized/2_ON_EXIT_PAGE.png",
-                            |                  "sourceLocation" : "scenario_ordinal_1_1/sources/2_ON_EXIT_PAGE.txt",
+                            |                  "originalLocation" : "scenario_ordinal_1_1/original/2_ON_PAGE_EXIT.png",
+                            |                  "resizedLocation" : "scenario_ordinal_1_1/resized/2_ON_PAGE_EXIT.png",
+                            |                  "sourceLocation" : "scenario_ordinal_1_1/sources/2_ON_PAGE_EXIT.txt",
                             |                  "pageUrl" : "url1",
                             |                  "index" : 2,
-                            |                  "screenshotMoment" : "ON_EXIT_PAGE"
+                            |                  "screenshotMoment" : "ON_PAGE_EXIT"
                             |                }
                             |              ],
                             |              "steps" : [
@@ -169,12 +169,12 @@ class TestsCollectorImpSpec extends FunSuite {
     assertEquals(Files.readString(actualReportJsFile.toPath), expectedContent)
 
     List(
-      "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-      "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
-      "scenario_ordinal_1_1/original/2_ON_EXIT_PAGE.png",
-      "scenario_ordinal_1_1/sources/2_ON_EXIT_PAGE.txt",
-      "scenario_ordinal_1_1/original/1_ON_ENTER_PAGE.png",
-      "scenario_ordinal_1_1/sources/1_ON_ENTER_PAGE.txt"
+      "scenario_ordinal_1_0/original/1_ON_PAGE_ENTER.png",
+      "scenario_ordinal_1_0/sources/1_ON_PAGE_ENTER.txt",
+      "scenario_ordinal_1_1/original/2_ON_PAGE_EXIT.png",
+      "scenario_ordinal_1_1/sources/2_ON_PAGE_EXIT.txt",
+      "scenario_ordinal_1_1/original/1_ON_PAGE_ENTER.png",
+      "scenario_ordinal_1_1/sources/1_ON_PAGE_ENTER.txt"
     )
       .map(suffix => s"report/screenshots/$suffix")
       .foreach(f => assertPathExist(reportParentDir.resolve(f)))
@@ -223,12 +223,12 @@ class TestsCollectorImpSpec extends FunSuite {
                             |              "finishedTimestamp" : 2,
                             |              "screenshots" : [
                             |                {
-                            |                  "originalLocation" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-                            |                  "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
-                            |                  "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
+                            |                  "originalLocation" : "scenario_ordinal_1_0/original/1_ON_PAGE_ENTER.png",
+                            |                  "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_PAGE_ENTER.png",
+                            |                  "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_PAGE_ENTER.txt",
                             |                  "pageUrl" : "url1",
                             |                  "index" : 1,
-                            |                  "screenshotMoment" : "ON_ENTER_PAGE"
+                            |                  "screenshotMoment" : "ON_PAGE_ENTER"
                             |                }
                             |              ],
                             |              "steps" : [
@@ -261,8 +261,8 @@ class TestsCollectorImpSpec extends FunSuite {
     assertEquals(Files.readString(actualReportJsFile.toPath), expectedContent)
 
     List(
-      "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-      "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt"
+      "scenario_ordinal_1_0/original/1_ON_PAGE_ENTER.png",
+      "scenario_ordinal_1_0/sources/1_ON_PAGE_ENTER.txt"
     ).map(suffix => s"report/screenshots/$suffix")
       .foreach(f => assertPathExist(reportParentDir.resolve(f)))
   }

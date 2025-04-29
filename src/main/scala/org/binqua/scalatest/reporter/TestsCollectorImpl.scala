@@ -1,6 +1,6 @@
 package org.binqua.scalatest.reporter
 
-import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
+import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_PAGE_ENTER, ON_PAGE_EXIT}
 import org.binqua.scalatest.reporter.Utils.EitherOps
 
 import java.time.Clock
@@ -56,9 +56,9 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
 
   }
 
-  override def addScreenshotOnExitAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_EXIT_PAGE)
+  override def addScreenshotOnExitAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_PAGE_EXIT)
 
-  override def addScreenshotOnEnterAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_ENTER_PAGE)
+  override def addScreenshotOnEnterAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_PAGE_ENTER)
 
 object TestsCollector:
 

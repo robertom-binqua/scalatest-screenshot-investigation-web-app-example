@@ -1,7 +1,7 @@
 package org.binqua.examples.http4sapp.app
 
 import munit.FunSuite
-import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
+import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_PAGE_ENTER, ON_PAGE_EXIT}
 import org.binqua.scalatest.reporter.{Scenario, Screenshot}
 import org.binqua.scalatest.reporter.TestOutcome.STARTING
 import org.scalatest.events.Ordinal
@@ -21,31 +21,31 @@ class ScenarioSpec extends FunSuite {
       throwable = None
     )
 
-    val actual1: (Scenario, Screenshot) = Scenario.addScreenshot(startingScenario, "url1", ON_EXIT_PAGE)
+    val actual1: (Scenario, Screenshot) = Scenario.addScreenshot(startingScenario, "url1", ON_PAGE_EXIT)
 
-    assertEquals(actual1._1, startingScenario.copy(screenshots = List(Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1))))
+    assertEquals(actual1._1, startingScenario.copy(screenshots = List(Screenshot("url1", ON_PAGE_EXIT, startingScenario.ordinal, 1))))
 
-    val actual2: (Scenario, Screenshot) = Scenario.addScreenshot(scenario = actual1._1, pageUrl = "url2", screenshotMoment = ON_ENTER_PAGE)
+    val actual2: (Scenario, Screenshot) = Scenario.addScreenshot(scenario = actual1._1, pageUrl = "url2", screenshotMoment = ON_PAGE_ENTER)
 
     assertEquals(
       actual2._1,
       startingScenario.copy(screenshots =
         List(
-          Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1),
-          Screenshot("url2", ON_ENTER_PAGE, startingScenario.ordinal, 2)
+          Screenshot("url1", ON_PAGE_EXIT, startingScenario.ordinal, 1),
+          Screenshot("url2", ON_PAGE_ENTER, startingScenario.ordinal, 2)
         )
       )
     )
 
-    val actual3: (Scenario, Screenshot) = Scenario.addScreenshot(actual2._1, "url3", ON_EXIT_PAGE)
+    val actual3: (Scenario, Screenshot) = Scenario.addScreenshot(actual2._1, "url3", ON_PAGE_EXIT)
 
     assertEquals(
       actual3._1,
       startingScenario.copy(screenshots =
           List(
-            Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1),
-            Screenshot("url2", ON_ENTER_PAGE, startingScenario.ordinal, 2),
-            Screenshot("url3", ON_EXIT_PAGE, startingScenario.ordinal, 3)
+            Screenshot("url1", ON_PAGE_EXIT, startingScenario.ordinal, 1),
+            Screenshot("url2", ON_PAGE_ENTER, startingScenario.ordinal, 2),
+            Screenshot("url3", ON_PAGE_EXIT, startingScenario.ordinal, 3)
         )
       )
     )

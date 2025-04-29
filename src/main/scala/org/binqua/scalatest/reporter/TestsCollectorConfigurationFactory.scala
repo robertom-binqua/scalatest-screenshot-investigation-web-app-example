@@ -1,8 +1,5 @@
 package org.binqua.scalatest.reporter
 
-import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
-import org.binqua.scalatest.reporter.Utils.EitherOps
-
 import java.io.File
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, ZoneId, ZonedDateTime}

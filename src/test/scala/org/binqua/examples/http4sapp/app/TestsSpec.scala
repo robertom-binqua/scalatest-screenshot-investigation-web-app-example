@@ -3,7 +3,7 @@ package org.binqua.examples.http4sapp.app
 import cats.implicits.catsSyntaxEitherId
 import io.circe.syntax.EncoderOps
 import munit.FunSuite
-import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
+import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_PAGE_ENTER, ON_PAGE_EXIT}
 import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
 import org.binqua.scalatest.reporter.Utils.EitherOps
 import org.binqua.scalatest.reporter._
@@ -26,10 +26,10 @@ class TestsSpec extends FunSuite {
     assertEquals(firstActualTests, Right(expTests1))
 
     val secondActualTests: Either[String, (Tests, Screenshot)] = firstActualTests.flatMap(tests => {
-      Tests.addScreenshot(tests, runningScenario, "url1", ON_ENTER_PAGE)
+      Tests.addScreenshot(tests, runningScenario, "url1", ON_PAGE_ENTER)
     })
 
-    val expScenario2 = expScenario1.copy(screenshots = List(Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1)))
+    val expScenario2 = expScenario1.copy(screenshots = List(Screenshot("url1", ON_PAGE_ENTER, expScenario1.ordinal, 1)))
     val expFeature2 = expFeature1.copy(scenarios = Scenarios(scenariosMap = Map(expScenario2.description -> expScenario2)))
     val expTest2 = expTest1.copy(features = Features(featuresMap = Map(expFeature2.description -> expFeature2)))
     val expectedTests2: Tests = Tests(tests = Map(expTest2.name -> expTest2))
@@ -37,12 +37,12 @@ class TestsSpec extends FunSuite {
     assertEquals(secondActualTests.map(_._1), Right(expectedTests2))
 
     val actualTest3: Either[String, (Tests, Screenshot)] =
-      secondActualTests.flatMap((test: (Tests, Screenshot)) => Tests.addScreenshot(test._1, runningScenario, "url2", ON_EXIT_PAGE))
+      secondActualTests.flatMap((test: (Tests, Screenshot)) => Tests.addScreenshot(test._1, runningScenario, "url2", ON_PAGE_EXIT))
 
     val expScenario3 = expScenario1.copy(screenshots =
         List(
-          Screenshot("url1", ON_ENTER_PAGE, expScenario1.ordinal, 1),
-          Screenshot("url2", ON_EXIT_PAGE, expScenario1.ordinal, 2)
+          Screenshot("url1", ON_PAGE_ENTER, expScenario1.ordinal, 1),
+          Screenshot("url2", ON_PAGE_EXIT, expScenario1.ordinal, 2)
       )
     )
     val expFeature3: Feature = expFeature2.copy(scenarios = Scenarios(scenariosMap = Map(expScenario3.description -> expScenario3)))
@@ -70,7 +70,7 @@ class TestsSpec extends FunSuite {
 
     assertEquals(actualTests.flatMap(Tests.runningTest), runningScenario.asRight)
 
-    val invalidTests: Either[String, (Tests, Screenshot)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_EXIT_PAGE))
+    val invalidTests: Either[String, (Tests, Screenshot)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_PAGE_EXIT))
 
     assertEquals(invalidTests, Left("Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED"))
 
@@ -86,7 +86,7 @@ class TestsSpec extends FunSuite {
 
     assertEquals(actualTests.flatMap(Tests.runningTest), Right(runningScenario))
 
-    val invalidTests: Either[String, (Tests, Screenshot)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_EXIT_PAGE))
+    val invalidTests: Either[String, (Tests, Screenshot)] = actualTests.flatMap(Tests.addScreenshot(_, runningScenario, "url", ON_PAGE_EXIT))
 
     assertEquals(invalidTests, Left("Sorry last scenario does not have testOutcome equal to STARTING but FAILED"))
 
@@ -100,13 +100,13 @@ class TestsSpec extends FunSuite {
       tests <- Tests(Map.empty).asRight
 
       test11 <- Tests.testStarting(tests, runningScenario = t1f1s1, timestamp = 1L)
-      test21 <- Tests.addScreenshot(test11, t1f1s1, "ulr11", ON_ENTER_PAGE).map(_._1)
-      test31 <- Tests.addScreenshot(test21, t1f1s1, "ulr21", ON_EXIT_PAGE).map(_._1)
+      test21 <- Tests.addScreenshot(test11, t1f1s1, "ulr11", ON_PAGE_ENTER).map(_._1)
+      test31 <- Tests.addScreenshot(test21, t1f1s1, "ulr21", ON_PAGE_EXIT).map(_._1)
       test51 <- Tests.testSucceeded(test31, t1f1s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
 
       test12 <- Tests.testStarting(test51, runningScenario = t2f2s2, timestamp = 1L)
-      test22 <- Tests.addScreenshot(test12, t2f2s2, "ulr12", ON_ENTER_PAGE).map(_._1)
-      test32 <- Tests.addScreenshot(test22, t2f2s2, "ulr22", ON_EXIT_PAGE).map(_._1)
+      test22 <- Tests.addScreenshot(test12, t2f2s2, "ulr12", ON_PAGE_ENTER).map(_._1)
+      test32 <- Tests.addScreenshot(test22, t2f2s2, "ulr22", ON_PAGE_EXIT).map(_._1)
       test52 <- Tests.testFailed(test32, t2f2s2, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
     } yield test52
 
@@ -127,20 +127,20 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "originalLocation" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-        |                "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
-        |                "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_1_0/original/1_ON_PAGE_ENTER.png",
+        |                "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_PAGE_ENTER.png",
+        |                "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_PAGE_ENTER.txt",
         |                "pageUrl" : "ulr11",
         |                "index" : 1,
-        |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |                "screenshotMoment" : "ON_PAGE_ENTER"
         |              },
         |              {
-        |                "originalLocation" : "scenario_ordinal_1_0/original/2_ON_EXIT_PAGE.png",
-        |                "resizedLocation" : "scenario_ordinal_1_0/resized/2_ON_EXIT_PAGE.png",
-        |                "sourceLocation" : "scenario_ordinal_1_0/sources/2_ON_EXIT_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_1_0/original/2_ON_PAGE_EXIT.png",
+        |                "resizedLocation" : "scenario_ordinal_1_0/resized/2_ON_PAGE_EXIT.png",
+        |                "sourceLocation" : "scenario_ordinal_1_0/sources/2_ON_PAGE_EXIT.txt",
         |                "pageUrl" : "ulr21",
         |                "index" : 2,
-        |                "screenshotMoment" : "ON_EXIT_PAGE"
+        |                "screenshotMoment" : "ON_PAGE_EXIT"
         |              }
         |            ],
         |            "steps" : [
@@ -171,20 +171,20 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "originalLocation" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
-        |                "resizedLocation" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
-        |                "sourceLocation" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_2_0/original/1_ON_PAGE_ENTER.png",
+        |                "resizedLocation" : "scenario_ordinal_2_0/resized/1_ON_PAGE_ENTER.png",
+        |                "sourceLocation" : "scenario_ordinal_2_0/sources/1_ON_PAGE_ENTER.txt",
         |                "pageUrl" : "ulr12",
         |                "index" : 1,
-        |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |                "screenshotMoment" : "ON_PAGE_ENTER"
         |              },
         |              {
-        |                "originalLocation" : "scenario_ordinal_2_0/original/2_ON_EXIT_PAGE.png",
-        |                "resizedLocation" : "scenario_ordinal_2_0/resized/2_ON_EXIT_PAGE.png",
-        |                "sourceLocation" : "scenario_ordinal_2_0/sources/2_ON_EXIT_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_2_0/original/2_ON_PAGE_EXIT.png",
+        |                "resizedLocation" : "scenario_ordinal_2_0/resized/2_ON_PAGE_EXIT.png",
+        |                "sourceLocation" : "scenario_ordinal_2_0/sources/2_ON_PAGE_EXIT.txt",
         |                "pageUrl" : "ulr22",
         |                "index" : 2,
-        |                "screenshotMoment" : "ON_EXIT_PAGE"
+        |                "screenshotMoment" : "ON_PAGE_EXIT"
         |              }
         |            ],
         |            "steps" : [
@@ -214,12 +214,12 @@ class TestsSpec extends FunSuite {
       test <- Tests(Map.empty).asRight
 
       test11 <- Tests.testStarting(test, runningScenario = t1_f1_s1, timestamp = 1L)
-      test21 <- Tests.addScreenshot(test11, t1_f1_s1, "ulr-f1-s1-1", ON_ENTER_PAGE).map(_._1)
+      test21 <- Tests.addScreenshot(test11, t1_f1_s1, "ulr-f1-s1-1", ON_PAGE_ENTER).map(_._1)
       test31 <- Tests.addStep(testsToBeUpdated = test21, runningScenario = t1_f1_s1, message = "m1-f1-s1", throwable = None, timestamp = 1L)
       test41 <- Tests.testSucceeded(test31, t1_f1_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
 
       test12 <- Tests.testStarting(test41, runningScenario = t1_f2_s1, timestamp = 1L)
-      test22 <- Tests.addScreenshot(test12, t1_f2_s1, "ulr-f2-s1-1", ON_ENTER_PAGE).map(_._1)
+      test22 <- Tests.addScreenshot(test12, t1_f2_s1, "ulr-f2-s1-1", ON_PAGE_ENTER).map(_._1)
       test42 <- Tests.addStep(testsToBeUpdated = test22, runningScenario = t1_f2_s1, message = "m1-f2-s1", throwable = None, timestamp = 1L)
       test52 <- Tests.testFailed(test42, t1_f2_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
     } yield test52
@@ -241,12 +241,12 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "originalLocation" : "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
-        |                "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_ENTER_PAGE.png",
-        |                "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_1_0/original/1_ON_PAGE_ENTER.png",
+        |                "resizedLocation" : "scenario_ordinal_1_0/resized/1_ON_PAGE_ENTER.png",
+        |                "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_PAGE_ENTER.txt",
         |                "pageUrl" : "ulr-f1-s1-1",
         |                "index" : 1,
-        |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |                "screenshotMoment" : "ON_PAGE_ENTER"
         |              }
         |            ],
         |            "steps" : [
@@ -276,12 +276,12 @@ class TestsSpec extends FunSuite {
         |            "finishedTimestamp" : 3,
         |            "screenshots" : [
         |              {
-        |                "originalLocation" : "scenario_ordinal_2_0/original/1_ON_ENTER_PAGE.png",
-        |                "resizedLocation" : "scenario_ordinal_2_0/resized/1_ON_ENTER_PAGE.png",
-        |                "sourceLocation" : "scenario_ordinal_2_0/sources/1_ON_ENTER_PAGE.txt",
+        |                "originalLocation" : "scenario_ordinal_2_0/original/1_ON_PAGE_ENTER.png",
+        |                "resizedLocation" : "scenario_ordinal_2_0/resized/1_ON_PAGE_ENTER.png",
+        |                "sourceLocation" : "scenario_ordinal_2_0/sources/1_ON_PAGE_ENTER.txt",
         |                "pageUrl" : "ulr-f2-s1-1",
         |                "index" : 1,
-        |                "screenshotMoment" : "ON_ENTER_PAGE"
+        |                "screenshotMoment" : "ON_PAGE_ENTER"
         |              }
         |            ],
         |            "steps" : [
