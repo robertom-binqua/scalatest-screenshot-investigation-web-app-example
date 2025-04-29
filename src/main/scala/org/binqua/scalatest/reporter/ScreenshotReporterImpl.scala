@@ -1,7 +1,7 @@
 package org.binqua.scalatest.reporter
 
 import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
-import org.binqua.scalatest.reporter.util.utils.EitherOps
+import org.binqua.scalatest.reporter.Utils.EitherOps
 import org.scalatest.Reporter
 import org.scalatest.events.{Event, NameInfo, NoteProvided, RecordableEvent, RunCompleted, TestFailed, TestStarting, TestSucceeded}
 

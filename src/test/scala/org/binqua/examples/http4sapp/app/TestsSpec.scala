@@ -5,7 +5,7 @@ import io.circe.syntax.EncoderOps
 import munit.FunSuite
 import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
-import org.binqua.scalatest.reporter.util.utils.EitherOps
+import org.binqua.scalatest.reporter.Utils.EitherOps
 import org.binqua.scalatest.reporter._
 import org.scalatest.events.Ordinal
 

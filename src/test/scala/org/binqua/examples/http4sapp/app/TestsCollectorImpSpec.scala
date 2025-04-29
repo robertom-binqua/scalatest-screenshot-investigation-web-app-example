@@ -3,7 +3,7 @@ package org.binqua.examples.http4sapp.app
 import munit.FunSuite
 import org.binqua.examples.http4sapp.app.TestUtil.assertPathExist
 import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
-import org.binqua.scalatest.reporter.util.utils.EitherOps
+import org.binqua.scalatest.reporter.Utils.EitherOps
 import org.binqua.scalatest.reporter._
 import org.scalatest.events.Ordinal
 

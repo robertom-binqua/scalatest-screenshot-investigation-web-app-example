@@ -5,7 +5,16 @@ import org.scalatest.events.Ordinal
 
 import scala.util.matching.Regex
 
-object Utils {
+object Utils:
+
+  implicit class EitherOps[L, R](either: Either[L, R]) {
+    def getOrThrow: R = {
+      either match {
+        case Right(value) => value
+        case Left(error)  => throw new RuntimeException(s"Unexpected Left: $error")
+      }
+    }
+  }
 
   private val FeatureScenarioPattern: Regex = """Feature:\s(.*)\sScenario:\s(.*)""".r
 
@@ -16,5 +25,3 @@ object Utils {
     }
 
   def ordinalToString(prefix: String, ordinal: Ordinal): String = s"${prefix}_${ordinal.toList.mkString("_")}"
-
-}
