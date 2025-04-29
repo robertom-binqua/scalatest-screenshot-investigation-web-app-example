@@ -21,7 +21,7 @@ object StateEvent {
   object RecordedEvent {
     def from(i: RecordableEvent): RecordedEvent = i match {
       case ip: InfoProvided => RecordedEvent(ip.ordinal, ip.message, ip.throwable, ip.timeStamp)
-      case _                => ???
+      case _                => ??? // see https://github.com/robertom-binqua/scalatest-screenshot-investigation-web-app-example/issues/4
     }
   }
   case class RecordedEvent(ordinal: Ordinal, message: String, throwable: Option[Throwable], timestamp: Long) extends StateEvent
