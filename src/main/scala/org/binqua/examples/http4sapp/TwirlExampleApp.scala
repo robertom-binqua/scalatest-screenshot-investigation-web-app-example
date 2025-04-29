@@ -3,8 +3,8 @@ package org.binqua.examples.http4sapp
 import cats.effect.Concurrent
 import org.binqua.examples.http4sapp.model.NavigationMenu
 import org.http4s.dsl.Http4sDsl
-import org.http4s.twirl._
-import org.http4s.{HttpApp, HttpRoutes}
+import org.http4s.twirl.*
+import org.http4s.{EntityEncoder, HttpApp, HttpRoutes}
 
 private case class TwirlExampleApp[F[_] : Concurrent]() extends Http4sDsl[F] {
 
@@ -14,7 +14,8 @@ private case class TwirlExampleApp[F[_] : Concurrent]() extends Http4sDsl[F] {
         case GET -> Root / pageIdentifier ~ "html" =>
           NavigationMenu.from(pageIdentifier) match {
             case Left(_) => BadRequest(s"Ops! it looks like there is no page $pageIdentifier.html")
-            case Right(theNavigationMenu) => Ok(org.binqua.examples.http4sapp.html.main(theNavigationMenu))
+            case Right(theNavigationMenu) =>
+              Ok(org.binqua.examples.http4sapp.html.main(theNavigationMenu))
           }
       }
       .orNotFound

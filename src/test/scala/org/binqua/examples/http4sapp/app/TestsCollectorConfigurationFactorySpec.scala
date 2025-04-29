@@ -2,9 +2,11 @@ package org.binqua.examples.http4sapp.app
 
 import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
+import org.binqua.examples.http4sapp.app.TestUtil.assertPathExist
 import org.binqua.scalatest.reporter.{TestsCollectorConfiguration, TestsCollectorConfigurationFactory}
 
 import java.io.File
+import java.nio.file.{Path, Paths}
 import java.time.{Clock, ZoneId, ZonedDateTime}
 
 class TestsCollectorConfigurationFactorySpec extends FunSuite {
@@ -45,16 +47,16 @@ class TestsCollectorConfigurationFactorySpec extends FunSuite {
       TestsCollectorConfigurationFactory.create(systemPropertyReportDestinationKey = systemPropertyForTest, fixedClock = fixedClock)
 
     val expRoot: File =
-      new File(new File(System.getProperty("user.dir")).getAbsoluteFile + File.separator + "tests_reports" + File.separator + "at_18_Feb_2021_at_13_01_02")
+      new File(new File(System.getProperty("user.dir")).getAbsolutePath + File.separator + "tests_reports" + File.separator + "at_18_Feb_2021_at_13_01_02")
 
-    val expectedReportDir = new File(expRoot.getAbsoluteFile + File.separator + "report")
-    val expectedScreenshotDir = new File(expectedReportDir.getAbsoluteFile + File.separator + "screenshots")
+    val expectedReportDir: Path = Paths.get(expRoot.getAbsolutePath,"report")
+    val expectedScreenshotDir: Path = expectedReportDir.resolve("screenshots")
 
-    assertEquals(actual.map(_.reportRootLocation), expectedReportDir.asRight)
-    assertEquals(actual.map(_.screenshotsRootLocation), expectedScreenshotDir.asRight)
+    assertEquals(actual.map(_.reportRootLocation), expectedReportDir.toFile.asRight)
+    assertEquals(actual.map(_.screenshotsRootLocation), expectedScreenshotDir.toFile.asRight)
 
-    assertEquals(expectedReportDir.exists(), true)
-    assertEquals(expectedScreenshotDir.exists(), true)
+    assertPathExist(expectedScreenshotDir)
+    assertPathExist(expectedReportDir)
 
   }
 

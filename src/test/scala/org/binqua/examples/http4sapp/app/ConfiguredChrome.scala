@@ -19,7 +19,7 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
 
   implicit override val webDriver: WebDriver = {
     val original: WebDriver = new ChromeDriver(chromeOptions())
-    new EventFiringDecorator(new Listener(original)).decorate(original)
+    new EventFiringDecorator(new Listener(original, TestsCollector.testsCollector)).decorate(original)
   }
 
   private def chromeOptions(): ChromeOptions = {
@@ -30,8 +30,7 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
     options
   }
 
-  class Listener(driver: WebDriver) extends WebDriverListener {
-    val testsCollector: TestsCollector = TestsCollector.testsCollector
+  class Listener(driver: WebDriver, testsCollector: TestsCollector) extends WebDriverListener {
     override def beforeAnyCall(target: AnyRef, method: Method, args: Array[AnyRef]): Unit = {
       //      val driver = target.asInstanceOf[ChromeDriver]
       //      println(s"driver $driver")

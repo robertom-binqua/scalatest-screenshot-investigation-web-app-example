@@ -107,5 +107,4 @@ object Tests {
         RunningScenario(ordinal, test.name, feature.description, scenario.description)
       })
   }
-
 }

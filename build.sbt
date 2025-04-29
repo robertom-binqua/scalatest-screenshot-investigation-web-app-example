@@ -1,7 +1,7 @@
 import scala.collection.Seq
 
 val CirceVersion = "0.14.6"
-val Http4sVersion = "0.23.26"
+val Http4sVersion = "1.0.0-M37"
 val LogbackVersion = "1.5.18"
 val MunitVersion = "0.7.29"
 val MunitCatsEffectVersion = "1.0.7"
@@ -11,14 +11,14 @@ name := "scalatest-screenshot-investigation-web-app-example"
 
 version := "0.1"
 
-scalaVersion := "2.13.16"
+scalaVersion := "3.6.4"
 
 lazy val root = (project in file("."))
   .settings(
     libraryDependencies ++= Seq(
       "org.http4s" %% "http4s-ember-server" % Http4sVersion,
       "org.http4s" %% "http4s-dsl" % Http4sVersion,
-      "org.http4s" %% "http4s-twirl" % "0.23.17",
+      "org.http4s" %% "http4s-twirl" % "1.0.0-M38",
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
       "ch.qos.logback" % "logback-core" % LogbackVersion,
       "org.slf4j" % "jcl-over-slf4j" % "2.0.17",
@@ -28,8 +28,6 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-literal" % CirceVersion,
       "io.circe" %% "circe-parser" % CirceVersion,
       "commons-io" % "commons-io" % "2.19.0",
-      "com.github.julien-truffaut" %% "monocle-core" % "2.1.0",
-      "com.github.julien-truffaut" %% "monocle-macro" % "2.1.0",
       "org.scalameta" %% "munit" % MunitVersion % "test",
       "org.typelevel" %% "munit-cats-effect-3" % MunitCatsEffectVersion % "test",
       "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0" % "test",
@@ -38,7 +36,7 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest-shouldmatchers" % Scalatest % "test",
       "org.scalatest" %% "scalatest-featurespec" % Scalatest % "test"
     ),
-    scalacOptions ++= Seq("-Ywarn-unused")
+    scalacOptions ++= Seq("-Wunused:imports,privates,locals")
   )
   .enablePlugins(JavaAppPackaging, SbtTwirl)
 
