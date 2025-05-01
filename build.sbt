@@ -35,7 +35,8 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest-flatspec" % Scalatest % Test,
       "org.scalatest" %% "scalatest-funsuite" % Scalatest % Test,
       "org.scalatest" %% "scalatest-shouldmatchers" % Scalatest % Test,
-      "org.scalatest" %% "scalatest-featurespec" % Scalatest % Test
+      "org.scalatest" %% "scalatest-featurespec" % Scalatest % Test,
+      "co.fs2" %% "fs2-io" % "3.11.0" % Test
     ),
     scalacOptions ++= Seq("-Wunused:imports,privates,locals")
   )
