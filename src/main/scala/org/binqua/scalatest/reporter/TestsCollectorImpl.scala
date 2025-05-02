@@ -33,7 +33,7 @@ object TestsCollectorConfigurationFactory {
       validSP <- Either.cond(
         sp.trim.nonEmpty,
         sp,
-        "The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed"
+        s"The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed"
       )
       result <- {
         val reportRoot = calculateFullReportRoot(fixedClock, validSP)
@@ -57,6 +57,7 @@ object TestsCollector {
     .create(systemPropertyReportDestinationKey = "reportDestinationRoot", fixedClock = Clock.systemUTC())
     .map(config => new TestsCollectorImpl(new ReportFileUtilsImpl(config)))
     .getOrThrow
+
 
 }
 

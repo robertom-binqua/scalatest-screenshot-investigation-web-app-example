@@ -1,7 +1,7 @@
-package org.binqua.examples.http4sapp
+package org.binqua.examples.http4sapp.selenium.http4sapp
 
 import cats.effect.Concurrent
-import org.binqua.examples.http4sapp.model.NavigationMenu
+import org.binqua.examples.http4sapp.selenium.http4sapp.model.NavigationMenu
 import org.http4s.dsl.Http4sDsl
 import org.http4s.twirl._
 import org.http4s.{HttpApp, HttpRoutes}

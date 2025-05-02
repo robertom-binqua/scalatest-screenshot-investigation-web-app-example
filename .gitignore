@@ -3,3 +3,4 @@ target/
 /.idea/
 /screenshots/
 /report-destination-root/
+/test_dir_created_during_test/

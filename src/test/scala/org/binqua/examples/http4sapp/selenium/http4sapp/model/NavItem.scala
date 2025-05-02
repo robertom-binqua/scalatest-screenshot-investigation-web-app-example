@@ -1,4 +1,4 @@
-package org.binqua.examples.http4sapp.model
+package org.binqua.examples.http4sapp.selenium.http4sapp.model
 
 case class NavItem(title: String, body: String, isActive: Boolean, pageUrl: String, navTitle: String) {
 

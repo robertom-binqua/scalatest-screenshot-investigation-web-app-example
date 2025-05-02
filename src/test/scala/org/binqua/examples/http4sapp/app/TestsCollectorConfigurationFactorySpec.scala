@@ -19,7 +19,7 @@ class TestsCollectorConfigurationFactorySpec extends FunSuite {
 
   test("given system property does not exist, we cannot proceed") {
 
-    val actual: Either[String, TestsCollectorConfiguration] = TestsCollectorConfigurationFactory.create("abc", Clock.systemUTC())
+    val actual: Either[String, TestsCollectorConfiguration] = TestsCollectorConfigurationFactory.create(systemPropertyReportDestinationKey = "abc", fixedClock = Clock.systemUTC())
 
     assertEquals(actual, "The system property abc specifying the root dir of the report missing. I cannot proceed".asLeft)
   }

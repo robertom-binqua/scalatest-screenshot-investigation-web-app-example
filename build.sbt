@@ -30,13 +30,15 @@ lazy val root = (project in file("."))
       "commons-io" % "commons-io" % "2.19.0",
       "com.github.julien-truffaut" %% "monocle-core" % "2.1.0",
       "com.github.julien-truffaut" %% "monocle-macro" % "2.1.0",
-      "org.scalameta" %% "munit" % MunitVersion % "test",
-      "org.typelevel" %% "munit-cats-effect-3" % MunitCatsEffectVersion % "test",
-      "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0" % "test",
+      "co.fs2" %% "fs2-io" % "3.11.0",
+      "org.scalameta" %% "munit" % MunitVersion % Test,
+      "org.typelevel" %% "munit-cats-effect-3" % MunitCatsEffectVersion % Test,
+      "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0" % Test,
       "org.scalatest" %% "scalatest-core" % Scalatest,
-      "org.scalatest" %% "scalatest-flatspec" % Scalatest % "test",
-      "org.scalatest" %% "scalatest-shouldmatchers" % Scalatest % "test",
-      "org.scalatest" %% "scalatest-featurespec" % Scalatest % "test"
+      "org.scalatest" %% "scalatest-flatspec" % Scalatest % Test,
+      "org.scalatest" %% "scalatest-shouldmatchers" % Scalatest % Test,
+      "org.scalatest" %% "scalatest-featurespec" % Scalatest % Test,
+      "org.typelevel" %% "munit-cats-effect" % "2.1.0" % Test
     ),
     scalacOptions ++= Seq("-Ywarn-unused")
   )
