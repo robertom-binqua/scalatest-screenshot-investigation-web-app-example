@@ -1,4 +1,4 @@
-package org.binqua.examples.http4sapp.selenium.http4sapp
+package org.binqua.scalatest.integration.http4sapp
 
 import cats.effect.{Async, Resource}
 import com.comcast.ip4s._
@@ -9,11 +9,11 @@ import org.http4s.server.middleware.Logger
 
 object Http4sAppServer {
 
-  def run[F[_] : Async]: Resource[F, Server] =
+  def run[F[_] : Async](port:Port): Resource[F, Server] =
     EmberServerBuilder
       .default[F]
       .withHost(ipv4"0.0.0.0")
-      .withPort(port"8081")
+      .withPort(port)
       .withHttpApp(createHttpApp())
       .build
 

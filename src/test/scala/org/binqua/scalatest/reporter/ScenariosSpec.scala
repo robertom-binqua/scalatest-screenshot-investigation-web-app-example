@@ -1,10 +1,9 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
 import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.binqua.scalatest.reporter.TestOutcome.{FAILED, STARTING, SUCCEEDED}
-import org.binqua.scalatest.reporter.{Scenario, Scenarios, Screenshot}
 import org.scalatest.events.Ordinal
 
 class ScenariosSpec extends FunSuite {

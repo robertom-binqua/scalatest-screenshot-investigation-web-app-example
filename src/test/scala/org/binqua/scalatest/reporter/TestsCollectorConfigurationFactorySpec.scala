@@ -1,8 +1,7 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
-import org.binqua.scalatest.reporter.{TestsCollectorConfiguration, TestsCollectorConfigurationFactory}
 
 import java.io.File
 import java.time.{Clock, ZoneId, ZonedDateTime}

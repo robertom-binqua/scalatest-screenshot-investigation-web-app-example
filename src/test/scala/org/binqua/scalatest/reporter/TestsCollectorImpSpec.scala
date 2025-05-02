@@ -1,10 +1,9 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import munit.FunSuite
-import org.binqua.examples.http4sapp.app.TestUtil.assertPathExist
 import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
+import org.binqua.scalatest.reporter.TestUtil.Assertions
 import org.binqua.scalatest.reporter.util.utils.EitherOps
-import org.binqua.scalatest.reporter._
 import org.scalatest.events.Ordinal
 
 import java.nio.file.{Files, Path}
@@ -33,14 +32,14 @@ class TestsCollectorImpSpec extends FunSuite {
     )
 
     val reportRoot: Path = Path.of(reportParentDir.toString, "report")
-    assertPathExist(reportRoot)
+    Assertions.pathExist(reportRoot)
 
     val screenshots: Path = Path.of(reportRoot.toString, "screenshots")
-    assertPathExist(screenshots)
+    Assertions.pathExist(screenshots)
 
     testsCollectorImpl.createReport()
 
-    assertPathExist(Path.of(reportRoot.toString, "testsReport.js"))
+    Assertions.pathExist(Path.of(reportRoot.toString, "testsReport.js"))
 
   }
 
@@ -177,7 +176,7 @@ class TestsCollectorImpSpec extends FunSuite {
       "scenario_ordinal_1_1/sources/1_ON_ENTER_PAGE.txt"
     )
       .map(suffix => s"report/screenshots/$suffix")
-      .foreach(f => assertPathExist(reportParentDir.resolve(f)))
+      .foreach(f => Assertions.pathExist(reportParentDir.resolve(f)))
 
   }
 
@@ -264,7 +263,7 @@ class TestsCollectorImpSpec extends FunSuite {
       "scenario_ordinal_1_0/original/1_ON_ENTER_PAGE.png",
       "scenario_ordinal_1_0/sources/1_ON_ENTER_PAGE.txt"
     ).map(suffix => s"report/screenshots/$suffix")
-      .foreach(f => assertPathExist(reportParentDir.resolve(f)))
+      .foreach(f => Assertions.pathExist(reportParentDir.resolve(f)))
   }
 
   test("we can add 1 test with no screenshot, and the report json it will be correct") {

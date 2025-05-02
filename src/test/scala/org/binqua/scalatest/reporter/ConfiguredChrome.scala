@@ -1,6 +1,5 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
-import org.binqua.scalatest.reporter.{ScreenshotDriverData, TestsCollector}
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.support.events.{EventFiringDecorator, WebDriverListener}
 import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebElement}

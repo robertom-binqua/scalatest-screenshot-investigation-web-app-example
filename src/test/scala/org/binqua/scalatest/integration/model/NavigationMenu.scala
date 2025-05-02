@@ -1,4 +1,4 @@
-package org.binqua.examples.http4sapp.selenium.http4sapp.model
+package org.binqua.scalatest.integration.model
 
 case class NavigationMenu(items: List[NavItem]) {
 

@@ -1,17 +1,19 @@
-package org.binqua.examples.http4sapp.selenium
+package org.binqua.scalatest.integration
 
 import cats.effect.{IO, Resource}
+import com.comcast.ip4s.IpLiteralSyntax
 import fs2.Pipe
 import fs2.io.file.{Files, Path}
 import munit.CatsEffectSuite
-import org.binqua.examples.http4sapp.app.ConfiguredChrome
-import org.binqua.examples.http4sapp.selenium.http4sapp.Http4sAppServer
-import org.binqua.scalatest.reporter.ScreenshotReporterRunner
+import org.binqua.scalatest.integration.http4sapp.Http4sAppServer
+import org.binqua.scalatest.reporter.{ConfiguredChrome, ScreenshotReporterRunner}
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should
 import org.scalatest.{Args, GivenWhenThen}
 
 class IntegrationSpec extends CatsEffectSuite {
+
+  val port = port"8081"
 
   val expectedFilesToBeGenerated: List[String] = List(
     "report",
@@ -37,7 +39,7 @@ class IntegrationSpec extends CatsEffectSuite {
 
   test("given we run selenium test programmatically and given we specified the Report class, a report should be generated") {
     val fileGenerated = (for {
-      _ <- Http4sAppServer.run[IO]
+      _ <- Http4sAppServer.run[IO](port)
       _ <- Resource.eval(Files[IO].deleteRecursively(reportDestinationDirPath).attempt)
       _ <- Resource.eval(IO.systemPropertiesForIO.set(systemPropertyKey, reportDestinationDirName))
     } yield ())
@@ -70,13 +72,14 @@ class IntegrationSpec extends CatsEffectSuite {
 
   class FeaturesForTestPurpose extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen {
 
-    val host = "http://localhost:8081/"
+    val host = s"http://localhost:${port.value}/"
 
     Feature("f1") {
       Scenario("s11") {
         info("when we login into the app")
         info("and the user is happy")
-        go to (host + "home.html")
+        val str = host + "home.html"
+        go to str
         pageTitle should be("Home")
 
         click on linkText("Page1")

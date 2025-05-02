@@ -1,8 +1,7 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import munit.FunSuite
 import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
-import org.binqua.scalatest.reporter.{Scenario, Screenshot}
 import org.binqua.scalatest.reporter.TestOutcome.STARTING
 import org.scalatest.events.Ordinal
 

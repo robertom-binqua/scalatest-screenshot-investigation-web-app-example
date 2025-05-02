@@ -1,8 +1,7 @@
-package org.binqua.examples.http4sapp.app
+package org.binqua.scalatest.reporter
 
 import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
-import org.binqua.scalatest.reporter.{RunningScenario, Utils}
 import org.scalatest.events.Ordinal
 
 class ScreenshotReporterImplSpec extends FunSuite {
