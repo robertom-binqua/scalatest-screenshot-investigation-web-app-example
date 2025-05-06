@@ -6,25 +6,24 @@ import fs2.Pipe
 import fs2.io.file.{Files, Path}
 import munit.CatsEffectSuite
 import org.binqua.scalatest.integration.http4sapp.Http4sAppServer
-import org.binqua.scalatest.reporter.{ConfiguredChrome, ScreenshotReporterRunner}
+import org.binqua.scalatest.reporter.ConfiguredChrome
+import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should
-import org.scalatest.{Args, GivenWhenThen}
 
 class IntegrationSpec extends CatsEffectSuite {
 
-  val port = port"8081"
-
   val expectedFilesToBeGenerated: List[String] = List(
     "report",
+    "report/testsReport.js",
     "report/screenshots",
-    "report/screenshots/scenario_ordinal_0_1",
-    "report/screenshots/scenario_ordinal_0_1/original",
-    "report/screenshots/scenario_ordinal_0_1/original/2_ON_EXIT_PAGE.png",
-    "report/screenshots/scenario_ordinal_0_1/original/1_ON_ENTER_PAGE.png",
-    "report/screenshots/scenario_ordinal_0_1/sources",
-    "report/screenshots/scenario_ordinal_0_1/sources/2_ON_EXIT_PAGE.txt",
-    "report/screenshots/scenario_ordinal_0_1/sources/1_ON_ENTER_PAGE.txt"
+    "report/screenshots/scenario_ordinal_1_3",
+    "report/screenshots/scenario_ordinal_1_3/original",
+    "report/screenshots/scenario_ordinal_1_3/original/2_ON_EXIT_PAGE.png",
+    "report/screenshots/scenario_ordinal_1_3/original/1_ON_ENTER_PAGE.png",
+    "report/screenshots/scenario_ordinal_1_3/sources",
+    "report/screenshots/scenario_ordinal_1_3/sources/2_ON_EXIT_PAGE.txt",
+    "report/screenshots/scenario_ordinal_1_3/sources/1_ON_ENTER_PAGE.txt"
   )
 
   private val systemPropertyKey = "reportDestinationRoot"
@@ -39,7 +38,7 @@ class IntegrationSpec extends CatsEffectSuite {
 
   test("given we run selenium test programmatically and given we specified the Report class, a report should be generated") {
     val fileGenerated = (for {
-      _ <- Http4sAppServer.run[IO](port)
+      _ <- Http4sAppServer.run[IO](FeaturesForTestPurpose.port)
       _ <- Resource.eval(Files[IO].deleteRecursively(reportDestinationDirPath).attempt)
       _ <- Resource.eval(IO.systemPropertiesForIO.set(systemPropertyKey, reportDestinationDirName))
     } yield ())
@@ -67,31 +66,39 @@ class IntegrationSpec extends CatsEffectSuite {
       .toList
   }
 
-  private def runSeleniumTest(): IO[Unit] =
-    IO(new FeaturesForTestPurpose().run(None, Args(new ScreenshotReporterRunner())))
-
-  class FeaturesForTestPurpose extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen {
-
-    val host = s"http://localhost:${port.value}/"
-
-    Feature("f1") {
-      Scenario("s11") {
-        info("when we login into the app")
-        info("and the user is happy")
-        val str = host + "home.html"
-        go to str
-        pageTitle should be("Home")
-
-        click on linkText("Page1")
-        pageTitle should be("Page 1")
-      }
-      Scenario("s12") {
-        Given("1")
-        Then("3")
-        go to (host + "home.html")
-        pageTitle should be("Home")
-      }
-    }
-
+  private def runSeleniumTest(): IO[Unit] = {
+    import org.scalatest._
+    IO( tools.Runner.run(Array("-R", ".", "-o","-s", "org.binqua.scalatest.integration.FeaturesForTestPurpose","-C","org.binqua.scalatest.reporter.ScreenshotReporterRunner")))
   }
+
+
+}
+
+object FeaturesForTestPurpose {
+  val port = port"8081"
+}
+
+class FeaturesForTestPurpose extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen {
+
+  val host = s"http://localhost:${FeaturesForTestPurpose.port.value}/"
+
+  Feature("f1") {
+    Scenario("s11") {
+      info("when we login into the app")
+      info("and the user is happy")
+      val str = host + "home.html"
+      go to str
+      pageTitle should be("Home")
+
+      click on linkText("Page1")
+      pageTitle should be("Page 1")
+    }
+    Scenario("s12") {
+      Given("1")
+      Then("3")
+      go to (host + "home.html")
+      pageTitle should be("Home")
+    }
+  }
+
 }

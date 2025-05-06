@@ -32,6 +32,18 @@
     </option>
     <option name="testKind" value="All in package" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
+    <option name="classBuf">
+      <list>
+        <option value="org.binqua.scalatest.integration.IntegrationSpec" />
+        <option value="org.binqua.scalatest.reporter.TestsSpec" />
+        <option value="org.binqua.scalatest.reporter.ScenarioSpec" />
+        <option value="org.binqua.scalatest.reporter.ScenariosSpec" />
+        <option value="org.binqua.scalatest.reporter.TestsCollectorImpSpec" />
+        <option value="org.binqua.scalatest.reporter.ScreenshotReporterImplSpec" />
+        <option value="org.binqua.scalatest.reporter.TestsCollectorConfigurationSpec" />
+        <option value="org.binqua.scalatest.reporter.TestsCollectorConfigurationFactorySpec" />
+      </list>
+    </option>
     <option name="searchTest" value="In single module" />
     <option name="shortenClasspath" value="NONE" />
     <option name="testPackagePath" value="org.binqua.scalatest" />
