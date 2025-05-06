@@ -7,7 +7,7 @@ import java.nio.file.Files
 
 object ReferenceData {
 
-  val startingScenario: Scenario =  Scenario(
+  val startingScenario: Scenario = Scenario(
     ordinal = new Ordinal(1).next,
     description = "desc",
     startedTimestamp = 1L,
@@ -18,10 +18,10 @@ object ReferenceData {
     throwable = None
   )
 
-  def screenshotDriverData: ScreenshotDriverData = ScreenshotDriverData(screenshotImage = aDummyScreenshot, pageSource = "source", pageUrl = "url1")
+  def screenshotDriverData: ScreenshotDriverData =
+    ScreenshotDriverData(screenshotImage = aDummyScreenshot, pageSource = "source", pageUrl = "url1", pageTitle = "title 1")
 
   private def aDummyScreenshot =
     Files.createTempFile("doesNotMatter", "png").toFile
-
 
 }

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="All tests in app" type="MUnitRunConfiguration" factoryName="MUnit" show_console_on_std_err="false" show_console_on_std_out="false">
-    <module name="scalatest-screenshot-investigation-web-app-example.test" />
+  <configuration default="false" name="All Munit specs" type="MUnitRunConfiguration" factoryName="MUnit" show_console_on_std_err="false" show_console_on_std_out="false">
+    <module name="scalatest-featurespecs-screenshots-reporter" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />
       <option name="IS_SUBST" value="false" />
@@ -32,20 +32,9 @@
     </option>
     <option name="testKind" value="All in package" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
-    <option name="classBuf">
-      <list>
-        <option value="org.binqua.examples.http4sapp.app.TestsSpec" />
-        <option value="org.binqua.examples.http4sapp.app.ScenarioSpec" />
-        <option value="org.binqua.examples.http4sapp.app.ScenariosSpec" />
-        <option value="org.binqua.examples.http4sapp.app.TestsCollectorImpSpec" />
-        <option value="org.binqua.examples.http4sapp.app.ScreenshotReporterImplSpec" />
-        <option value="org.binqua.examples.http4sapp.app.TestsCollectorConfigurationSpec" />
-        <option value="org.binqua.examples.http4sapp.app.TestsCollectorConfigurationFactorySpec" />
-      </list>
-    </option>
     <option name="searchTest" value="In single module" />
     <option name="shortenClasspath" value="NONE" />
-    <option name="testPackagePath" value="org.binqua.examples.http4sapp.app" />
+    <option name="testPackagePath" value="org.binqua.scalatest" />
     <option name="workingDirectory" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />

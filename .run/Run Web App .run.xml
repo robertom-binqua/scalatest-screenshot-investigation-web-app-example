@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run Web App " type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="org.binqua.examples.http4sapp.Main" />
-    <module name="scalatest-screenshot-investigation-web-app-example.main" />
+    <module name="scalatest-screenshot-investigation-web-app-example" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="org.binqua.examples.http4sapp.*" />

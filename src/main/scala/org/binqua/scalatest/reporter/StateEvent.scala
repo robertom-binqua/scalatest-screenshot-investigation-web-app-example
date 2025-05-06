@@ -5,7 +5,7 @@ import org.scalatest.events.{InfoProvided, Ordinal, RecordableEvent}
 
 import java.io.File
 
-final case class ScreenshotDriverData(screenshotImage: File, pageSource: String, pageUrl: String)
+final case class ScreenshotDriverData(screenshotImage: File, pageSource: String, pageUrl: String, pageTitle: String)
 
 trait StateEvent
 
