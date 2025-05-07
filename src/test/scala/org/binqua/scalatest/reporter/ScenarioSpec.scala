@@ -1,7 +1,6 @@
 package org.binqua.scalatest.reporter
 
 import munit.FunSuite
-import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.binqua.scalatest.reporter.TestOutcome.STARTING
 import org.scalatest.events.Ordinal
 
@@ -20,31 +19,37 @@ class ScenarioSpec extends FunSuite {
       throwable = None
     )
 
-    val actual1: (Scenario, Screenshot) = Scenario.addScreenshot(startingScenario, "url1", ON_EXIT_PAGE)
-
-    assertEquals(actual1._1, startingScenario.copy(screenshots = List(Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1))))
-
-    val actual2: (Scenario, Screenshot) = Scenario.addScreenshot(scenario = actual1._1, pageUrl = "url2", screenshotMoment = ON_ENTER_PAGE)
+    val (actualScenario1, _) = Scenario.addScreenshot(scenario = startingScenario, screenshotExternalData = ReferenceData.screenshotExternalData.url1)
 
     assertEquals(
-      actual2._1,
+      actualScenario1,
+      startingScenario.copy(screenshots =
+        List(Screenshot(screenshotExternalData = ReferenceData.screenshotExternalData.url1, ordinal = startingScenario.ordinal, index = 1))
+      )
+    )
+
+    val (actualScenario2, _) = Scenario.addScreenshot(scenario = actualScenario1, screenshotExternalData = ReferenceData.screenshotExternalData.url2)
+
+    assertEquals(
+      actualScenario2,
       startingScenario.copy(screenshots =
         List(
-          Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1),
-          Screenshot("url2", ON_ENTER_PAGE, startingScenario.ordinal, 2)
+          Screenshot(ReferenceData.screenshotExternalData.url1, startingScenario.ordinal, 1),
+          Screenshot(ReferenceData.screenshotExternalData.url2, startingScenario.ordinal, 2)
         )
       )
     )
 
-    val actual3: (Scenario, Screenshot) = Scenario.addScreenshot(actual2._1, "url3", ON_EXIT_PAGE)
+    val thirdScreenshotExternalData = ReferenceData.screenshotExternalData.url3
+    val (actualScenario3, _) = Scenario.addScreenshot(scenario = actualScenario2, screenshotExternalData = thirdScreenshotExternalData)
 
     assertEquals(
-      actual3._1,
+      actualScenario3,
       startingScenario.copy(screenshots =
-          List(
-            Screenshot("url1", ON_EXIT_PAGE, startingScenario.ordinal, 1),
-            Screenshot("url2", ON_ENTER_PAGE, startingScenario.ordinal, 2),
-            Screenshot("url3", ON_EXIT_PAGE, startingScenario.ordinal, 3)
+        List(
+          Screenshot(ReferenceData.screenshotExternalData.url1, startingScenario.ordinal, 1),
+          Screenshot(ReferenceData.screenshotExternalData.url2, startingScenario.ordinal, 2),
+          Screenshot(ReferenceData.screenshotExternalData.url3, startingScenario.ordinal, 3)
         )
       )
     )

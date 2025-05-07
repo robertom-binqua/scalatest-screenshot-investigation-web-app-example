@@ -61,11 +61,10 @@ case class Test(name: String, features: Features, ordinal: Ordinal) {
       ordinal: Ordinal,
       featureDescription: String,
       scenarioDescription: String,
-      pageUrl: String,
-      screenshotMoment: ScreenshotMoment
+      screenshotExternalData: ScreenshotExternalData
   ): Either[String, (Test, Screenshot)] =
     Features
-      .addScreenshot(features, ordinal, featureDescription, scenarioDescription, pageUrl, screenshotMoment)
+      .addScreenshot(features, ordinal, featureDescription, scenarioDescription, screenshotExternalData)
       .map((result: (Features, Screenshot)) => {
         val (features, screenshot) = result
         (this.copy(features = features), screenshot)

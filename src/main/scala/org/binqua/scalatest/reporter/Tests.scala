@@ -16,13 +16,12 @@ object Tests {
   def addScreenshot(
       testsToBeUpdated: Tests,
       runningScenario: RunningScenario,
-      pageUrl: String,
-      screenshotMoment: ScreenshotMoment
+      screenshotExternalData: ScreenshotExternalData
   ): Either[String, (Tests, Screenshot)] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot add a screenshot")
       .flatMap((runningTest: Test) =>
         runningTest
-          .addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, pageUrl, screenshotMoment)
+          .addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, screenshotExternalData)
           .map((updatedTest: (Test, Screenshot)) => {
             val newTests = Tests(tests = testsToBeUpdated.tests.updated(runningScenario.test, updatedTest._1))
             (newTests, updatedTest._2)

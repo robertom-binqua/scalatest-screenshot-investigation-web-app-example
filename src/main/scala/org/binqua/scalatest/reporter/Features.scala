@@ -26,7 +26,7 @@ object Features {
       .toRight(s"last feature does not have featureDescription equals to $featureDescription")
       .flatMap(featureFound =>
         featureFound.scenarios
-          .testUpdate(scenarioDescription, updatedTimestamp, recordedEvent, throwable,newState)
+          .testUpdate(scenarioDescription, updatedTimestamp, recordedEvent, throwable, newState)
           .map((updatedScenario: Scenarios) => featureFound.copy(scenarios = updatedScenario))
           .map(updatedFeature => Features(featuresMap = features.featuresMap.updated(featureDescription, updatedFeature)))
       )
@@ -54,15 +54,14 @@ object Features {
       ordinal: Ordinal,
       featureDescription: String,
       scenarioDescription: String,
-      pageUrl: String,
-      screenshotMoment: ScreenshotMoment
+      screenshotExternalData: ScreenshotExternalData
   ): Either[String, (Features, Screenshot)] =
     features.featuresMap
       .get(featureDescription)
       .toRight("there are not features. I cannot add a screenshot")
       .flatMap(feature =>
         feature
-          .withNewScreenshot(ordinal, scenarioDescription, pageUrl, screenshotMoment)
+          .withNewScreenshot(ordinal, scenarioDescription, screenshotExternalData)
           .map((result: (Feature, Screenshot)) => {
             val (updateFeature, screenshotLocation) = result
             (Features(features.featuresMap.updated(featureDescription, updateFeature)), screenshotLocation)

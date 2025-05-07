@@ -5,7 +5,6 @@ import cats.implicits.{catsSyntaxEitherId, toBifunctorOps}
 import io.circe.syntax.EncoderOps
 import io.circe.{Json, JsonObject}
 import org.apache.commons.io.FileUtils
-import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.binqua.scalatest.reporter.util.utils.EitherOps
 
 import java.io.File
@@ -19,9 +18,7 @@ trait TestsCollector {
 
   def createReport(): Unit
 
-  def addScreenshotOnEnterAt(screenshotDriverData: ScreenshotDriverData): Unit
-
-  def addScreenshotOnExitAt(screenshotDriverData: ScreenshotDriverData): Unit
+  def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit
 
 }
 
@@ -57,7 +54,6 @@ object TestsCollector {
     .create(systemPropertyReportDestinationKey = "reportDestinationRoot", fixedClock = Clock.systemUTC())
     .map(config => new TestsCollectorImpl(new ReportFileUtilsImpl(config)))
     .getOrThrow
-
 
 }
 
@@ -135,15 +131,15 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
   def createReport(): Unit =
     reportFileUtils.writeReport(tests)
 
-  private def addScreenshot(screenshotDriverData: ScreenshotDriverData, screenshotMoment: ScreenshotMoment): Unit = {
+  def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit = {
 
     val (newTests, screenshot): (Tests, Screenshot) =
-      Tests.runningTest(tests).flatMap(Tests.addScreenshot(tests, _, screenshotDriverData.pageUrl, screenshotMoment)).getOrThrow
+      Tests.runningTest(tests).flatMap(Tests.addScreenshot(tests, _, screenshotDriverData.screenshotExternalData)).getOrThrow
 
     tests = newTests
 
     reportFileUtils.copyFile(
-      from = screenshotDriverData.screenshotImage,
+      from = screenshotDriverData.image,
       toSuffix = screenshot.originalFileLocation
     )
 
@@ -154,9 +150,6 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
 
   }
 
-  override def addScreenshotOnExitAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_EXIT_PAGE)
-
-  override def addScreenshotOnEnterAt(screenshotDriverData: ScreenshotDriverData): Unit = addScreenshot(screenshotDriverData, ON_ENTER_PAGE)
 }
 
 class ReportFileUtilsImpl(config: TestsCollectorConfiguration) extends ReportFileUtils {

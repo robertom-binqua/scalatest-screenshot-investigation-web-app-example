@@ -1,5 +1,6 @@
 package org.binqua.scalatest.reporter
 
+import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.support.events.{EventFiringDecorator, WebDriverListener}
 import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebElement}
@@ -47,12 +48,15 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
       }
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
         testsCollector
-          .addScreenshotOnEnterAt(
+          .addScreenshot(
             ScreenshotDriverData(
               driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
               driver.getPageSource,
-              driver.getCurrentUrl,
-              driver.getTitle
+              ScreenshotExternalData(
+                driver.getCurrentUrl,
+                driver.getTitle,
+                ON_ENTER_PAGE
+              )
             )
           )
       }
@@ -62,12 +66,15 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
 //      println(s"afterAnyCall ${target.getClass} ")
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
         testsCollector
-          .addScreenshotOnExitAt(
+          .addScreenshot(
             ScreenshotDriverData(
               driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
               driver.getPageSource,
-              driver.getCurrentUrl,
-              driver.getTitle
+              ScreenshotExternalData(
+                driver.getCurrentUrl,
+                driver.getTitle,
+                ON_EXIT_PAGE
+              )
             )
           )
       }

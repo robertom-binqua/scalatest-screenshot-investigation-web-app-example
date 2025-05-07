@@ -5,9 +5,10 @@ import org.scalatest.events.{InfoProvided, Ordinal, RecordableEvent}
 
 import java.io.File
 
-final case class ScreenshotDriverData(screenshotImage: File, pageSource: String, pageUrl: String, pageTitle: String)
+final case class ScreenshotExternalData(pageUrl: String, pageTitle: String, screenshotMoment: ScreenshotMoment)
+final case class ScreenshotDriverData(image: File, pageSource: String, screenshotExternalData: ScreenshotExternalData)
 
-trait StateEvent
+sealed trait StateEvent
 
 object StateEvent {
   case class TestStarting(runningScenario: RunningScenario, timestamp: Long) extends StateEvent

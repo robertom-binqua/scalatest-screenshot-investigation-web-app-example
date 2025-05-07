@@ -59,9 +59,9 @@ object Scenario {
         })
   }
 
-  def addScreenshot(scenario: Scenario, pageUrl: String, screenshotMoment: ScreenshotMoment): (Scenario, Screenshot) = {
+  def addScreenshot(scenario: Scenario, screenshotExternalData:ScreenshotExternalData): (Scenario, Screenshot) = {
     def newScreenshot(existingScreenshots: List[Screenshot]): List[Screenshot] =
-      List(Screenshot(pageUrl, screenshotMoment, scenario.ordinal, existingScreenshots.size + 1))
+      List(Screenshot(screenshotExternalData, scenario.ordinal, existingScreenshots.size + 1))
 
     val screenshot = newScreenshot(scenario.screenshots)
 
