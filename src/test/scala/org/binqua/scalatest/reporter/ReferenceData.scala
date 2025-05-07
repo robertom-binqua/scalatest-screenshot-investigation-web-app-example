@@ -10,7 +10,7 @@ import java.nio.file.Files
 object ReferenceData {
 
   val startingScenario: Scenario = Scenario(
-    ordinal = new Ordinal(1).next,
+    id = new Ordinal(1).next,
     description = "desc",
     startedTimestamp = 1L,
     finishedTimestamp = Option.empty,

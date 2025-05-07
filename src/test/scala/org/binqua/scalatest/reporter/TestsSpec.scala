@@ -14,11 +14,11 @@ class TestsSpec extends FunSuite {
     val expScenario1 = ReferenceData.startingScenario
 
     val expFeature1 =
-      Feature(description = "feature desc", ordinal = expScenario1.ordinal, scenarios = Scenarios(scenariosMap = Map(expScenario1.description -> expScenario1)))
-    val expTest1 = Test("test desc", Features(featuresMap = Map(expFeature1.description -> expFeature1)), expScenario1.ordinal)
+      Feature(description = "feature desc", ordinal = expScenario1.id, scenarios = Scenarios(scenariosMap = Map(expScenario1.description -> expScenario1)))
+    val expTest1 = Test("test desc", Features(featuresMap = Map(expFeature1.description -> expFeature1)), expScenario1.id)
     val expTests1: Tests = Tests(tests = Map(expTest1.name -> expTest1))
 
-    val runningScenario = RunningScenario(expScenario1.ordinal, expTest1.name, feature = expFeature1.description, expScenario1.description)
+    val runningScenario = RunningScenario(expScenario1.id, expTest1.name, feature = expFeature1.description, expScenario1.description)
 
     val firstActualTests: Either[String, Tests] = Tests.testStarting(testsToBeUpdated = Tests(Map.empty), runningScenario = runningScenario, timestamp = 1L)
     assertEquals(firstActualTests, Right(expTests1))
@@ -28,7 +28,7 @@ class TestsSpec extends FunSuite {
         Tests.addScreenshot(testsToBeUpdated = tests, runningScenario = runningScenario, screenshotExternalData = ReferenceData.screenshotExternalData.url1)
     )
 
-    val expScenario2 = expScenario1.copy(screenshots = List(Screenshot(ReferenceData.screenshotExternalData.url1, expScenario1.ordinal, 1)))
+    val expScenario2 = expScenario1.copy(screenshots = List(Screenshot(ReferenceData.screenshotExternalData.url1, expScenario1.id, 1)))
     val expFeature2 = expFeature1.copy(scenarios = Scenarios(scenariosMap = Map(expScenario2.description -> expScenario2)))
     val expTest2 = expTest1.copy(features = Features(featuresMap = Map(expFeature2.description -> expFeature2)))
     val expectedTests2: Tests = Tests(tests = Map(expTest2.name -> expTest2))
@@ -40,8 +40,8 @@ class TestsSpec extends FunSuite {
 
     val expScenario3 = expScenario1.copy(screenshots =
       List(
-        Screenshot(ReferenceData.screenshotExternalData.url1, expScenario1.ordinal, 1),
-        Screenshot(ReferenceData.screenshotExternalData.url2, expScenario1.ordinal, 2)
+        Screenshot(ReferenceData.screenshotExternalData.url1, expScenario1.id, 1),
+        Screenshot(ReferenceData.screenshotExternalData.url2, expScenario1.id, 2)
       )
     )
     val expFeature3: Feature = expFeature2.copy(scenarios = Scenarios(scenariosMap = Map(expScenario3.description -> expScenario3)))
@@ -54,7 +54,7 @@ class TestsSpec extends FunSuite {
 
     assertEquals(
       obtained = result,
-      expected = RunningScenario(expScenario1.ordinal, expTest1.name, expFeature1.description, expScenario1.description).asRight
+      expected = RunningScenario(expScenario1.id, expTest1.name, expFeature1.description, expScenario1.description).asRight
     )
 
   }
@@ -122,7 +122,7 @@ class TestsSpec extends FunSuite {
         |        "id" : "f_1_0",
         |        "scenarios" : [
         |          {
-        |            "ordinal" : "1_0",
+        |            "id" : "s_1_0",
         |            "description" : "s1",
         |            "startedTimestamp" : 1,
         |            "finishedTimestamp" : 3,
@@ -148,7 +148,7 @@ class TestsSpec extends FunSuite {
         |              {
         |                "message" : "given",
         |                "timestamp" : 5,
-        |                "ordinal" : "122_0"
+        |                "id" : "st_122_0"
         |              }
         |            ],
         |            "testOutcome" : "succeeded"
@@ -166,7 +166,7 @@ class TestsSpec extends FunSuite {
         |        "id" : "f_2_0",
         |        "scenarios" : [
         |          {
-        |            "ordinal" : "2_0",
+        |            "id" : "s_2_0",
         |            "description" : "s2",
         |            "startedTimestamp" : 1,
         |            "finishedTimestamp" : 3,
@@ -192,7 +192,7 @@ class TestsSpec extends FunSuite {
         |              {
         |                "message" : "and",
         |                "timestamp" : 5,
-        |                "ordinal" : "122_0"
+        |                "id" : "st_122_0"
         |              }
         |            ],
         |            "testOutcome" : "failed"
@@ -236,7 +236,7 @@ class TestsSpec extends FunSuite {
         |        "id" : "f_1_0",
         |        "scenarios" : [
         |          {
-        |            "ordinal" : "1_0",
+        |            "id" : "s_1_0",
         |            "description" : "s1",
         |            "startedTimestamp" : 1,
         |            "finishedTimestamp" : 3,
@@ -254,12 +254,12 @@ class TestsSpec extends FunSuite {
         |              {
         |                "message" : "m1-f1-s1",
         |                "timestamp" : 1,
-        |                "ordinal" : "1_0"
+        |                "id" : "st_1_0"
         |              },
         |              {
         |                "message" : "given",
         |                "timestamp" : 5,
-        |                "ordinal" : "122_0"
+        |                "id" : "st_122_0"
         |              }
         |            ],
         |            "testOutcome" : "succeeded"
@@ -271,7 +271,7 @@ class TestsSpec extends FunSuite {
         |        "id" : "f_2_0",
         |        "scenarios" : [
         |          {
-        |            "ordinal" : "2_0",
+        |            "id" : "s_2_0",
         |            "description" : "s1",
         |            "startedTimestamp" : 1,
         |            "finishedTimestamp" : 3,
@@ -289,12 +289,12 @@ class TestsSpec extends FunSuite {
         |              {
         |                "message" : "m1-f2-s1",
         |                "timestamp" : 1,
-        |                "ordinal" : "2_0"
+        |                "id" : "st_2_0"
         |              },
         |              {
         |                "message" : "and",
         |                "timestamp" : 5,
-        |                "ordinal" : "122_0"
+        |                "id" : "st_122_0"
         |              }
         |            ],
         |            "testOutcome" : "failed"

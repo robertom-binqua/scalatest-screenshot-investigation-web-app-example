@@ -91,7 +91,7 @@ class TestsCollectorImpSpec extends FunSuite {
         |          "id" : "f_1_0",
         |          "scenarios" : [
         |            {
-        |              "ordinal" : "1_0",
+        |              "id" : "s_1_0",
         |              "description" : "s",
         |              "startedTimestamp" : 1,
         |              "finishedTimestamp" : 2,
@@ -109,7 +109,7 @@ class TestsCollectorImpSpec extends FunSuite {
         |                {
         |                  "message" : "m",
         |                  "timestamp" : 5,
-        |                  "ordinal" : "122_0"
+        |                  "id" : "st_122_0"
         |                }
         |              ],
         |              "testOutcome" : "succeeded"
@@ -127,7 +127,7 @@ class TestsCollectorImpSpec extends FunSuite {
         |          "id" : "f_1_1",
         |          "scenarios" : [
         |            {
-        |              "ordinal" : "1_1",
+        |              "id" : "s_1_1",
         |              "description" : "s",
         |              "startedTimestamp" : 3,
         |              "finishedTimestamp" : 4,
@@ -153,7 +153,7 @@ class TestsCollectorImpSpec extends FunSuite {
         |                {
         |                  "message" : "m",
         |                  "timestamp" : 5,
-        |                  "ordinal" : "122_0"
+        |                  "id" : "st_122_0"
         |                }
         |              ],
         |              "testOutcome" : "succeeded"
@@ -217,7 +217,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |          "id" : "f_1_0",
                             |          "scenarios" : [
                             |            {
-                            |              "ordinal" : "1_0",
+                            |              "id" : "s_1_0",
                             |              "description" : "s",
                             |              "startedTimestamp" : 1,
                             |              "finishedTimestamp" : 2,
@@ -235,17 +235,17 @@ class TestsCollectorImpSpec extends FunSuite {
                             |                {
                             |                  "message" : "this is a note 2",
                             |                  "timestamp" : 3,
-                            |                  "ordinal" : "1_0"
+                            |                  "id" : "st_1_0"
                             |                },
                             |                {
                             |                  "message" : "this is a note 1",
                             |                  "timestamp" : 2,
-                            |                  "ordinal" : "1_0"
+                            |                  "id" : "st_1_0"
                             |                },
                             |                {
                             |                  "message" : "m",
                             |                  "timestamp" : 5,
-                            |                  "ordinal" : "122_0"
+                            |                  "id" : "st_122_0"
                             |                }
                             |              ],
                             |              "testOutcome" : "succeeded"
@@ -301,7 +301,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |          "id" : "f_1_0",
                             |          "scenarios" : [
                             |            {
-                            |              "ordinal" : "1_0",
+                            |              "id" : "s_1_0",
                             |              "description" : "s",
                             |              "startedTimestamp" : 1,
                             |              "finishedTimestamp" : 2,
@@ -311,17 +311,17 @@ class TestsCollectorImpSpec extends FunSuite {
                             |                {
                             |                  "message" : "this is a note 2",
                             |                  "timestamp" : 3,
-                            |                  "ordinal" : "1_0"
+                            |                  "id" : "st_1_0"
                             |                },
                             |                {
                             |                  "message" : "this is a note 1",
                             |                  "timestamp" : 2,
-                            |                  "ordinal" : "1_0"
+                            |                  "id" : "st_1_0"
                             |                },
                             |                {
                             |                  "message" : "m",
                             |                  "timestamp" : 5,
-                            |                  "ordinal" : "122_0"
+                            |                  "id" : "st_122_0"
                             |                }
                             |              ],
                             |              "testOutcome" : "succeeded"

@@ -9,7 +9,7 @@ class ScenarioSpec extends FunSuite {
   test("withNewScreenshot should work") {
 
     val startingScenario = Scenario(
-      ordinal = new Ordinal(1),
+      id = new Ordinal(1),
       description = "desc",
       startedTimestamp = 122L,
       finishedTimestamp = Some(111L),
@@ -24,7 +24,7 @@ class ScenarioSpec extends FunSuite {
     assertEquals(
       actualScenario1,
       startingScenario.copy(screenshots =
-        List(Screenshot(screenshotExternalData = ReferenceData.screenshotExternalData.url1, ordinal = startingScenario.ordinal, index = 1))
+        List(Screenshot(screenshotExternalData = ReferenceData.screenshotExternalData.url1, ordinal = startingScenario.id, index = 1))
       )
     )
 
@@ -34,8 +34,8 @@ class ScenarioSpec extends FunSuite {
       actualScenario2,
       startingScenario.copy(screenshots =
         List(
-          Screenshot(ReferenceData.screenshotExternalData.url1, startingScenario.ordinal, 1),
-          Screenshot(ReferenceData.screenshotExternalData.url2, startingScenario.ordinal, 2)
+          Screenshot(ReferenceData.screenshotExternalData.url1, startingScenario.id, 1),
+          Screenshot(ReferenceData.screenshotExternalData.url2, startingScenario.id, 2)
         )
       )
     )
@@ -47,9 +47,9 @@ class ScenarioSpec extends FunSuite {
       actualScenario3,
       startingScenario.copy(screenshots =
         List(
-          Screenshot(ReferenceData.screenshotExternalData.url1, startingScenario.ordinal, 1),
-          Screenshot(ReferenceData.screenshotExternalData.url2, startingScenario.ordinal, 2),
-          Screenshot(ReferenceData.screenshotExternalData.url3, startingScenario.ordinal, 3)
+          Screenshot(ReferenceData.screenshotExternalData.url1, startingScenario.id, 1),
+          Screenshot(ReferenceData.screenshotExternalData.url2, startingScenario.id, 2),
+          Screenshot(ReferenceData.screenshotExternalData.url3, startingScenario.id, 3)
         )
       )
     )

@@ -95,7 +95,7 @@ object Tests {
       test <- tests.tests.values
       feature <- test.features.featuresMap.values
       scenario <- feature.scenarios.scenariosMap.values
-    } yield (test, feature, scenario, scenario.ordinal)
+    } yield (test, feature, scenario, scenario.id)
 
     result.toList
       .sortWith((l, r) => l._4 > r._4)

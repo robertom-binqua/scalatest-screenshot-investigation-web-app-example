@@ -8,7 +8,7 @@ object Step {
     Json.obj(
       "message" -> Json.fromString(step.message),
       "timestamp" -> Json.fromLong(step.timestamp),
-      "ordinal" -> Json.fromString(step.ordinal.toList.mkString("_"))
+      "id" -> Json.fromString(s"st_${step.ordinal.toList.mkString("_")}")
     )
   }
 }

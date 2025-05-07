@@ -6,7 +6,7 @@ import io.circe.{Encoder, Json}
 import org.scalatest.events.Ordinal
 
 case class Scenario(
-    ordinal: Ordinal,
+    id: Ordinal,
     description: String,
     startedTimestamp: Long,
     finishedTimestamp: Option[Long],
@@ -17,17 +17,13 @@ case class Scenario(
 )
 
 object Scenario {
-  implicit val ordinalEncoder: Encoder[Ordinal] = (ordinal: Ordinal) => Json.fromString(ordinal.toList.mkString("_"))
+  implicit val ordinalEncoder: Encoder[Ordinal] = (ordinal: Ordinal) => Json.fromString(ordinal.toList.mkString("s_", "_", ""))
   implicit val encoder: Encoder[Scenario] = deriveEncoder[Scenario].mapJson(_.dropNullValues)
-  implicit val throwableEncoder: Encoder[Throwable] = (a: Throwable) => {
-    Json.obj(
-      "exception-message" -> Json.fromString(a.getMessage)
-    )
-  }
+  implicit val throwableEncoder: Encoder[Throwable] = (a: Throwable) => Json.obj("exception-message" -> Json.fromString(a.getMessage))
 
   def starting(ordinal: Ordinal, name: String, timestamp: Long): Scenario =
     Scenario(
-      ordinal = ordinal,
+      id = ordinal,
       description = name,
       startedTimestamp = timestamp,
       finishedTimestamp = None,
@@ -59,13 +55,13 @@ object Scenario {
         })
   }
 
-  def addScreenshot(scenario: Scenario, screenshotExternalData:ScreenshotExternalData): (Scenario, Screenshot) = {
+  def addScreenshot(scenario: Scenario, screenshotExternalData: ScreenshotExternalData): (Scenario, Screenshot) = {
     def newScreenshot(existingScreenshots: List[Screenshot]): List[Screenshot] =
-      List(Screenshot(screenshotExternalData, scenario.ordinal, existingScreenshots.size + 1))
+      List(Screenshot(screenshotExternalData, scenario.id, existingScreenshots.size + 1))
 
     val screenshot = newScreenshot(scenario.screenshots)
 
-    val newScreenshots =  scenario.screenshots ::: screenshot
+    val newScreenshots = scenario.screenshots ::: screenshot
 
     (scenario.copy(screenshots = newScreenshots), screenshot.head)
   }
