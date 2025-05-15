@@ -1,6 +1,7 @@
 package org.binqua.scalatest.integration
 
 import cats.effect.{IO, Resource}
+import cats.instances.unit
 import com.comcast.ip4s.IpLiteralSyntax
 import fs2.Pipe
 import fs2.io.file.{Files, Path}
@@ -30,26 +31,30 @@ class IntegrationSpec extends CatsEffectSuite {
   private val reportDestinationDirName = "test_dir_created_during_test"
   private val reportDestinationDirPath = Path(reportDestinationDirName)
 
-  override def beforeAll(): Unit =
-    System.clearProperty(systemPropertyKey)
-
-  override def afterAll(): Unit =
-    System.clearProperty(systemPropertyKey)
-
   test("given we run selenium test programmatically and given we specified the Report class, a report should be generated") {
+    val fileGenerated: IO[List[String]] = runTest("org.binqua.scalatest.integration.FeaturesForTestPurpose")
+    assertIO(obtained = fileGenerated, returns = expectedFilesToBeGenerated)
+  }
+
+  test("we can run a bigger test, to create a .json to be used in the reactapp development - 22 files should be generated") {
+    val fileGenerated: IO[List[String]] = runTest("org.binqua.scalatest.integration.ReactAppUsagePurpose")
+    assertIO(obtained = fileGenerated.map(_.size), returns = 22)
+  }
+
+  private def runTest(testToRun: String): IO[List[String]] = {
     val fileGenerated = (for {
       _ <- Http4sAppServer.run[IO](FeaturesForTestPurpose.port)
       _ <- Resource.eval(Files[IO].deleteRecursively(reportDestinationDirPath).attempt)
       _ <- Resource.eval(IO.systemPropertiesForIO.set(systemPropertyKey, reportDestinationDirName))
+      _ <- Resource.onFinalize[IO](IO.systemPropertiesForIO.clear(systemPropertyKey).as(unit))
     } yield ())
       .use(_ =>
         for {
-          _ <- runSeleniumTest()
+          _ <- runSeleniumTest(testToRun)
           actualReportFiles <- collectAllReportFiles(reportDestinationDirPath)
         } yield actualReportFiles
       )
-
-    assertIO(obtained = fileGenerated, returns = expectedFilesToBeGenerated)
+    fileGenerated
   }
 
   private def collectAllReportFiles(root: Path): IO[List[String]] = {
@@ -66,9 +71,9 @@ class IntegrationSpec extends CatsEffectSuite {
       .toList
   }
 
-  private def runSeleniumTest(): IO[Unit] = {
+  private def runSeleniumTest(testToRun: String): IO[Unit] = {
     import org.scalatest._
-    IO( tools.Runner.run(Array("-R", ".", "-o","-s", "org.binqua.scalatest.integration.FeaturesForTestPurpose","-C","org.binqua.scalatest.reporter.ScreenshotReporterRunner")))
+    IO( tools.Runner.run(Array("-R", ".", "-o","-s", testToRun,"-C","org.binqua.scalatest.reporter.ScreenshotReporterRunner")))
   }
 
 
@@ -101,4 +106,43 @@ class FeaturesForTestPurpose extends AnyFeatureSpec with should.Matchers with Co
     }
   }
 
+}
+
+class ReactAppUsagePurpose extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen {
+
+  val host = s"http://localhost:${FeaturesForTestPurpose.port.value}/"
+
+  Feature("We can go through all the page of our app from home to page 4") {
+    Scenario("we can go from home page to last page") {
+      info("Given we go to the home page")
+      val str = host + "home.html"
+      go to str
+      pageTitle should be("Home")
+
+      info("When we click page 1")
+      click on linkText("Page1")
+
+      info("Then we jump to Page1")
+      pageTitle should be("Page 1")
+
+      info("And when we click page 2")
+      click on linkText("Page2")
+
+      info("Then we jump to Page2")
+      pageTitle should be("Page 2")
+
+      info("And when we click page 3")
+      click on linkText("Page3")
+
+      info("Then we jump to Page3")
+      pageTitle should be("Page 3")
+
+      info("And when we click page 4")
+      click on linkText("Page4")
+
+      info("Then we jump to Page4")
+      pageTitle should be("Page 4")
+    }
+
+  }
 }

@@ -12,7 +12,7 @@ case class NavigationMenu(items: List[NavItem]) {
 
 object NavigationMenu {
   def from(pageIdentifier: String): Either[String, NavigationMenu] = {
-    if (List("home", "page1", "page2", "page3").contains(pageIdentifier))
+    if (List("home", "page1", "page2", "page3", "page4").contains(pageIdentifier))
       Right(
         NavigationMenu(
           List(
@@ -43,6 +43,13 @@ object NavigationMenu {
               isActive = "page3".equals(pageIdentifier),
               pageUrl = "page3.html",
               navTitle = "Page3"
+            ),
+            NavItem(
+              title = "Page 4",
+              body = "this is the body of page 4. Just for fun",
+              isActive = "page4".equals(pageIdentifier),
+              pageUrl = "page4.html",
+              navTitle = "Page4"
             )
           )
         )
