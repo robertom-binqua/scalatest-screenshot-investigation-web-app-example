@@ -128,8 +128,7 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
         tests = Tests.addStep(tests, runningScenario, message, throwable, timestamp).getOrThrow
     }
 
-  def createReport(): Unit =
-    reportFileUtils.writeReport(tests)
+  def createReport(): Unit = reportFileUtils.writeReport(tests)
 
   def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit = {
 

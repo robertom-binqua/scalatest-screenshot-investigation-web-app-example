@@ -68,7 +68,7 @@ case class Scenarios(scenariosMap: Map[String, Scenario]) {
           val scenarios = this.copy(scenariosMap = this.scenariosMap.updated(scenarioDescription, updatedScenario))
           (scenarios, screenshot).asRight
         } else
-          s"Sorry last scenario does not have testOutcome equal to STARTING but ${lastScenario.testOutcome}".asLeft
+          s"Sorry last scenario '${lastScenario.description}' does not have testOutcome equal to STARTING but ${lastScenario.testOutcome}".asLeft
       )
 
 }

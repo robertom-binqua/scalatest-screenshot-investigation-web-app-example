@@ -72,7 +72,7 @@ class TestsSpec extends FunSuite {
     val invalidTests: Either[String, (Tests, Screenshot)] =
       actualTests.flatMap(Tests.addScreenshot(_, runningScenario, ReferenceData.screenshotExternalData.url1))
 
-    assertEquals(invalidTests, Left("Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED"))
+    assertEquals(invalidTests, Left("Sorry last scenario 'scenario desc' does not have testOutcome equal to STARTING but SUCCEEDED"))
 
   }
 
@@ -89,7 +89,7 @@ class TestsSpec extends FunSuite {
     val invalidTests: Either[String, (Tests, Screenshot)] =
       actualTests.flatMap(Tests.addScreenshot(_, runningScenario, ReferenceData.screenshotExternalData.url1))
 
-    assertEquals(invalidTests, Left("Sorry last scenario does not have testOutcome equal to STARTING but FAILED"))
+    assertEquals(invalidTests, Left("Sorry last scenario 'scenario desc' does not have testOutcome equal to STARTING but FAILED"))
 
   }
 

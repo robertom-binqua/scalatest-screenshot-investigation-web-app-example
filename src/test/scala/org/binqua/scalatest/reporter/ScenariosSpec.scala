@@ -46,7 +46,7 @@ class ScenariosSpec extends FunSuite {
     val actual1: Either[String, (Scenarios, Screenshot)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.id, scenario.description, ReferenceData.screenshotExternalData.url1)
 
-    assertEquals(actual1.map(_._1), "Sorry last scenario does not have testOutcome equal to STARTING but FAILED".asLeft)
+    assertEquals(actual1.map(_._1), "Sorry last scenario 'desc' does not have testOutcome equal to STARTING but FAILED".asLeft)
 
   }
 
@@ -57,7 +57,7 @@ class ScenariosSpec extends FunSuite {
     val actual1: Either[String, (Scenarios, Screenshot)] =
       Scenarios(scenariosMap = Map("desc" -> scenario)).withNewScreenshot(scenario.id, scenario.description, ReferenceData.screenshotExternalData.url1)
 
-    assertEquals(actual1.map(_._1), "Sorry last scenario does not have testOutcome equal to STARTING but SUCCEEDED".asLeft)
+    assertEquals(actual1.map(_._1), "Sorry last scenario 'desc' does not have testOutcome equal to STARTING but SUCCEEDED".asLeft)
 
   }
 
