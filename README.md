@@ -24,6 +24,15 @@ Below is an example of the generated report (currently under construction, with 
 
 ![report example](./docs/exampleOfReport.png)
 
+Below is an example of a possible way to query for test (WIP). For all the screenshots collected there are only 4
+combinations of page title - page url (this text shows the only possible combinations and it has been built from the json report itself):
+
+![report example](./docs/exampleOfTestQueryConstruction.png)
+
+Below is an example of query result (WIP). We found 4 tests were a screenshot with that title and url were involved. If you click on one of a query result, you will be redirected to the full test detail page.
+
+![report example](./docs/exampleOfTestQueryResult.png)
+
 ## Features
 
 coming
