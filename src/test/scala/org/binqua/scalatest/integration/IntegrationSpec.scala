@@ -7,7 +7,7 @@ import fs2.Pipe
 import fs2.io.file.{Files, Path}
 import munit.CatsEffectSuite
 import org.binqua.scalatest.integration.http4sapp.Http4sAppServer
-import org.binqua.scalatest.reporter.ConfiguredChrome
+import org.binqua.scalatest.web.ConfiguredChrome
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should

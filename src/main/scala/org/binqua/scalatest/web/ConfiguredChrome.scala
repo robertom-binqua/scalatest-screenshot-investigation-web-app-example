@@ -1,6 +1,7 @@
-package org.binqua.scalatest.reporter
+package org.binqua.scalatest.web
 
 import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
+import org.binqua.scalatest.reporter.{ScreenshotDriverData, ScreenshotExternalData, TestsCollector}
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.support.events.{EventFiringDecorator, WebDriverListener}
 import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebElement}
@@ -18,8 +19,9 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
   }
 
   implicit override val webDriver: WebDriver = {
+    val testsCollector: TestsCollector = TestsCollector.testsCollector
     val original: WebDriver = new ChromeDriver(chromeOptions())
-    new EventFiringDecorator(new Listener(original)).decorate(original)
+    new EventFiringDecorator(new Listener(original, testsCollector)).decorate(original)
   }
 
   private def chromeOptions(): ChromeOptions = {
@@ -30,8 +32,7 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
     options
   }
 
-  class Listener(driver: WebDriver) extends WebDriverListener {
-    val testsCollector: TestsCollector = TestsCollector.testsCollector
+  class Listener(driver: WebDriver, testsCollector: TestsCollector) extends WebDriverListener {
     override def beforeAnyCall(target: AnyRef, method: Method, args: Array[AnyRef]): Unit = {
       //      val driver = target.asInstanceOf[ChromeDriver]
       //      println(s"driver $driver")

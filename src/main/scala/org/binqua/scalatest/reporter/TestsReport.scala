@@ -6,75 +6,75 @@ import io.circe.syntax.EncoderOps
 import org.binqua.scalatest.reporter.StateEvent.RecordedEvents
 import org.scalatest.events.Ordinal
 
-case class Tests(tests: Map[String, Test])
+case class TestsReport(tests: Map[String, Test])
 
-object Tests {
-  implicit val encoder: Encoder[Tests] = (tests: Tests) => tests.tests.values.asJson
+object TestsReport {
+  implicit val encoder: Encoder[TestsReport] = (testsReport: TestsReport) => testsReport.tests.values.asJson
 
-  val empty: Tests = Tests(Map.empty)
+  val empty: TestsReport = TestsReport(Map.empty)
 
   def addScreenshot(
-      testsToBeUpdated: Tests,
-      runningScenario: RunningScenario,
-      screenshotExternalData: ScreenshotExternalData
-  ): Either[String, (Tests, Screenshot)] =
+                     testsToBeUpdated: TestsReport,
+                     runningScenario: RunningScenario,
+                     screenshotExternalData: ScreenshotExternalData
+  ): Either[String, (TestsReport, Screenshot)] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot add a screenshot")
       .flatMap((runningTest: Test) =>
         runningTest
           .addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, screenshotExternalData)
           .map((updatedTest: (Test, Screenshot)) => {
-            val newTests = Tests(tests = testsToBeUpdated.tests.updated(runningScenario.test, updatedTest._1))
+            val newTests = TestsReport(tests = testsToBeUpdated.tests.updated(runningScenario.test, updatedTest._1))
             (newTests, updatedTest._2)
           })
       )
 
   def addStep(
-      testsToBeUpdated: Tests,
-      runningScenario: RunningScenario,
-      message: String,
-      throwable: Option[Throwable],
-      timestamp: Long
-  ): Either[String, Tests] =
+               testsToBeUpdated: TestsReport,
+               runningScenario: RunningScenario,
+               message: String,
+               throwable: Option[Throwable],
+               timestamp: Long
+  ): Either[String, TestsReport] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, "I cannot add a step.")
       .flatMap((test: Test) =>
         Test
           .addStep(test, runningScenario.feature, runningScenario.scenario, runningScenario.ordinal, message, throwable, timestamp)
           .map(testsToBeUpdated.tests.updated(runningScenario.test, _))
-          .map(Tests(_))
+          .map(TestsReport(_))
       )
 
   def testFailed(
-      testsToBeUpdated: Tests,
-      runningScenario: RunningScenario,
-      recordedEvent: RecordedEvents,
-      throwable: Option[Throwable],
-      timestamp: Long
-  ): Either[String, Tests] =
+                  testsToBeUpdated: TestsReport,
+                  runningScenario: RunningScenario,
+                  recordedEvent: RecordedEvents,
+                  throwable: Option[Throwable],
+                  timestamp: Long
+  ): Either[String, TestsReport] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot set the test to failed")
       .flatMap(
         _.markAsFailed(runningScenario.feature, runningScenario.scenario, recordedEvent, throwable, timestamp)
           .map(testsToBeUpdated.tests.updated(runningScenario.test, _))
-          .map(Tests(_))
+          .map(TestsReport(_))
       )
 
-  def testSucceeded(testsToBeUpdated: Tests, runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long): Either[String, Tests] =
+  def testSucceeded(testsToBeUpdated: TestsReport, runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long): Either[String, TestsReport] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot set the test to succeeded")
       .flatMap(
         _.markAsSucceeded(runningScenario.feature, runningScenario.scenario, recordedEvent, timestamp)
           .map(testsToBeUpdated.tests.updated(runningScenario.test, _))
-          .map(Tests(_))
+          .map(TestsReport(_))
       )
 
-  private def findTestToBeUpdated(tests: Tests, runningScenario: RunningScenario, details: String): Either[String, Test] =
+  private def findTestToBeUpdated(tests: TestsReport, runningScenario: RunningScenario, details: String): Either[String, Test] =
     tests.tests
       .get(runningScenario.test)
       .toRight(s"I was going to update test ${runningScenario.test} but test ${runningScenario.test} does not exist.$details")
 
-  def testStarting(testsToBeUpdated: Tests, runningScenario: RunningScenario, timestamp: Long): Either[String, Tests] =
+  def testStarting(testsToBeUpdated: TestsReport, runningScenario: RunningScenario, timestamp: Long): Either[String, TestsReport] =
     testsToBeUpdated.tests
       .get(runningScenario.test)
-      .fold[Either[String, Tests]](
-        ifEmpty = Tests(tests =
+      .fold[Either[String, TestsReport]](
+        ifEmpty = TestsReport(tests =
           testsToBeUpdated.tests.updated(
             runningScenario.test,
             Test(
@@ -87,10 +87,10 @@ object Tests {
       )(testAlreadyPresent =>
         testAlreadyPresent
           .withNewFeatureOrScenario(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, timestamp)
-          .map((updatedTest: Test) => Tests(tests = testsToBeUpdated.tests.updated(runningScenario.test, updatedTest)))
+          .map((updatedTest: Test) => TestsReport(tests = testsToBeUpdated.tests.updated(runningScenario.test, updatedTest)))
       )
 
-  def runningTest(tests: Tests): Either[String, RunningScenario] = {
+  def runningTest(tests: TestsReport): Either[String, RunningScenario] = {
     val result: Iterable[(Test, Feature, Scenario, Ordinal)] = for {
       test <- tests.tests.values
       feature <- test.features.featuresMap.values

@@ -6,13 +6,15 @@ import io.circe.syntax.EncoderOps
 import io.circe.{Json, JsonObject}
 import org.apache.commons.io.FileUtils
 import org.binqua.scalatest.reporter.util.utils
-import org.binqua.scalatest.reporter.util.utils.{EitherOps, clean}
+import org.binqua.scalatest.reporter.util.utils.EitherOps
 import org.jsoup.Jsoup
 
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, ZoneId, ZonedDateTime}
+import java.util.concurrent.atomic.AtomicReference
+import scala.annotation.tailrec
 
 trait TestsCollector {
 
@@ -113,31 +115,53 @@ sealed trait TestsCollectorConfiguration {
 
 class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollector {
 
-  var tests: Tests = Tests(Map.empty)
+  var testsReport: AtomicReference[TestsReport] = new AtomicReference(TestsReport(Map.empty))
+
+  @tailrec
+  private def retryCompareAndSet[A, B](ar: AtomicReference[A], calculateNewValueFromOld: A => (A, B)): B = {
+    val oldValue: A = ar.get
+    val newValues: (A, B) = calculateNewValueFromOld(oldValue)
+    if (!ar.compareAndSet(oldValue, newValues._1)) retryCompareAndSet(ar, calculateNewValueFromOld)
+    else newValues._2
+  }
 
   def add(event: StateEvent): Unit =
     event match {
       case StateEvent.TestStarting(runningScenario, timestamp) =>
-        tests = Tests.testStarting(tests, runningScenario, timestamp).getOrThrow
+        retryCompareAndSet(
+          ar = testsReport,
+          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testStarting(oldTests, runningScenario, timestamp).getOrThrow, ())
+        )
 
       case StateEvent.TestFailed(runningScenario, recordedEvent, throwable, timestamp) =>
-        tests = Tests.testFailed(tests, runningScenario, recordedEvent, throwable, timestamp).getOrThrow
+        retryCompareAndSet(
+          ar = testsReport,
+          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testFailed(oldTests, runningScenario, recordedEvent, throwable, timestamp).getOrThrow, ())
+        )
 
       case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
-        tests = Tests.testSucceeded(tests, runningScenario, recordedEvent, timestamp).getOrThrow
+        retryCompareAndSet(
+          ar = testsReport,
+          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testSucceeded(oldTests, runningScenario, recordedEvent, timestamp).getOrThrow, ())
+        )
 
       case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
-        tests = Tests.addStep(tests, runningScenario, message, throwable, timestamp).getOrThrow
+        retryCompareAndSet(
+          ar = testsReport,
+          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.addStep(oldTests, runningScenario, message, throwable, timestamp).getOrThrow, ())
+        )
     }
 
-  def createReport(): Unit = reportFileUtils.writeReport(tests)
+  def createReport(): Unit = reportFileUtils.writeReport(testsReport.get())
 
   def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit = {
 
-    val (newTests, screenshot): (Tests, Screenshot) =
-      Tests.runningTest(tests).flatMap(Tests.addScreenshot(tests, _, screenshotDriverData.screenshotExternalData)).getOrThrow
-
-    tests = newTests
+    val screenshot: Screenshot =
+      retryCompareAndSet(
+        ar = testsReport,
+        calculateNewValueFromOld =
+          (oldTests: TestsReport) => TestsReport.runningTest(oldTests).flatMap(TestsReport.addScreenshot(oldTests, _, screenshotDriverData.screenshotExternalData)).getOrThrow
+      )
 
     reportFileUtils.copyFile(
       from = screenshotDriverData.image,
@@ -172,7 +196,7 @@ class ReportFileUtilsImpl(config: TestsCollectorConfiguration) extends ReportFil
       StandardCharsets.UTF_8
     )
 
-  override def writeReport(tests: Tests): Unit = {
+  override def writeReport(tests: TestsReport): Unit = {
     val json: JsonObject = JsonObject(
       "screenshotsLocationPrefix" -> Json.fromString(config.screenshotsLocationPrefix),
       "testsReport" -> tests.asJson
@@ -200,6 +224,6 @@ trait ReportFileUtils {
 
   def withNoHtmlElementsToFile(originalSourceToBeWritten: String, toSuffix: File): Unit
 
-  def writeReport(tests: Tests): Unit
+  def writeReport(tests: TestsReport): Unit
 
 }
