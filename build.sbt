@@ -28,6 +28,7 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-literal" % CirceVersion,
       "io.circe" %% "circe-parser" % CirceVersion,
       "commons-io" % "commons-io" % "2.19.0",
+      "org.jsoup" % "jsoup" % "1.20.1",
       "co.fs2" %% "fs2-io" % "3.11.0"  % Test,
       "org.scalameta" %% "munit" % MunitVersion % Test,
       "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0" % Test,

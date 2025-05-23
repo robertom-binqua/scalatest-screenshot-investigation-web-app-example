@@ -99,6 +99,7 @@ class TestsCollectorImpSpec extends FunSuite {
         |                {
         |                  "originalLocation" : "scenario_ordinal_1_0/original/1_ON_EXIT_PAGE.png",
         |                  "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_EXIT_PAGE.txt",
+        |                  "sourceWithNoHtmlLocation" : "scenario_ordinal_1_0/withNoHtml/1_ON_EXIT_PAGE.txt",
         |                  "pageUrl" : "url1",
         |                  "index" : 1,
         |                  "pageTitle" : "title 1",
@@ -135,6 +136,7 @@ class TestsCollectorImpSpec extends FunSuite {
         |                {
         |                  "originalLocation" : "scenario_ordinal_1_1/original/1_ON_EXIT_PAGE.png",
         |                  "sourceLocation" : "scenario_ordinal_1_1/sources/1_ON_EXIT_PAGE.txt",
+        |                  "sourceWithNoHtmlLocation" : "scenario_ordinal_1_1/withNoHtml/1_ON_EXIT_PAGE.txt",
         |                  "pageUrl" : "url1",
         |                  "index" : 1,
         |                  "pageTitle" : "title 1",
@@ -143,6 +145,7 @@ class TestsCollectorImpSpec extends FunSuite {
         |                {
         |                  "originalLocation" : "scenario_ordinal_1_1/original/2_ON_ENTER_PAGE.png",
         |                  "sourceLocation" : "scenario_ordinal_1_1/sources/2_ON_ENTER_PAGE.txt",
+        |                  "sourceWithNoHtmlLocation" : "scenario_ordinal_1_1/withNoHtml/2_ON_ENTER_PAGE.txt",
         |                  "pageUrl" : "url2",
         |                  "index" : 2,
         |                  "pageTitle" : "title 2",
@@ -225,6 +228,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |                {
                             |                  "originalLocation" : "scenario_ordinal_1_0/original/1_ON_EXIT_PAGE.png",
                             |                  "sourceLocation" : "scenario_ordinal_1_0/sources/1_ON_EXIT_PAGE.txt",
+                            |                  "sourceWithNoHtmlLocation" : "scenario_ordinal_1_0/withNoHtml/1_ON_EXIT_PAGE.txt",
                             |                  "pageUrl" : "url1",
                             |                  "index" : 1,
                             |                  "pageTitle" : "title 1",

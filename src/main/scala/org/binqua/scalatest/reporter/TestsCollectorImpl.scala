@@ -5,7 +5,9 @@ import cats.implicits.{catsSyntaxEitherId, toBifunctorOps}
 import io.circe.syntax.EncoderOps
 import io.circe.{Json, JsonObject}
 import org.apache.commons.io.FileUtils
-import org.binqua.scalatest.reporter.util.utils.EitherOps
+import org.binqua.scalatest.reporter.util.utils
+import org.binqua.scalatest.reporter.util.utils.{EitherOps, clean}
+import org.jsoup.Jsoup
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -93,11 +95,11 @@ object TestsCollectorConfiguration {
     if (!reportDir.exists()) List(s"ReportDir $reportDir should exist but it does not").asLeft
     else reportDir.asRight
 
-  private def validateScreenshotsDir(screenshotsDir: File): Either[List[String], File] = {
+  private def validateScreenshotsDir(screenshotsDir: File): Either[List[String], File] =
     if (!screenshotsDir.exists())
       List(s"ScreenshotsDir $screenshotsDir should exist but it does not").asLeft
-    else screenshotsDir.asRight
-  }
+    else
+      screenshotsDir.asRight
 
   def unsafeFrom(reportRootParent: File): TestsCollectorConfiguration = from(reportRootParent).getOrThrow
 }
@@ -139,12 +141,17 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
 
     reportFileUtils.copyFile(
       from = screenshotDriverData.image,
-      toSuffix = screenshot.originalFileLocation
+      toSuffix = screenshot.originalFilename
     )
 
     reportFileUtils.writeStringToFile(
       stringToBeWritten = screenshotDriverData.pageSource,
-      toSuffix = screenshot.sourceCode
+      toSuffix = screenshot.sourceCodeFilename
+    )
+
+    reportFileUtils.withNoHtmlElementsToFile(
+      originalSourceToBeWritten = screenshotDriverData.pageSource,
+      toSuffix = screenshot.sourceWithNoHtmlFilename
     )
 
   }
@@ -176,6 +183,13 @@ class ReportFileUtilsImpl(config: TestsCollectorConfiguration) extends ReportFil
       StandardCharsets.UTF_8
     )
   }
+
+  override def withNoHtmlElementsToFile(originalSourceToBeWritten: String, toSuffix: File): Unit =
+    FileUtils.writeStringToFile(
+      new File(config.screenshotsRootLocation + File.separator + toSuffix),
+      utils.clean(Jsoup.parse(originalSourceToBeWritten).wholeText()),
+      StandardCharsets.UTF_8
+    )
 }
 
 trait ReportFileUtils {
@@ -183,6 +197,8 @@ trait ReportFileUtils {
   def copyFile(from: File, toSuffix: File): Unit
 
   def writeStringToFile(stringToBeWritten: String, toSuffix: File): Unit
+
+  def withNoHtmlElementsToFile(originalSourceToBeWritten: String, toSuffix: File): Unit
 
   def writeReport(tests: Tests): Unit
 

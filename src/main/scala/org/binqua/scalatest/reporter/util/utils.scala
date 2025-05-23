@@ -2,7 +2,7 @@ package org.binqua.scalatest.reporter.util
 
 object utils {
 
-  implicit class EitherOps[L,R](either: Either[L, R]) {
+  implicit class EitherOps[L, R](either: Either[L, R]) {
     def getOrThrow: R = {
       either match {
         case Right(value) => value
@@ -10,5 +10,7 @@ object utils {
       }
     }
   }
+
+  def clean(toBeCleaned: String): String = LazyList.from(toBeCleaned.split("\n")).filter(_.trim.nonEmpty).map(_.trim).mkString("\n")
 
 }

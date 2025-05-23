@@ -6,6 +6,7 @@ import org.scalatest.events.{InfoProvided, Ordinal, RecordableEvent}
 import java.io.File
 
 final case class ScreenshotExternalData(pageUrl: String, pageTitle: String, screenshotMoment: ScreenshotMoment)
+
 final case class ScreenshotDriverData(image: File, pageSource: String, screenshotExternalData: ScreenshotExternalData)
 
 sealed trait StateEvent

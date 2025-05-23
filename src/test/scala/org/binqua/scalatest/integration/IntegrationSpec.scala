@@ -44,16 +44,26 @@ class IntegrationSpec extends CatsEffectSuite {
       "report/screenshots/scenario_ordinal_1_3/sources/3_ON_ENTER_PAGE.txt",
       "report/screenshots/scenario_ordinal_1_3/sources/5_ON_ENTER_PAGE.txt",
       "report/screenshots/scenario_ordinal_1_3/sources/1_ON_ENTER_PAGE.txt",
-      "report/screenshots/scenario_ordinal_1_3/sources/4_ON_EXIT_PAGE.txt"
+      "report/screenshots/scenario_ordinal_1_3/sources/4_ON_EXIT_PAGE.txt",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml/8_ON_EXIT_PAGE.txt",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml/2_ON_EXIT_PAGE.txt",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml/6_ON_EXIT_PAGE.txt",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml/7_ON_ENTER_PAGE.txt",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml/3_ON_ENTER_PAGE.txt",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml/5_ON_ENTER_PAGE.txt",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml/1_ON_ENTER_PAGE.txt",
+      "report/screenshots/scenario_ordinal_1_3/withNoHtml/4_ON_EXIT_PAGE.txt"
     )
 
     val actualFileGenerated: IO[List[String]] = runTest("org.binqua.scalatest.integration.ReactAppUsagePurpose")
-    assertIO(obtained = actualFileGenerated, expectedFilesToBeGenerated)
+      .map(_.sorted)
+    assertIO(obtained = actualFileGenerated, expectedFilesToBeGenerated.sorted)
   }
 
   private def runTest(testToRun: String): IO[List[String]] = {
     val fileGenerated = (for {
-      _ <- Http4sAppServer.run[IO](FeaturesForTestPurpose.port)
+      _ <- Http4sAppServer.run[IO](ReactAppUsagePurpose.port)
       _ <- Resource.eval(Files[IO].deleteRecursively(reportDestinationDirPath).attempt)
       _ <- Resource.eval(IO.systemPropertiesForIO.set(systemPropertyKey, reportDestinationDirName))
       _ <- Resource.onFinalize[IO](IO.systemPropertiesForIO.clear(systemPropertyKey).as(unit))
@@ -88,13 +98,13 @@ class IntegrationSpec extends CatsEffectSuite {
 
 }
 
-object FeaturesForTestPurpose {
+object ReactAppUsagePurpose {
   val port = port"8081"
 }
 
 class ReactAppUsagePurpose extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen {
 
-  val host = s"http://localhost:${FeaturesForTestPurpose.port.value}/"
+  val host = s"http://localhost:${ReactAppUsagePurpose.port.value}/"
 
   Feature("We can go through all the page of our app from home to page 4") {
     Scenario("we can go from home page to last page") {

@@ -8,8 +8,9 @@ import java.io.File
 object Screenshot {
   implicit val encoder: Encoder[Screenshot] = (screenshot: Screenshot) =>
     Json.obj(
-      "originalLocation" -> Json.fromString(screenshot.originalFileLocation.toString),
-      "sourceLocation" -> Json.fromString(screenshot.sourceCode.toString),
+      "originalLocation" -> Json.fromString(screenshot.originalFilename.toString),
+      "sourceLocation" -> Json.fromString(screenshot.sourceCodeFilename.toString),
+      "sourceWithNoHtmlLocation" -> Json.fromString(screenshot.sourceWithNoHtmlFilename.toString),
       "pageUrl" -> Json.fromString(screenshot.screenshotExternalData.pageUrl),
       "index" -> Json.fromInt(screenshot.index),
       "pageTitle" -> Json.fromString(screenshot.screenshotExternalData.pageTitle),
@@ -18,14 +19,21 @@ object Screenshot {
 }
 
 case class Screenshot(screenshotExternalData: ScreenshotExternalData, ordinal: Ordinal, index: Int) {
+
   private val root = s"scenario_ordinal_${ordinal.toList.mkString("_")}"
 
-  def originalFileLocation: File = new File(
-    root + File.separator + "original" + File.separator + s"${index}_${screenshotExternalData.screenshotMoment}.png"
+  private val prefix = s"${index}_${screenshotExternalData.screenshotMoment}"
+
+  def originalFilename: File = new File(
+    root + File.separator + "original" + File.separator + s"$prefix.png"
   )
 
-  def sourceCode: File = new File(
-    root + File.separator + "sources" + File.separator + s"${index}_${screenshotExternalData.screenshotMoment}.txt"
+  def sourceCodeFilename: File = new File(
+    root + File.separator + "sources" + File.separator + s"$prefix.txt"
+  )
+
+  def sourceWithNoHtmlFilename: File = new File(
+    root + File.separator + "withNoHtml" + File.separator + s"$prefix.txt"
   )
 
 }
