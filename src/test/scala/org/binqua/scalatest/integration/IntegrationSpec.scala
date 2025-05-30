@@ -24,7 +24,7 @@ class IntegrationSpec extends CatsEffectSuite {
 
     val expectedFilesToBeGenerated: List[String] = List(
       "report",
-      "report/testsReport.js",
+      "report/testsReport.json",
       "report/screenshots",
       "report/screenshots/scenario_ordinal_1_3",
       "report/screenshots/scenario_ordinal_1_3/original",

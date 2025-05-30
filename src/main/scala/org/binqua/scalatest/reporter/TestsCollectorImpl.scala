@@ -29,19 +29,18 @@ trait TestsCollector {
 object TestsCollectorConfigurationFactory {
   def create(systemPropertyReportDestinationKey: String, fixedClock: Clock): Either[String, TestsCollectorConfiguration] =
     for {
-      sp <- Option(System.getProperty(systemPropertyReportDestinationKey))
-        .toRight(s"The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed")
-      validSP <- Either.cond(
-        sp.trim.nonEmpty,
-        sp,
-        s"The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed"
-      )
+      sp <- Option(System.getProperty(systemPropertyReportDestinationKey)).toRight(invalidSystemProperty(systemPropertyReportDestinationKey))
+      validSP <- Either.cond(sp.trim.nonEmpty, sp, invalidSystemProperty(systemPropertyReportDestinationKey))
       result <- {
         val reportRoot = calculateFullReportRoot(fixedClock, validSP)
         reportRoot.mkdirs()
         TestsCollectorConfiguration.from(reportRoot)
       }
     } yield result
+
+  private def invalidSystemProperty(systemPropertyReportDestinationKey: String): String = {
+    s"The system property $systemPropertyReportDestinationKey specifying the root dir of the report missing. I cannot proceed"
+  }
 
   private def calculateFullReportRoot(fixedClock: Clock, validSP: String): File =
     new File(
@@ -83,7 +82,7 @@ object TestsCollectorConfiguration {
         new TestsCollectorConfiguration {
           override def reportRootLocation: File = reportRoot
 
-          override def jsonReportLocation: File = new File(reportRoot.getAbsolutePath + File.separator + "testsReport.js")
+          override def jsonReportLocation: File = new File(reportRoot.getAbsolutePath + File.separator + "testsReport.json")
 
           override def screenshotsRootLocation: File = screenshotsRoot
 
@@ -115,7 +114,7 @@ sealed trait TestsCollectorConfiguration {
 
 class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollector {
 
-  var testsReport: AtomicReference[TestsReport] = new AtomicReference(TestsReport(Map.empty))
+  val testsReport: AtomicReference[TestsReport] = new AtomicReference(TestsReport(Map.empty))
 
   @tailrec
   private def retryCompareAndSet[A, B](ar: AtomicReference[A], calculateNewValueFromOld: A => (A, B)): B = {
@@ -125,7 +124,7 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
     else newValues._2
   }
 
-  def add(event: StateEvent): Unit =
+  def add(event: StateEvent): Unit = {
     event match {
       case StateEvent.TestStarting(runningScenario, timestamp) =>
         retryCompareAndSet(
@@ -136,7 +135,8 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
       case StateEvent.TestFailed(runningScenario, recordedEvent, throwable, timestamp) =>
         retryCompareAndSet(
           ar = testsReport,
-          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testFailed(oldTests, runningScenario, recordedEvent, throwable, timestamp).getOrThrow, ())
+          calculateNewValueFromOld =
+            (oldTests: TestsReport) => (TestsReport.testFailed(oldTests, runningScenario, recordedEvent, throwable, timestamp).getOrThrow, ())
         )
 
       case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
@@ -151,6 +151,7 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
           calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.addStep(oldTests, runningScenario, message, throwable, timestamp).getOrThrow, ())
         )
     }
+  }
 
   def createReport(): Unit = reportFileUtils.writeReport(testsReport.get())
 
@@ -159,12 +160,12 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
     val screenshot: Screenshot =
       retryCompareAndSet(
         ar = testsReport,
-        calculateNewValueFromOld =
-          (oldTests: TestsReport) => TestsReport.runningTest(oldTests).flatMap(TestsReport.addScreenshot(oldTests, _, screenshotDriverData.screenshotExternalData)).getOrThrow
+        calculateNewValueFromOld = (oldTests: TestsReport) =>
+          TestsReport.runningTest(oldTests).flatMap(TestsReport.addScreenshot(oldTests, _, screenshotDriverData.screenshotExternalData)).getOrThrow
       )
 
-    reportFileUtils.copyFile(
-      from = screenshotDriverData.image,
+    reportFileUtils.saveImage(
+      data = screenshotDriverData.image,
       toSuffix = screenshot.originalFilename
     )
 
@@ -189,6 +190,9 @@ class ReportFileUtilsImpl(config: TestsCollectorConfiguration) extends ReportFil
       new File(config.screenshotsRootLocation + File.separator + toSuffix)
     )
 
+  override def saveImage(data: Array[Byte], toSuffix: File): Unit =
+    FileUtils.writeByteArrayToFile(new File(config.screenshotsRootLocation + File.separator + toSuffix), data)
+
   override def writeStringToFile(stringToBeWritten: String, toSuffix: File): Unit =
     FileUtils.writeStringToFile(
       new File(config.screenshotsRootLocation + File.separator + toSuffix),
@@ -203,7 +207,7 @@ class ReportFileUtilsImpl(config: TestsCollectorConfiguration) extends ReportFil
     )
     FileUtils.writeStringToFile(
       config.jsonReportLocation,
-      s"window.testsReport = ${json.toJson.spaces2}",
+      json.toJson.spaces2,
       StandardCharsets.UTF_8
     )
   }
@@ -217,6 +221,8 @@ class ReportFileUtilsImpl(config: TestsCollectorConfiguration) extends ReportFil
 }
 
 trait ReportFileUtils {
+
+  def saveImage(data: Array[Byte], toSuffix: File): Unit
 
   def copyFile(from: File, toSuffix: File): Unit
 

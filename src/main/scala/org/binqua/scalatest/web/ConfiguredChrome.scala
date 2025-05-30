@@ -2,61 +2,61 @@ package org.binqua.scalatest.web
 
 import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PAGE}
 import org.binqua.scalatest.reporter.{ScreenshotDriverData, ScreenshotExternalData, TestsCollector}
+import org.openqa.selenium._
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
+import org.openqa.selenium.remote.RemoteWebElement
 import org.openqa.selenium.support.events.{EventFiringDecorator, WebDriverListener}
-import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebElement}
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import org.scalatestplus.selenium.{Driver, WebBrowser}
 
 import java.lang.reflect.Method
+import java.util
+import java.util.Base64
+import scala.collection.mutable
+import scala.jdk.CollectionConverters.MapHasAsScala
 
 trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
 
   this: Suite =>
 
-  override def afterAll(): Unit = {
-    close()
-  }
+  override def afterAll(): Unit = close()
 
   implicit override val webDriver: WebDriver = {
     val testsCollector: TestsCollector = TestsCollector.testsCollector
-    val original: WebDriver = new ChromeDriver(chromeOptions())
+    val original: ChromeDriver = new ChromeDriver(chromeOptions())
     new EventFiringDecorator(new Listener(original, testsCollector)).decorate(original)
   }
 
   private def chromeOptions(): ChromeOptions = {
     val options: ChromeOptions = new ChromeOptions
-    options.setBrowserVersion("135")
-    options.addArguments("--disable-features=MediaRouter")
+    options.setBrowserVersion("137")
     options.setAcceptInsecureCerts(true)
     options
   }
 
-  class Listener(driver: WebDriver, testsCollector: TestsCollector) extends WebDriverListener {
+  private class Listener(driver: ChromeDriver, testsCollector: TestsCollector) extends WebDriverListener {
     override def beforeAnyCall(target: AnyRef, method: Method, args: Array[AnyRef]): Unit = {
-      //      val driver = target.asInstanceOf[ChromeDriver]
-      //      println(s"driver $driver")
-//      println(s"beforeAnyCall ${target.getClass}")
-//      println(s"method $method")
 
       if (target.isInstanceOf[WebElement]) {
-        // (target.asInstanceOf[RemoteWebElement]).getTagName
-//        val element = target.asInstanceOf[RemoteWebElement]
-//        println(s"(target.asInstanceOf[RemoteWebElement]).getTagName ${element.getTagName}")
-//        println(s"type ${element.getAttribute("type")}")
-//        println(s"value ${element.getAttribute("value")}")
-//        println(s"text ${element.getText}")
+        (target.asInstanceOf[RemoteWebElement]).getTagName
+        val element = target.asInstanceOf[RemoteWebElement]
+        println(s"(target.asInstanceOf[RemoteWebElement]).getTagName ${element.getTagName}")
+        println(s"type ${element.getAttribute("type")}")
+        println(s"value ${element.getAttribute("value")}")
+        println(s"text ${element.getText}")
       }
+
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
+
         testsCollector
           .addScreenshot(
             ScreenshotDriverData(
-              driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
+              takeScreenshot,
               driver.getPageSource,
               ScreenshotExternalData(
-                driver.getCurrentUrl,
-                driver.getTitle,
-                ON_ENTER_PAGE
+                pageUrl = driver.getCurrentUrl,
+                pageTitle = driver.getTitle,
+                screenshotMoment = ON_ENTER_PAGE
               )
             )
           )
@@ -64,12 +64,11 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
     }
 
     override def afterAnyCall(target: AnyRef, method: Method, args: Array[AnyRef], result: AnyRef): Unit = {
-//      println(s"afterAnyCall ${target.getClass} ")
       if (method.toString.endsWith("org.openqa.selenium.WebElement.click()")) {
         testsCollector
           .addScreenshot(
             ScreenshotDriverData(
-              driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE),
+              takeScreenshot,
               driver.getPageSource,
               ScreenshotExternalData(
                 driver.getCurrentUrl,
@@ -79,6 +78,17 @@ trait ConfiguredChrome extends WebBrowser with Driver with BeforeAndAfterAll {
             )
           )
       }
+    }
+
+    private def takeScreenshot: Array[Byte] = {
+      val params: util.HashMap[String, Object] = new util.HashMap[String, Object]()
+      params.put("format", "jpeg")
+      params.put("quality", Integer.valueOf(70))
+      params.put("captureBeyondViewport", java.lang.Boolean.TRUE)
+
+      val result: mutable.Map[String, AnyRef] = driver.executeCdpCommand("Page.captureScreenshot", params).asScala
+
+      Base64.getDecoder.decode(result("data").asInstanceOf[String])
     }
   }
 
