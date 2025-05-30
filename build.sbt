@@ -23,6 +23,8 @@ lazy val root = (project in file("."))
       "commons-io" % "commons-io" % "2.19.0",
       "org.jsoup" % "jsoup" % "1.20.1",
       "org.scalatestplus" %% "selenium-4-21" % "3.2.19.0",
+      "org.seleniumhq.selenium" % "selenium-devtools-v137" % "4.33.0",
+      "org.seleniumhq.selenium" % "selenium-chrome-driver" % "4.33.0",
       "org.scalatest" %% "scalatest-core" % Scalatest,
       "org.http4s" %% "http4s-ember-server" % Http4sVersion % Test,
       "org.http4s" %% "http4s-dsl" % Http4sVersion % Test,

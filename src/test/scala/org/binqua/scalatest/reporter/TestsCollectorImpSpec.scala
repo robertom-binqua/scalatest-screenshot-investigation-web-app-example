@@ -10,6 +10,8 @@ import java.nio.file.{Files, Path}
 
 class TestsCollectorImpSpec extends FunSuite {
 
+  private val testReportFileLocation = "report/testsReport.json"
+
   test("testsCollector create report dir, screenshots dir and testsReport.js") {
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
     val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
@@ -39,7 +41,7 @@ class TestsCollectorImpSpec extends FunSuite {
 
     testsCollectorImpl.createReport()
 
-    Assertions.pathExist(Path.of(reportRoot.toString, "testsReport.js"))
+    Assertions.pathExist(Path.of(reportRoot.toString, "testsReport.json"))
 
   }
 
@@ -79,7 +81,7 @@ class TestsCollectorImpSpec extends FunSuite {
     testsCollectorImpl.createReport()
 
     val expectedContent =
-      """window.testsReport = {
+      """{
         |  "screenshotsLocationPrefix" : "report/screenshots/",
         |  "testsReport" : [
         |    {
@@ -168,7 +170,7 @@ class TestsCollectorImpSpec extends FunSuite {
         |  ]
         |}""".stripMargin
 
-    val actualReportJsFile = Path.of(reportParentDir.toFile.getAbsolutePath, "report/testsReport.js").toFile
+    val actualReportJsFile = Path.of(reportParentDir.toFile.getAbsolutePath, testReportFileLocation).toFile
     assertEquals(Files.readString(actualReportJsFile.toPath), expectedContent)
 
     List(
@@ -208,7 +210,7 @@ class TestsCollectorImpSpec extends FunSuite {
 
     testsCollectorImpl.createReport()
 
-    val expectedContent = """window.testsReport = {
+    val expectedContent = """{
                             |  "screenshotsLocationPrefix" : "report/screenshots/",
                             |  "testsReport" : [
                             |    {
@@ -261,7 +263,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |  ]
                             |}""".stripMargin
 
-    val actualReportJsFile = Path.of(reportParentDir.toFile.getAbsolutePath, "report/testsReport.js").toFile
+    val actualReportJsFile = Path.of(reportParentDir.toFile.getAbsolutePath, testReportFileLocation).toFile
     assertEquals(Files.readString(actualReportJsFile.toPath), expectedContent)
 
     List(
@@ -293,7 +295,7 @@ class TestsCollectorImpSpec extends FunSuite {
 
     testsCollectorImpl.createReport()
 
-    val expectedContent = """window.testsReport = {
+    val expectedContent = """{
                             |  "screenshotsLocationPrefix" : "report/screenshots/",
                             |  "testsReport" : [
                             |    {
@@ -337,7 +339,7 @@ class TestsCollectorImpSpec extends FunSuite {
                             |  ]
                             |}""".stripMargin
 
-    val actualReportJsFile = Path.of(reportParentDir.toFile.getAbsolutePath, "report/testsReport.js").toFile
+    val actualReportJsFile = Path.of(reportParentDir.toFile.getAbsolutePath, testReportFileLocation).toFile
     assertEquals(Files.readString(actualReportJsFile.toPath), expectedContent)
   }
 

@@ -4,9 +4,6 @@ import org.binqua.scalatest.reporter.ScreenshotMoment.{ON_ENTER_PAGE, ON_EXIT_PA
 import org.binqua.scalatest.reporter.TestOutcome.STARTING
 import org.scalatest.events.Ordinal
 
-import java.io.File
-import java.nio.file.Files
-
 object ReferenceData {
 
   val startingScenario: Scenario = Scenario(
@@ -34,6 +31,6 @@ object ReferenceData {
     val url4: ScreenshotDriverData = ScreenshotDriverData(image = aDummyScreenshot, pageSource = "source3", screenshotExternalData.url4)
   }
 
-  private def aDummyScreenshot: File = Files.createTempFile("doesNotMatter", "png").toFile
+  private def aDummyScreenshot: Array[Byte] = Array(1.byteValue)
 
 }
