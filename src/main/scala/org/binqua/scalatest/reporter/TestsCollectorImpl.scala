@@ -1,7 +1,7 @@
 package org.binqua.scalatest.reporter
 
 import cats.effect.IO.catsSyntaxTuple2Parallel
-import cats.implicits.{catsSyntaxEitherId, toBifunctorOps}
+import cats.implicits.{catsSyntaxEitherId, catsSyntaxOptionId, toBifunctorOps}
 import io.circe.syntax.EncoderOps
 import io.circe.{Json, JsonObject}
 import org.apache.commons.io.FileUtils
@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, ZoneId, ZonedDateTime}
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.locks.{Condition, ReentrantLock}
 import scala.annotation.tailrec
 
 trait TestsCollector {
@@ -114,7 +115,15 @@ sealed trait TestsCollectorConfiguration {
 
 class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollector {
 
-  val testsReport: AtomicReference[TestsReport] = new AtomicReference(TestsReport(Map.empty))
+  private val lock: ReentrantLock = new ReentrantLock()
+
+  private val screenshotTakenWeCanProceedConsumingEvents: Condition = lock.newCondition()
+  private val lastEventIsTakeAScreenshot: Condition = lock.newCondition()
+
+  private var keepReadingAllEvents: Boolean = true
+  private var lastEvent: Option[StateEvent] = None
+
+  private val testsReport: AtomicReference[TestsReport] = new AtomicReference(TestsReport(Map.empty))
 
   @tailrec
   private def retryCompareAndSet[A, B](ar: AtomicReference[A], calculateNewValueFromOld: A => (A, B)): B = {
@@ -125,61 +134,95 @@ class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollecto
   }
 
   def add(event: StateEvent): Unit = {
-    event match {
-      case StateEvent.TestStarting(runningScenario, timestamp) =>
-        retryCompareAndSet(
-          ar = testsReport,
-          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testStarting(oldTests, runningScenario, timestamp).getOrThrow, ())
-        )
+    lock.lock();
+    try {
+      Thread.sleep(2000)
+      while (!keepReadingAllEvents) {
+        screenshotTakenWeCanProceedConsumingEvents.await()
+      }
+      lastEvent = event.some
+      event match {
+        case StateEvent.TestStarting(runningScenario, timestamp) =>
+          retryCompareAndSet(
+            ar = testsReport,
+            calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testStarting(oldTests, runningScenario, timestamp).getOrThrow, ())
+          )
 
-      case StateEvent.TestFailed(runningScenario, recordedEvent, throwable, timestamp) =>
-        retryCompareAndSet(
-          ar = testsReport,
-          calculateNewValueFromOld =
-            (oldTests: TestsReport) => (TestsReport.testFailed(oldTests, runningScenario, recordedEvent, throwable, timestamp).getOrThrow, ())
-        )
+        case StateEvent.TestFailed(runningScenario, recordedEvent, throwable, timestamp) =>
+          retryCompareAndSet(
+            ar = testsReport,
+            calculateNewValueFromOld =
+              (oldTests: TestsReport) => (TestsReport.testFailed(oldTests, runningScenario, recordedEvent, throwable, timestamp).getOrThrow, ())
+          )
 
-      case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
-        retryCompareAndSet(
-          ar = testsReport,
-          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testSucceeded(oldTests, runningScenario, recordedEvent, timestamp).getOrThrow, ())
-        )
+        case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
+          retryCompareAndSet(
+            ar = testsReport,
+            calculateNewValueFromOld =
+              (oldTests: TestsReport) => (TestsReport.testSucceeded(oldTests, runningScenario, recordedEvent, timestamp).getOrThrow, ())
+          )
 
-      case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
-        retryCompareAndSet(
-          ar = testsReport,
-          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.addStep(oldTests, runningScenario, message, throwable, timestamp).getOrThrow, ())
-        )
+        case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
+          retryCompareAndSet(
+            ar = testsReport,
+            calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.addStep(oldTests, runningScenario, message, throwable, timestamp).getOrThrow, ())
+          )
+      }
+
+      if (eventIsTakeAScreenshotEvent(lastEvent)) {
+        keepReadingAllEvents = false // block the current method on the dispatcher thread when we exit, so add screenshot will be the only thread
+        lastEventIsTakeAScreenshot.signalAll() //
+      }
+
+    } finally {
+      lock.unlock()
     }
   }
 
-  def createReport(): Unit = reportFileUtils.writeReport(testsReport.get())
-
+  // blocks-until lastEventIsNot -> TakeAScreenshot
   def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit = {
-
-    val screenshot: Screenshot =
-      retryCompareAndSet(
+    var screenshot: Option[Screenshot] = None
+    lock.lock()
+    try {
+      while (!eventIsTakeAScreenshotEvent(lastEvent)) { // events are still too old. Waiting to reach take a screenshot event
+        lastEventIsTakeAScreenshot.await()
+      }
+      screenshot = retryCompareAndSet(
         ar = testsReport,
         calculateNewValueFromOld = (oldTests: TestsReport) =>
           TestsReport.runningTest(oldTests).flatMap(TestsReport.addScreenshot(oldTests, _, screenshotDriverData.screenshotExternalData)).getOrThrow
+      ).some
+
+      reportFileUtils.saveImage(
+        data = screenshotDriverData.image,
+        toSuffix = screenshot.get.originalFilename
       )
 
-    reportFileUtils.saveImage(
-      data = screenshotDriverData.image,
-      toSuffix = screenshot.originalFilename
-    )
+      reportFileUtils.writeStringToFile(
+        stringToBeWritten = screenshotDriverData.pageSource,
+        toSuffix = screenshot.get.sourceCodeFilename
+      )
 
-    reportFileUtils.writeStringToFile(
-      stringToBeWritten = screenshotDriverData.pageSource,
-      toSuffix = screenshot.sourceCodeFilename
-    )
+      reportFileUtils.withNoHtmlElementsToFile(
+        originalSourceToBeWritten = screenshotDriverData.pageSource,
+        toSuffix = screenshot.get.sourceWithNoHtmlFilename
+      )
 
-    reportFileUtils.withNoHtmlElementsToFile(
-      originalSourceToBeWritten = screenshotDriverData.pageSource,
-      toSuffix = screenshot.sourceWithNoHtmlFilename
-    )
+      keepReadingAllEvents = true
+      lastEvent = None
+      screenshotTakenWeCanProceedConsumingEvents.signalAll()
+    } finally {
+      lock.unlock()
+    }
 
   }
+
+  private def eventIsTakeAScreenshotEvent(event: Option[StateEvent]): Boolean = event match {
+    case Some(StateEvent.Note(_, message, _, _)) => message.startsWith("take screenshot now")
+    case _                                       => false
+  }
+
+  def createReport(): Unit = reportFileUtils.writeReport(testsReport.get())
 
 }
 

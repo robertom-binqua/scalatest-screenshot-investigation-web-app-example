@@ -9,7 +9,7 @@ import munit.CatsEffectSuite
 import org.binqua.scalatest.integration.http4sapp.Http4sAppServer
 import org.binqua.scalatest.web.ConfiguredChrome
 import org.scalatest.GivenWhenThen
-import org.scalatest.featurespec.AnyFeatureSpec
+import org.scalatest.featurespec.{AnyFeatureSpec, AnyFeatureSpecLike}
 import org.scalatest.matchers.should
 
 class IntegrationSpec extends CatsEffectSuite {
@@ -140,3 +140,4 @@ class ReactAppUsagePurpose extends AnyFeatureSpec with should.Matchers with Conf
 
   }
 }
+

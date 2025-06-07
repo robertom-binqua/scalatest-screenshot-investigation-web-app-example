@@ -37,7 +37,7 @@ lazy val root = (project in file("."))
       "org.scalameta" %% "munit" % MunitVersion % Test,
       "org.scalatest" %% "scalatest-flatspec" % Scalatest % Test,
       "org.scalatest" %% "scalatest-shouldmatchers" % Scalatest % Test,
-      "org.scalatest" %% "scalatest-featurespec" % Scalatest % Test,
+      "org.scalatest" %% "scalatest-featurespec" % Scalatest,
       "org.typelevel" %% "munit-cats-effect" % "2.1.0" % Test
     ),
     scalacOptions ++= Seq("-Ywarn-unused")

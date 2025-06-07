@@ -1,6 +1,6 @@
 package org.binqua.scalatest.integration
 
-import org.binqua.scalatest.web.ConfiguredChrome
+import org.binqua.scalatest.web.{ConfiguredChrome, WithScreenshotsSupport}
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, WebDriver, WebElement}
 import org.scalatest.{GivenWhenThen, Ignore}
@@ -10,8 +10,49 @@ import org.scalatest.matchers.should
 import java.time.Duration
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-@Ignore
-class TateExampleSpec extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen {
+class TateExampleSpec extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen with WithScreenshotsSupport{
+
+  Feature("feature 1") {
+
+    Scenario("feature 2") {
+
+      note(s"given we go to somewhere")
+
+      note("and given we accept to proceed")
+
+      note("and given we want to become a member")
+
+      note("and given we are absolutely sure to continue")
+
+      note("after we select no gift aid")
+
+      note("we can add the purchase to the basket")
+
+      note("and secure checkout the basket")
+
+    }
+  }
+
+  Feature("feature 3") {
+
+    Scenario("feature 4") {
+
+      note(s"given we go to somewhere")
+
+      note("and given we accept to proceed")
+
+      note("and given we want to become a member")
+
+      note("and given we are absolutely sure to continue")
+
+      note("after we select no gift aid")
+
+      note("we can add the purchase to the basket")
+
+      note("and secure checkout the basket")
+
+    }
+  }
 
   Feature("we can visit https://www.tate.org.uk and become a member") {
 
@@ -24,22 +65,22 @@ class TateExampleSpec extends AnyFeatureSpec with should.Matchers with Configure
       pageTitle should be("Tate")
 
       info("and given we accept to proceed")
-      click on NavigationLinks.accept()
+      takeAScreenshot(click on NavigationLinks.accept())
 
       info("and given we want to become a member")
-      click on NavigationLinks.becomeAMember()
+      takeAScreenshot(click on NavigationLinks.becomeAMember())
 
       info("and given we are absolutely sure to continue")
-      click on NavigationLinks.continue()
+      takeAScreenshot(click on NavigationLinks.continue())
 
       info("after we select no gift aid")
-      click on NavigationLinks.noGifAid()
+      takeAScreenshot(click on NavigationLinks.noGifAid())
 
       info("we can add the purchase to the basket")
-      click on NavigationLinks.addToBasket()
+      takeAScreenshot(click on NavigationLinks.addToBasket())
 
       info("and secure checkout the basket")
-      click on NavigationLinks.secureCheckout()
+      takeAScreenshot(click on NavigationLinks.secureCheckout())
 
       val wait = new WebDriverWait(webDriver, Duration.ofSeconds(10))
       wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[normalize-space()='Continue']")))
