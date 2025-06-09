@@ -6,7 +6,7 @@ import org.scalatest.Reporter
 import org.scalatest.events.{Event, NameInfo, NoteProvided, RecordableEvent, RunCompleted, TestFailed, TestStarting, TestSucceeded}
 
 class ScreenshotReporterRunner extends Reporter {
-  val reporter = new ScreenshotReporterImpl(TestsCollector.testsCollector)
+  val reporter: Reporter = new ScreenshotReporterImpl(TestsCollector.testsCollector)
   override def apply(event: Event): Unit = reporter.apply(event)
 }
 
