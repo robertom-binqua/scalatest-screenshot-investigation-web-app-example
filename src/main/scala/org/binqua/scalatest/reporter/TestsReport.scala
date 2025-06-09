@@ -90,6 +90,7 @@ object TestsReport {
           .map((updatedTest: Test) => TestsReport(tests = testsToBeUpdated.tests.updated(runningScenario.test, updatedTest)))
       )
 
+  // this can be removed now because we save the last event.
   def runningTest(tests: TestsReport): Either[String, RunningScenario] = {
     val result: Iterable[(Test, Feature, Scenario, Ordinal)] = for {
       test <- tests.tests.values

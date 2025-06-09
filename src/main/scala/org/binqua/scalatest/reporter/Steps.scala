@@ -6,7 +6,7 @@ import io.circe.syntax.EncoderOps
 import org.scalatest.events.Ordinal
 
 object Steps {
-  implicit val encoder: Encoder[Steps] = (steps: Steps) => steps.list.asJson
+  implicit val encoder: Encoder[Steps] = (steps: Steps) => steps.list.filter(step => !step.message.startsWith("take screenshot now")).asJson
 
   def merge(events: StateEvent.RecordedEvents, steps: Option[Steps]): Either[String, Option[Steps]] = {
     def toStep: StateEvent.RecordedEvent => Step =

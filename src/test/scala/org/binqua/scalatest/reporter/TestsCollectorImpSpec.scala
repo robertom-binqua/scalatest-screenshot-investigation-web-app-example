@@ -119,11 +119,6 @@ class TestsCollectorImpSpec extends FunSuite {
         |              ],
         |              "steps" : [
         |                {
-        |                  "message" : "take screenshot now 1",
-        |                  "timestamp" : 3,
-        |                  "id" : "st_1_0"
-        |                },
-        |                {
         |                  "message" : "m",
         |                  "timestamp" : 5,
         |                  "id" : "st_122_0"
@@ -169,16 +164,6 @@ class TestsCollectorImpSpec extends FunSuite {
         |                }
         |              ],
         |              "steps" : [
-        |                {
-        |                  "message" : "take screenshot now 2",
-        |                  "timestamp" : 7,
-        |                  "id" : "st_1_1"
-        |                },
-        |                {
-        |                  "message" : "take screenshot now 1",
-        |                  "timestamp" : 6,
-        |                  "id" : "st_1_1"
-        |                },
         |                {
         |                  "message" : "m",
         |                  "timestamp" : 5,
@@ -272,11 +257,6 @@ class TestsCollectorImpSpec extends FunSuite {
                             |                {
                             |                  "message" : "this is a note 1",
                             |                  "timestamp" : 2,
-                            |                  "id" : "st_1_0"
-                            |                },
-                            |                {
-                            |                  "message" : "take screenshot now",
-                            |                  "timestamp" : 3,
                             |                  "id" : "st_1_0"
                             |                },
                             |                {

@@ -4,7 +4,7 @@ import io.circe.{Encoder, Json}
 import org.scalatest.events.Ordinal
 
 object Step {
-  implicit val featureEncoder: Encoder[Step] = Encoder.instance { step =>
+  implicit val encoder: Encoder[Step] = Encoder.instance { step =>
     Json.obj(
       "message" -> Json.fromString(step.message),
       "timestamp" -> Json.fromLong(step.timestamp),

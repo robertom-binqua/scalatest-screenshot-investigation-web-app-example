@@ -2,9 +2,12 @@ package org.binqua.scalatest.reporter
 
 import cats.implicits.catsSyntaxOptionId
 import org.binqua.scalatest.reporter.util.utils.EitherOps
+import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 
 import java.time.Clock
 import java.util.concurrent.locks.{Condition, ReentrantLock}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, Future}
 
 trait TestsCollector {
 
@@ -39,7 +42,7 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
   // guarded by lock
   private var testsReport: TestsReport = TestsReport(Map.empty)
 
-  // blocks-until keepReadingAllEvents = false.
+  // blocks-until keepReadingAllEvents = false, to give time to addScreenshot to read the right test coordinates.
   def add(event: StateEvent): Unit = {
     lock.lock();
     try {
@@ -61,9 +64,10 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
         case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
           testsReport = TestsReport.addStep(testsReport, runningScenario, message, throwable, timestamp).getOrThrow
       }
+
       if (eventIsTakeAScreenshotEvent(lastEvent)) {
         keepReadingAllEvents = false // block the current method on the dispatcher thread when we exit, so add screenshot will be the only thread
-        lastEventIsTakeAScreenshot.signalAll() //
+        lastEventIsTakeAScreenshot.signalAll()
       }
 
     } finally {
@@ -73,30 +77,21 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
 
   // blocks-until lastEventIsNot -> TakeAScreenshotEvent = StateEvent.Note(_, message, _, _) => message.startsWith("take screenshot now")
   def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit = {
+    var maybeSomeScreenshotData: Option[Screenshot] = None
     lock.lock()
     try {
-      while (!eventIsTakeAScreenshotEvent(lastEvent)) // events are still too old. Waiting to reach take a screenshot event
+      while (!eventIsTakeAScreenshotEvent(lastEvent)) // events are still too old: waiting to reach "take a screenshot event"
         lastEventIsTakeAScreenshot.await()
 
-      val (newTests, screenshot): (TestsReport, Screenshot) =
-        TestsReport.runningTest(testsReport).flatMap(TestsReport.addScreenshot(testsReport, _, screenshotDriverData.screenshotExternalData)).getOrThrow
+      val (newTestsReport, screenshot): (TestsReport, Screenshot) =
+        TestsReport
+          .runningTest(testsReport)
+          .flatMap(TestsReport.addScreenshot(testsReport, _, screenshotDriverData.screenshotExternalData))
+          .getOrThrow
 
-      testsReport = newTests
+      maybeSomeScreenshotData = screenshot.some
 
-      reportFileUtils.saveImage(
-        data = screenshotDriverData.image,
-        toSuffix = screenshot.originalFilename
-      )
-
-      reportFileUtils.writeStringToFile(
-        stringToBeWritten = screenshotDriverData.pageSource,
-        toSuffix = screenshot.sourceCodeFilename
-      )
-
-      reportFileUtils.withNoHtmlElementsToFile(
-        originalSourceToBeWritten = screenshotDriverData.pageSource,
-        toSuffix = screenshot.sourceWithNoHtmlFilename
-      )
+      testsReport = newTestsReport
 
       keepReadingAllEvents = true
       lastEvent = None
@@ -105,11 +100,37 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
       lock.unlock()
     }
 
+    maybeSomeScreenshotData match {
+      case Some(screenshot) => saveFiles(screenshot, screenshotDriverData)
+      case None             => throw new IllegalStateException(s"Ops! there are not screenshot data while saving data from $screenshotDriverData")
+    }
+
   }
 
-  private def eventIsTakeAScreenshotEvent(event: Option[StateEvent]): Boolean = event match {
-    case Some(StateEvent.Note(_, message, _, _)) => message.startsWith("take screenshot now")
-    case _                                       => false
+  private def saveFiles(screenshot: Screenshot, screenshotDriverData: ScreenshotDriverData): Unit = {
+    val image = Future(
+      reportFileUtils.saveImage(
+        data = screenshotDriverData.image,
+        toSuffix = screenshot.originalFilename
+      )
+    )
+
+    val htmlSource = Future(
+      reportFileUtils.writeStringToFile(
+        stringToBeWritten = screenshotDriverData.pageSource,
+        toSuffix = screenshot.sourceCodeFilename
+      )
+    )
+
+    val sourceContentWithNoHtmlTags = Future(
+      reportFileUtils.withNoHtmlElementsToFile(
+        originalSourceToBeWritten = screenshotDriverData.pageSource,
+        toSuffix = screenshot.sourceWithNoHtmlFilename
+      )
+    )
+
+    Await.result(Future.sequence(List(image, htmlSource, sourceContentWithNoHtmlTags)).map(_ => ()), 10.seconds)
+
   }
 
   def createReport(): Unit = {
@@ -119,6 +140,11 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
     } finally {
       lock.unlock()
     }
+  }
+
+  private def eventIsTakeAScreenshotEvent(event: Option[StateEvent]): Boolean = event match {
+    case Some(StateEvent.Note(_, message, _, _)) => message.startsWith("take screenshot now")
+    case _                                       => false
   }
 
 }
