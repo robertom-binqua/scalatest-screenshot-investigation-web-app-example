@@ -24,7 +24,10 @@ class TestsCollectorImpSpec extends FunSuite {
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
+
+    testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "take screenshot now", None, timestamp = 3L))
     testsCollectorImpl.addScreenshot(ReferenceData.screenshotDriverData.url1)
+
     testsCollectorImpl.add(
       StateEvent.TestSucceeded(
         runningScenario = runningScenario,
@@ -60,6 +63,7 @@ class TestsCollectorImpSpec extends FunSuite {
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
 
+    testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "take screenshot now 1", None, timestamp = 3L))
     testsCollectorImpl.addScreenshot(ReferenceData.screenshotDriverData.url1)
 
     testsCollectorImpl.add(
@@ -73,8 +77,13 @@ class TestsCollectorImpSpec extends FunSuite {
     val newRunningScenario = runningScenario.copy(test = "t1", ordinal = runningScenario.ordinal.next)
 
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = newRunningScenario, timestamp = 3L))
+
+    testsCollectorImpl.add(StateEvent.Note(runningScenario = newRunningScenario, "take screenshot now 1", None, timestamp = 6L))
     testsCollectorImpl.addScreenshot(ReferenceData.screenshotDriverData.url1)
+
+    testsCollectorImpl.add(StateEvent.Note(runningScenario = newRunningScenario, "take screenshot now 2", None, timestamp = 7L))
     testsCollectorImpl.addScreenshot(ReferenceData.screenshotDriverData.url2)
+
     val stringOrEvents = RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "m", None, 5L))).getOrThrow
     testsCollectorImpl.add(StateEvent.TestSucceeded(runningScenario = newRunningScenario, stringOrEvents, timestamp = 4L))
 
@@ -109,6 +118,11 @@ class TestsCollectorImpSpec extends FunSuite {
         |                }
         |              ],
         |              "steps" : [
+        |                {
+        |                  "message" : "take screenshot now 1",
+        |                  "timestamp" : 3,
+        |                  "id" : "st_1_0"
+        |                },
         |                {
         |                  "message" : "m",
         |                  "timestamp" : 5,
@@ -156,6 +170,16 @@ class TestsCollectorImpSpec extends FunSuite {
         |              ],
         |              "steps" : [
         |                {
+        |                  "message" : "take screenshot now 2",
+        |                  "timestamp" : 7,
+        |                  "id" : "st_1_1"
+        |                },
+        |                {
+        |                  "message" : "take screenshot now 1",
+        |                  "timestamp" : 6,
+        |                  "id" : "st_1_1"
+        |                },
+        |                {
         |                  "message" : "m",
         |                  "timestamp" : 5,
         |                  "id" : "st_122_0"
@@ -195,6 +219,8 @@ class TestsCollectorImpSpec extends FunSuite {
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
+
+    testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "take screenshot now", None, timestamp = 3L))
     testsCollectorImpl.addScreenshot(ReferenceData.screenshotDriverData.url1)
 
     testsCollectorImpl.add(StateEvent.Note(runningScenario = runningScenario, "this is a note 1", None, timestamp = 2L))
@@ -246,6 +272,11 @@ class TestsCollectorImpSpec extends FunSuite {
                             |                {
                             |                  "message" : "this is a note 1",
                             |                  "timestamp" : 2,
+                            |                  "id" : "st_1_0"
+                            |                },
+                            |                {
+                            |                  "message" : "take screenshot now",
+                            |                  "timestamp" : 3,
                             |                  "id" : "st_1_0"
                             |                },
                             |                {

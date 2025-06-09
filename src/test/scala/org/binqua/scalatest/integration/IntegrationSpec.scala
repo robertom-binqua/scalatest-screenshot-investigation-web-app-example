@@ -7,7 +7,7 @@ import fs2.Pipe
 import fs2.io.file.{Files, Path}
 import munit.CatsEffectSuite
 import org.binqua.scalatest.integration.http4sapp.Http4sAppServer
-import org.binqua.scalatest.web.ConfiguredChrome
+import org.binqua.scalatest.web.{ConfiguredChrome, WithScreenshotsSupport}
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should
@@ -102,39 +102,39 @@ object ReactAppUsagePurpose {
   val port = port"8081"
 }
 
-class ReactAppUsagePurpose extends AnyFeatureSpec with should.Matchers with ConfiguredChrome with GivenWhenThen {
+class ReactAppUsagePurpose extends AnyFeatureSpec with should.Matchers with WithScreenshotsSupport with ConfiguredChrome with GivenWhenThen {
 
   val host = s"http://localhost:${ReactAppUsagePurpose.port.value}/"
 
   Feature("We can go through all the page of our app from home to page 4") {
     Scenario("we can go from home page to last page") {
-      info("Given we go to the home page")
+      note("Given we go to the home page")
       val str = host + "home.html"
       go to str
       pageTitle should be("Home")
 
-      info("When we click page 1")
-      click on linkText("Page1")
+      note("When we click page 1")
+      takeAScreenshot(click on linkText("Page1"))
 
-      info("Then we jump to Page1")
+      note("Then we jump to Page1")
       pageTitle should be("Page 1")
 
-      info("And when we click page 2")
-      click on linkText("Page2")
+      note("And when we click page 2")
+      takeAScreenshot(click on linkText("Page2"))
 
-      info("Then we jump to Page2")
+      note("Then we jump to Page2")
       pageTitle should be("Page 2")
 
-      info("And when we click page 3")
-      click on linkText("Page3")
+      note("And when we click page 3")
+      takeAScreenshot(click on linkText("Page3"))
 
-      info("Then we jump to Page3")
+      note("Then we jump to Page3")
       pageTitle should be("Page 3")
 
-      info("And when we click page 4")
-      click on linkText("Page4")
+      note("And when we click page 4")
+      takeAScreenshot(click on linkText("Page4"))
 
-      info("Then we jump to Page4")
+      note("Then we jump to Page4")
       pageTitle should be("Page 4")
     }
 

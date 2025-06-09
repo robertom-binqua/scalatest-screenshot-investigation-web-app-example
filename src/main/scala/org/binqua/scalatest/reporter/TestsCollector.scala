@@ -1,11 +1,10 @@
 package org.binqua.scalatest.reporter
 
+import cats.implicits.catsSyntaxOptionId
 import org.binqua.scalatest.reporter.util.utils.EitherOps
 
 import java.time.Clock
-import java.util.concurrent.atomic.AtomicReference
-import scala.annotation.tailrec
-
+import java.util.concurrent.locks.{Condition, ReentrantLock}
 
 trait TestsCollector {
 
@@ -26,74 +25,100 @@ object TestsCollector {
 
 }
 
-class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollector {
+// ThreadSafe
+final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollector {
 
-  val testsReport: AtomicReference[TestsReport] = new AtomicReference(TestsReport(Map.empty))
+  private val lock: ReentrantLock = new ReentrantLock()
+  private val screenshotTakenWeCanProceedConsumingEvents: Condition = lock.newCondition()
+  private val lastEventIsTakeAScreenshot: Condition = lock.newCondition()
 
-  @tailrec
-  private def retryCompareAndSet[A, B](ar: AtomicReference[A], calculateNewValueFromOld: A => (A, B)): B = {
-    val oldValue: A = ar.get
-    val newValues: (A, B) = calculateNewValueFromOld(oldValue)
-    if (!ar.compareAndSet(oldValue, newValues._1)) retryCompareAndSet(ar, calculateNewValueFromOld)
-    else newValues._2
-  }
+  // guarded by lock
+  private var keepReadingAllEvents: Boolean = true
+  // guarded by lock
+  private var lastEvent: Option[StateEvent] = None
+  // guarded by lock
+  private var testsReport: TestsReport = TestsReport(Map.empty)
 
+  // blocks-until keepReadingAllEvents = false.
   def add(event: StateEvent): Unit = {
-    event match {
-      case StateEvent.TestStarting(runningScenario, timestamp) =>
-        retryCompareAndSet(
-          ar = testsReport,
-          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testStarting(oldTests, runningScenario, timestamp).getOrThrow, ())
-        )
+    lock.lock();
+    try {
+      while (!keepReadingAllEvents)
+        screenshotTakenWeCanProceedConsumingEvents.await()
 
-      case StateEvent.TestFailed(runningScenario, recordedEvent, throwable, timestamp) =>
-        retryCompareAndSet(
-          ar = testsReport,
-          calculateNewValueFromOld =
-            (oldTests: TestsReport) => (TestsReport.testFailed(oldTests, runningScenario, recordedEvent, throwable, timestamp).getOrThrow, ())
-        )
+      lastEvent = event.some
 
-      case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
-        retryCompareAndSet(
-          ar = testsReport,
-          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.testSucceeded(oldTests, runningScenario, recordedEvent, timestamp).getOrThrow, ())
-        )
+      event match {
+        case StateEvent.TestStarting(runningScenario, timestamp) =>
+          testsReport = TestsReport.testStarting(testsReport, runningScenario, timestamp).getOrThrow
 
-      case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
-        retryCompareAndSet(
-          ar = testsReport,
-          calculateNewValueFromOld = (oldTests: TestsReport) => (TestsReport.addStep(oldTests, runningScenario, message, throwable, timestamp).getOrThrow, ())
-        )
+        case StateEvent.TestFailed(runningScenario, recordedEvent, throwable, timestamp) =>
+          testsReport = TestsReport.testFailed(testsReport, runningScenario, recordedEvent, throwable, timestamp).getOrThrow
+
+        case StateEvent.TestSucceeded(runningScenario, recordedEvent, timestamp) =>
+          testsReport = TestsReport.testSucceeded(testsReport, runningScenario, recordedEvent, timestamp).getOrThrow
+
+        case StateEvent.Note(runningScenario, message, throwable, timestamp) =>
+          testsReport = TestsReport.addStep(testsReport, runningScenario, message, throwable, timestamp).getOrThrow
+      }
+      if (eventIsTakeAScreenshotEvent(lastEvent)) {
+        keepReadingAllEvents = false // block the current method on the dispatcher thread when we exit, so add screenshot will be the only thread
+        lastEventIsTakeAScreenshot.signalAll() //
+      }
+
+    } finally {
+      lock.unlock()
     }
   }
 
-  def createReport(): Unit = reportFileUtils.writeReport(testsReport.get())
-
+  // blocks-until lastEventIsNot -> TakeAScreenshotEvent = StateEvent.Note(_, message, _, _) => message.startsWith("take screenshot now")
   def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit = {
+    lock.lock()
+    try {
+      while (!eventIsTakeAScreenshotEvent(lastEvent)) // events are still too old. Waiting to reach take a screenshot event
+        lastEventIsTakeAScreenshot.await()
 
-    val screenshot: Screenshot =
-      retryCompareAndSet(
-        ar = testsReport,
-        calculateNewValueFromOld = (oldTests: TestsReport) =>
-          TestsReport.runningTest(oldTests).flatMap(TestsReport.addScreenshot(oldTests, _, screenshotDriverData.screenshotExternalData)).getOrThrow
+      val (newTests, screenshot): (TestsReport, Screenshot) =
+        TestsReport.runningTest(testsReport).flatMap(TestsReport.addScreenshot(testsReport, _, screenshotDriverData.screenshotExternalData)).getOrThrow
+
+      testsReport = newTests
+
+      reportFileUtils.saveImage(
+        data = screenshotDriverData.image,
+        toSuffix = screenshot.originalFilename
       )
 
-    reportFileUtils.saveImage(
-      data = screenshotDriverData.image,
-      toSuffix = screenshot.originalFilename
-    )
+      reportFileUtils.writeStringToFile(
+        stringToBeWritten = screenshotDriverData.pageSource,
+        toSuffix = screenshot.sourceCodeFilename
+      )
 
-    reportFileUtils.writeStringToFile(
-      stringToBeWritten = screenshotDriverData.pageSource,
-      toSuffix = screenshot.sourceCodeFilename
-    )
+      reportFileUtils.withNoHtmlElementsToFile(
+        originalSourceToBeWritten = screenshotDriverData.pageSource,
+        toSuffix = screenshot.sourceWithNoHtmlFilename
+      )
 
-    reportFileUtils.withNoHtmlElementsToFile(
-      originalSourceToBeWritten = screenshotDriverData.pageSource,
-      toSuffix = screenshot.sourceWithNoHtmlFilename
-    )
+      keepReadingAllEvents = true
+      lastEvent = None
+      screenshotTakenWeCanProceedConsumingEvents.signalAll()
+    } finally {
+      lock.unlock()
+    }
 
   }
 
-}
+  private def eventIsTakeAScreenshotEvent(event: Option[StateEvent]): Boolean = event match {
+    case Some(StateEvent.Note(_, message, _, _)) => message.startsWith("take screenshot now")
+    case _                                       => false
+  }
 
+  def createReport(): Unit = {
+    lock.lock()
+    try {
+      reportFileUtils.writeReport(testsReport)
+    } finally {
+      lock.unlock()
+    }
+  }
+
+}
