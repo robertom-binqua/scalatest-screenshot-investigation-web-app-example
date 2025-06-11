@@ -9,22 +9,30 @@ import java.util.concurrent.locks.{Condition, ReentrantLock}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
-trait TestsCollector {
+trait WebDriverTestsCollector {
+  def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit
+}
+
+trait ReporterTestsCollector {
 
   def add(event: StateEvent): Unit
 
   def createReport(): Unit
 
-  def addScreenshot(screenshotDriverData: ScreenshotDriverData): Unit
-
 }
+
+trait TestsCollector extends WebDriverTestsCollector with ReporterTestsCollector
 
 object TestsCollector {
 
-  val testsCollector: TestsCollector = TestsCollectorConfigurationFactory
+  private val internalTestsCollector: TestsCollector = TestsCollectorConfigurationFactory
     .create(systemPropertyReportDestinationKey = "reportDestinationRoot", fixedClock = Clock.systemUTC())
     .map(config => new TestsCollectorImpl(new ReportFileUtilsImpl(config)))
     .getOrThrow
+
+  val webDriverTestsCollector: WebDriverTestsCollector = internalTestsCollector
+
+  val reporterTestsCollector: ReporterTestsCollector = internalTestsCollector
 
 }
 
@@ -70,6 +78,15 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
         lastEventIsTakeAScreenshot.signalAll()
       }
 
+    } finally {
+      lock.unlock()
+    }
+  }
+
+  def createReport(): Unit = {
+    lock.lock()
+    try {
+      reportFileUtils.writeReport(testsReport)
     } finally {
       lock.unlock()
     }
@@ -131,15 +148,6 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
 
     Await.result(Future.sequence(List(image, htmlSource, sourceContentWithNoHtmlTags)).map(_ => ()), 10.seconds)
 
-  }
-
-  def createReport(): Unit = {
-    lock.lock()
-    try {
-      reportFileUtils.writeReport(testsReport)
-    } finally {
-      lock.unlock()
-    }
   }
 
   private def eventIsTakeAScreenshotEvent(event: Option[StateEvent]): Boolean = event match {

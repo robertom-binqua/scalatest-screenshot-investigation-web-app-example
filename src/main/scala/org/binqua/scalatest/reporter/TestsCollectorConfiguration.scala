@@ -39,8 +39,8 @@ object TestsCollectorConfiguration {
    * Playing a little bit with cats ... https://typelevel.org/cats/typeclasses/parallel.html
    */
 
-  val reportDirName = "report"
-  val screenshotsDirName = "screenshots"
+  private val reportDirName = "report"
+  private val screenshotsDirName = "screenshots"
 
   def from(reportDirParent: File): Either[String, TestsCollectorConfiguration] = {
 

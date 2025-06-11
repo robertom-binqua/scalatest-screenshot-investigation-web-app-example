@@ -3,14 +3,14 @@ package org.binqua.scalatest.reporter
 import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
 import org.binqua.scalatest.reporter.util.utils.EitherOps
 import org.scalatest.Reporter
-import org.scalatest.events.{Event, NameInfo, NoteProvided, RecordableEvent, RunCompleted, TestFailed, TestStarting, TestSucceeded}
+import org.scalatest.events._
 
 class ScreenshotReporterRunner extends Reporter {
-  val reporter: Reporter = new ScreenshotReporterImpl(TestsCollector.testsCollector)
+  val reporter: Reporter = new ScreenshotReporterImpl(TestsCollector.reporterTestsCollector)
   override def apply(event: Event): Unit = reporter.apply(event)
 }
 
-class ScreenshotReporterImpl(testsCollector: TestsCollector) extends Reporter {
+class ScreenshotReporterImpl(testsCollector: ReporterTestsCollector) extends Reporter {
 
   override def apply(event: Event): Unit = {
     event match {
