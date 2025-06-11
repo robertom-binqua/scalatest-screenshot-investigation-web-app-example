@@ -4,7 +4,6 @@ import cats.implicits.catsSyntaxOptionId
 import org.binqua.scalatest.reporter.util.utils.EitherOps
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 
-import java.time.Clock
 import java.util.concurrent.locks.{Condition, ReentrantLock}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
@@ -25,10 +24,7 @@ trait TestsCollector extends WebDriverTestsCollector with ReporterTestsCollector
 
 object TestsCollector {
 
-  private val internalTestsCollector: TestsCollector = TestsCollectorConfigurationFactory
-    .create(systemPropertyReportDestinationKey = "reportDestinationRoot", fixedClock = Clock.systemUTC())
-    .map(config => new TestsCollectorImpl(new ReportFileUtilsImpl(config)))
-    .getOrThrow
+  private val internalTestsCollector: TestsCollector = new TestsCollectorImpl(new ReportInitializerImpl)
 
   val webDriverTestsCollector: WebDriverTestsCollector = internalTestsCollector
 
@@ -37,7 +33,7 @@ object TestsCollector {
 }
 
 // ThreadSafe
-final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCollector {
+final class TestsCollectorImpl(reportFileUtilsInitializer: ReportInitializer) extends TestsCollector {
 
   private val lock: ReentrantLock = new ReentrantLock()
   private val screenshotTakenWeCanProceedConsumingEvents: Condition = lock.newCondition()
@@ -50,6 +46,8 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
   // guarded by lock
   private var testsReport: TestsReport = TestsReport(Map.empty)
 
+  private var maybeReportFileUtils: Option[ReportFileUtils] = None
+
   // blocks-until keepReadingAllEvents = false, to give time to addScreenshot to read the right test coordinates.
   def add(event: StateEvent): Unit = {
     lock.lock();
@@ -60,6 +58,12 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
       lastEvent = event.some
 
       event match {
+        case StateEvent.RunStarting(_) =>
+          maybeReportFileUtils = reportFileUtilsInitializer.init().getOrThrow.some
+          testsReport = TestsReport(Map.empty)
+          lastEvent = None
+          keepReadingAllEvents = true
+
         case StateEvent.TestStarting(runningScenario, timestamp) =>
           testsReport = TestsReport.testStarting(testsReport, runningScenario, timestamp).getOrThrow
 
@@ -86,7 +90,7 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
   def createReport(): Unit = {
     lock.lock()
     try {
-      reportFileUtils.writeReport(testsReport)
+      maybeReportFileUtils.get.writeReport(testsReport)
     } finally {
       lock.unlock()
     }
@@ -126,21 +130,21 @@ final class TestsCollectorImpl(reportFileUtils: ReportFileUtils) extends TestsCo
 
   private def saveFiles(screenshot: Screenshot, screenshotDriverData: ScreenshotDriverData): Unit = {
     val image = Future(
-      reportFileUtils.saveImage(
+      maybeReportFileUtils.get.saveImage(
         data = screenshotDriverData.image,
         toSuffix = screenshot.originalFilename
       )
     )
 
     val htmlSource = Future(
-      reportFileUtils.writeStringToFile(
+      maybeReportFileUtils.get.writeStringToFile(
         stringToBeWritten = screenshotDriverData.pageSource,
         toSuffix = screenshot.sourceCodeFilename
       )
     )
 
     val sourceContentWithNoHtmlTags = Future(
-      reportFileUtils.withNoHtmlElementsToFile(
+      maybeReportFileUtils.get.withNoHtmlElementsToFile(
         originalSourceToBeWritten = screenshotDriverData.pageSource,
         toSuffix = screenshot.sourceWithNoHtmlFilename
       )

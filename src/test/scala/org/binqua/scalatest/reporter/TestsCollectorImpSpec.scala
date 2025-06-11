@@ -1,5 +1,6 @@
 package org.binqua.scalatest.reporter
 
+import cats.implicits.catsSyntaxEitherId
 import munit.FunSuite
 import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
 import org.binqua.scalatest.reporter.TestUtil.Assertions
@@ -12,15 +13,18 @@ class TestsCollectorImpSpec extends FunSuite {
 
   private val testReportFileLocation = "report/testsReport.json"
 
-  test("testsCollector create report dir, screenshots dir and testsReport.js") {
-    val reportParentDir: Path = Files.createTempDirectory("tempDir")
-    val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
+  def reportFileUtilsInitializerFromTempDir(reportParentDir: Path): ReportInitializer = () =>
+    new ReportFileUtilsImpl(
+      config = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
+    ).asRight
 
-    val testsCollectorImpl = new TestsCollectorImpl(
-      new ReportFileUtilsImpl(
-        config = configuration
-      )
-    )
+  test("testsCollector create report dir, screenshots dir and testsReport.js") {
+
+    val reportParentDir: Path = Files.createTempDirectory("tempDir")
+
+    val testsCollectorImpl = new TestsCollectorImpl(reportFileUtilsInitializerFromTempDir(reportParentDir))
+
+    testsCollectorImpl.add(StateEvent.RunStarting(timestamp = 1L))
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
@@ -52,13 +56,9 @@ class TestsCollectorImpSpec extends FunSuite {
 
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
 
-    val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
+    val testsCollectorImpl = new TestsCollectorImpl(reportFileUtilsInitializerFromTempDir(reportParentDir))
 
-    val testsCollectorImpl = new TestsCollectorImpl(
-      new ReportFileUtilsImpl(
-        config = configuration
-      )
-    )
+    testsCollectorImpl.add(StateEvent.RunStarting(timestamp = 1L))
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
@@ -198,9 +198,10 @@ class TestsCollectorImpSpec extends FunSuite {
   test("we can add 1 test with 2 notes e 2 recorded events ....") {
 
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
-    val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
 
-    val testsCollectorImpl = new TestsCollectorImpl(new ReportFileUtilsImpl(configuration))
+    val testsCollectorImpl = new TestsCollectorImpl(reportFileUtilsInitializerFromTempDir(reportParentDir))
+
+    testsCollectorImpl.add(StateEvent.RunStarting(timestamp = 1L))
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))
@@ -287,9 +288,10 @@ class TestsCollectorImpSpec extends FunSuite {
   test("we can add 1 test with no screenshot, and the report json it will be correct") {
 
     val reportParentDir: Path = Files.createTempDirectory("tempDir")
-    val configuration: TestsCollectorConfiguration = TestsCollectorConfiguration.unsafeFrom(reportParentDir.toFile)
 
-    val testsCollectorImpl = new TestsCollectorImpl(new ReportFileUtilsImpl(configuration))
+    val testsCollectorImpl = new TestsCollectorImpl(reportFileUtilsInitializerFromTempDir(reportParentDir))
+
+    testsCollectorImpl.add(StateEvent.RunStarting(timestamp = 1L))
 
     val runningScenario = RunningScenario(new Ordinal(1), test = "t", feature = "f", scenario = "s")
     testsCollectorImpl.add(StateEvent.TestStarting(runningScenario = runningScenario, timestamp = 1L))

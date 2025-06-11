@@ -8,7 +8,7 @@ trait WithScreenshotsSupport {
 
   this: AnyFeatureSpecLike =>
 
-  private var counter: AtomicInteger = new AtomicInteger(0)
+  private val counter: AtomicInteger = new AtomicInteger(0)
 
   def takeAScreenshot(toBeWrapped: => Unit): Unit = {
     note(s"take screenshot now ${counter.incrementAndGet()}")
