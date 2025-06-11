@@ -57,13 +57,56 @@ class IntegrationSpec extends CatsEffectSuite {
     )
 
     val actualFileGenerated: IO[List[String]] = runTest("org.binqua.scalatest.integration.ReactAppUsagePurpose")
-      .map(_.sorted)
+
+    assertIO(obtained = actualFileGenerated, expectedFilesToBeGenerated.sorted)
+  }
+
+  test("We can run a ThreeFeaturesWith2ScenariosEach spec") {
+
+    def filesToBeGeneratedFromOrdinalSuffix(ordinal: Int): List[String] = List(
+      s"report/screenshots/scenario_ordinal_1_$ordinal",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original/2_ON_EXIT_PAGE.png",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original/6_ON_EXIT_PAGE.png",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original/8_ON_EXIT_PAGE.png",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original/5_ON_ENTER_PAGE.png",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original/1_ON_ENTER_PAGE.png",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original/4_ON_EXIT_PAGE.png",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original/7_ON_ENTER_PAGE.png",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/original/3_ON_ENTER_PAGE.png",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources/8_ON_EXIT_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources/2_ON_EXIT_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources/6_ON_EXIT_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources/7_ON_ENTER_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources/3_ON_ENTER_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources/5_ON_ENTER_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources/1_ON_ENTER_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/sources/4_ON_EXIT_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml/8_ON_EXIT_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml/2_ON_EXIT_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml/6_ON_EXIT_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml/7_ON_ENTER_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml/3_ON_ENTER_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml/5_ON_ENTER_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml/1_ON_ENTER_PAGE.txt",
+      s"report/screenshots/scenario_ordinal_1_$ordinal/withNoHtml/4_ON_EXIT_PAGE.txt"
+    )
+
+    val expectedFilesToBeGenerated: List[String] =
+      List("report", "report/testsReport.json", "report/screenshots") :::
+        List(3, 22, 43, 62, 83, 102)
+          .flatMap(partOfOrdinal => filesToBeGeneratedFromOrdinalSuffix(partOfOrdinal))
+
+    val actualFileGenerated: IO[List[String]] = runTest("org.binqua.scalatest.integration.ThreeFeaturesWith2ScenariosEach")
+
     assertIO(obtained = actualFileGenerated, expectedFilesToBeGenerated.sorted)
   }
 
   private def runTest(testToRun: String): IO[List[String]] = {
     val fileGenerated = (for {
-      _ <- Http4sAppServer.run[IO](ReactAppUsagePurpose.port)
+      _ <- Http4sAppServer.run[IO](ThreeFeaturesWith2ScenariosEach.port)
       _ <- Resource.eval(Files[IO].deleteRecursively(reportDestinationDirPath).attempt)
       _ <- Resource.eval(IO.systemPropertiesForIO.set(systemPropertyKey, reportDestinationDirName))
       _ <- Resource.onFinalize[IO](IO.systemPropertiesForIO.clear(systemPropertyKey).as(unit))
@@ -74,7 +117,7 @@ class IntegrationSpec extends CatsEffectSuite {
           actualReportFiles <- collectAllReportFiles(reportDestinationDirPath)
         } yield actualReportFiles
       )
-    fileGenerated
+    fileGenerated.map(_.sorted)
   }
 
   private def collectAllReportFiles(root: Path): IO[List[String]] = {
@@ -98,13 +141,13 @@ class IntegrationSpec extends CatsEffectSuite {
 
 }
 
-object ReactAppUsagePurpose {
+object ThreeFeaturesWith2ScenariosEach {
   val port = port"8081"
 }
 
 class ReactAppUsagePurpose extends AnyFeatureSpec with should.Matchers with WithScreenshotsSupport with ConfiguredChrome with GivenWhenThen {
 
-  val host = s"http://localhost:${ReactAppUsagePurpose.port.value}/"
+  val host = s"http://localhost:${ThreeFeaturesWith2ScenariosEach.port.value}/"
 
   Feature("We can go through all the page of our app from home to page 4") {
     Scenario("we can go from home page to last page") {
@@ -137,6 +180,198 @@ class ReactAppUsagePurpose extends AnyFeatureSpec with should.Matchers with With
       note("Then we jump to Page4")
       pageTitle should be("Page 4")
     }
+  }
+}
 
+class ThreeFeaturesWith2ScenariosEach extends AnyFeatureSpec with should.Matchers with WithScreenshotsSupport with ConfiguredChrome with GivenWhenThen {
+
+  val host = s"http://localhost:${ThreeFeaturesWith2ScenariosEach.port.value}/"
+
+  Feature("f1") {
+    Scenario("f1s1") {
+      note("Given we go to the home page")
+      val str = host + "home.html"
+      go to str
+      pageTitle should be("Home")
+
+      note("When we click page 1")
+      takeAScreenshot(click on linkText("Page1"))
+
+      note("Then we jump to Page1")
+      pageTitle should be("Page 1")
+
+      note("And when we click page 2")
+      takeAScreenshot(click on linkText("Page2"))
+
+      note("Then we jump to Page2")
+      pageTitle should be("Page 2")
+
+      note("And when we click page 3")
+      takeAScreenshot(click on linkText("Page3"))
+
+      note("Then we jump to Page3")
+      pageTitle should be("Page 3")
+
+      note("And when we click page 4")
+      takeAScreenshot(click on linkText("Page4"))
+
+      note("Then we jump to Page4")
+      pageTitle should be("Page 4")
+    }
+    Scenario("f1s2") {
+      note("Given we go to the home page")
+      val str = host + "home.html"
+      go to str
+      pageTitle should be("Home")
+
+      note("When we click page 1")
+      takeAScreenshot(click on linkText("Page1"))
+
+      note("Then we jump to Page1")
+      pageTitle should be("Page 1")
+
+      note("And when we click page 2")
+      takeAScreenshot(click on linkText("Page2"))
+
+      note("Then we jump to Page2")
+      pageTitle should be("Page 2")
+
+      note("And when we click page 3")
+      takeAScreenshot(click on linkText("Page3"))
+
+      note("Then we jump to Page3")
+      pageTitle should be("Page 3")
+
+      note("And when we click page 4")
+      takeAScreenshot(click on linkText("Page4"))
+
+      note("Then we jump to Page4")
+      pageTitle should be("Page 4")
+    }
+  }
+
+  Feature("f2") {
+    Scenario("f2s1") {
+      note("Given we go to the home page")
+      val str = host + "home.html"
+      go to str
+      pageTitle should be("Home")
+
+      note("When we click page 1")
+      takeAScreenshot(click on linkText("Page1"))
+
+      note("Then we jump to Page1")
+      pageTitle should be("Page 1")
+
+      note("And when we click page 2")
+      takeAScreenshot(click on linkText("Page2"))
+
+      note("Then we jump to Page2")
+      pageTitle should be("Page 2")
+
+      note("And when we click page 3")
+      takeAScreenshot(click on linkText("Page3"))
+
+      note("Then we jump to Page3")
+      pageTitle should be("Page 3")
+
+      note("And when we click page 4")
+      takeAScreenshot(click on linkText("Page4"))
+
+      note("Then we jump to Page4")
+      pageTitle should be("Page 4")
+    }
+    Scenario("f2s2") {
+      note("Given we go to the home page")
+      val str = host + "home.html"
+      go to str
+      pageTitle should be("Home")
+
+      note("When we click page 1")
+      takeAScreenshot(click on linkText("Page1"))
+
+      note("Then we jump to Page1")
+      pageTitle should be("Page 1")
+
+      note("And when we click page 2")
+      takeAScreenshot(click on linkText("Page2"))
+
+      note("Then we jump to Page2")
+      pageTitle should be("Page 2")
+
+      note("And when we click page 3")
+      takeAScreenshot(click on linkText("Page3"))
+
+      note("Then we jump to Page3")
+      pageTitle should be("Page 3")
+
+      note("And when we click page 4")
+      takeAScreenshot(click on linkText("Page4"))
+
+      note("Then we jump to Page4")
+      pageTitle should be("Page 4")
+    }
+  }
+  Feature("f3") {
+    Scenario("f3s1") {
+      note("Given we go to the home page")
+      val str = host + "home.html"
+      go to str
+      pageTitle should be("Home")
+
+      note("When we click page 1")
+      takeAScreenshot(click on linkText("Page1"))
+
+      note("Then we jump to Page1")
+      pageTitle should be("Page 1")
+
+      note("And when we click page 2")
+      takeAScreenshot(click on linkText("Page2"))
+
+      note("Then we jump to Page2")
+      pageTitle should be("Page 2")
+
+      note("And when we click page 3")
+      takeAScreenshot(click on linkText("Page3"))
+
+      note("Then we jump to Page3")
+      pageTitle should be("Page 3")
+
+      note("And when we click page 4")
+      takeAScreenshot(click on linkText("Page4"))
+
+      note("Then we jump to Page4")
+      pageTitle should be("Page 4")
+    }
+    Scenario("f3s2") {
+      note("Given we go to the home page")
+      val str = host + "home.html"
+      go to str
+      pageTitle should be("Home")
+
+      note("When we click page 1")
+      takeAScreenshot(click on linkText("Page1"))
+
+      note("Then we jump to Page1")
+      pageTitle should be("Page 1")
+
+      note("And when we click page 2")
+      takeAScreenshot(click on linkText("Page2"))
+
+      note("Then we jump to Page2")
+      pageTitle should be("Page 2")
+
+      note("And when we click page 3")
+      takeAScreenshot(click on linkText("Page3"))
+
+      note("Then we jump to Page3")
+      pageTitle should be("Page 3")
+
+      note("And when we click page 4")
+      takeAScreenshot(click on linkText("Page4"))
+
+      note("Then we jump to Page4")
+      pageTitle should be("Page 4")
+    }
   }
 }

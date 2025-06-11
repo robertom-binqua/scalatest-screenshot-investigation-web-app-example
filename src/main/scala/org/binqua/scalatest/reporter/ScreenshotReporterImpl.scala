@@ -14,6 +14,10 @@ class ScreenshotReporterImpl(testsCollector: ReporterTestsCollector) extends Rep
 
   override def apply(event: Event): Unit = {
     event match {
+
+      case RunStarting(_, _, _, _, _, _, _, timestamp) =>
+        testsCollector.add(StateEvent.RunStarting(timestamp))
+
       case TestStarting(ordinal, _, testName, _, featureAndScenario, _, _, _, _, _, _, timestamp) =>
         val testStartingEvent = Utils
           .createARunningScenario(ordinal, testName, featureAndScenario)
