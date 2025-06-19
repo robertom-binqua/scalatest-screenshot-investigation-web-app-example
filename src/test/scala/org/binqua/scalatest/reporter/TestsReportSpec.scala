@@ -12,23 +12,21 @@ class TestsReportSpec extends FunSuite {
   test("we can start a test and add 2 screenshots to it.") {
 
     val expScenario1 = ReferenceData.startingScenario
-
-    val expFeature1 =
-      Feature(description = "feature desc", ordinal = expScenario1.id, scenarios = Scenarios(scenariosMap = Map(expScenario1.description -> expScenario1)))
-    val expTest1 = Test("test desc", Features(featuresMap = Map(expFeature1.description -> expFeature1)), expScenario1.id)
+    val expFeature1 =      Feature(description = "feature desc", ordinal = expScenario1.ordinal, scenarios = Scenarios(scenariosMap = Map(expScenario1.description -> expScenario1)))
+    val expTest1 = Test("test desc", Features(featuresMap = Map(expFeature1.description -> expFeature1)), expScenario1.ordinal)
     val expTests1: TestsReport = TestsReport(tests = Map(expTest1.name -> expTest1))
 
-    val runningScenario = RunningScenario(expScenario1.id, expTest1.name, feature = expFeature1.description, expScenario1.description)
+    val runningScenario = RunningScenario(expScenario1.ordinal, expTest1.name, feature = expFeature1.description, expScenario1.description)
 
     val firstActualTests: Either[String, TestsReport] = TestsReport.testStarting(testsToBeUpdated = TestsReport(Map.empty), runningScenario = runningScenario, timestamp = 1L)
     assertEquals(firstActualTests, Right(expTests1))
 
     val secondActualTests: Either[String, (TestsReport, Screenshot)] = firstActualTests.flatMap(f =
       tests =>
-        TestsReport.addScreenshot(testsToBeUpdated = tests, runningScenario = runningScenario, screenshotExternalData = ReferenceData.screenshotExternalData.url1)
+        TestsReport.addScreenshot(testsToBeUpdated = tests, runningScenario = runningScenario, screenshotExternalData = ReferenceData.screenshotDriverData.url1)
     )
 
-    val expScenario2 = expScenario1.copy(screenshots = List(Screenshot(ReferenceData.screenshotExternalData.url1, expScenario1.id, 1)))
+    val expScenario2 = expScenario1.copy(screenshots = List(Screenshot(ReferenceData.screenshotDriverData.url1, expScenario1.ordinal, 1)))
     val expFeature2 = expFeature1.copy(scenarios = Scenarios(scenariosMap = Map(expScenario2.description -> expScenario2)))
     val expTest2 = expTest1.copy(features = Features(featuresMap = Map(expFeature2.description -> expFeature2)))
     val expectedTests2: TestsReport = TestsReport(tests = Map(expTest2.name -> expTest2))
@@ -36,12 +34,12 @@ class TestsReportSpec extends FunSuite {
     assertEquals(secondActualTests.map(_._1), Right(expectedTests2))
 
     val actualTest3: Either[String, (TestsReport, Screenshot)] =
-      secondActualTests.flatMap((test: (TestsReport, Screenshot)) => TestsReport.addScreenshot(test._1, runningScenario, ReferenceData.screenshotExternalData.url2))
+      secondActualTests.flatMap((test: (TestsReport, Screenshot)) => TestsReport.addScreenshot(test._1, runningScenario, ReferenceData.screenshotDriverData.url2))
 
     val expScenario3 = expScenario1.copy(screenshots =
       List(
-        Screenshot(ReferenceData.screenshotExternalData.url1, expScenario1.id, 1),
-        Screenshot(ReferenceData.screenshotExternalData.url2, expScenario1.id, 2)
+        Screenshot(ReferenceData.screenshotDriverData.url1, expScenario1.ordinal, 1),
+        Screenshot(ReferenceData.screenshotDriverData.url2, expScenario1.ordinal, 2)
       )
     )
     val expFeature3: Feature = expFeature2.copy(scenarios = Scenarios(scenariosMap = Map(expScenario3.description -> expScenario3)))
@@ -54,7 +52,7 @@ class TestsReportSpec extends FunSuite {
 
     assertEquals(
       obtained = result,
-      expected = RunningScenario(expScenario1.id, expTest1.name, expFeature1.description, expScenario1.description).asRight
+      expected = RunningScenario(expScenario1.ordinal, expTest1.name, expFeature1.description, expScenario1.description).asRight
     )
 
   }
@@ -70,7 +68,7 @@ class TestsReportSpec extends FunSuite {
     assertEquals(actualTests.flatMap(TestsReport.runningTest), runningScenario.asRight)
 
     val invalidTests: Either[String, (TestsReport, Screenshot)] =
-      actualTests.flatMap(TestsReport.addScreenshot(_, runningScenario, ReferenceData.screenshotExternalData.url1))
+      actualTests.flatMap(TestsReport.addScreenshot(_, runningScenario, ReferenceData.screenshotDriverData.url1))
 
     assertEquals(invalidTests, Left("Sorry last scenario 'scenario desc' does not have testOutcome equal to STARTING but SUCCEEDED"))
 
@@ -87,7 +85,7 @@ class TestsReportSpec extends FunSuite {
     assertEquals(actualTests.flatMap(TestsReport.runningTest), Right(runningScenario))
 
     val invalidTests: Either[String, (TestsReport, Screenshot)] =
-      actualTests.flatMap(TestsReport.addScreenshot(_, runningScenario, ReferenceData.screenshotExternalData.url1))
+      actualTests.flatMap(TestsReport.addScreenshot(_, runningScenario, ReferenceData.screenshotDriverData.url1))
 
     assertEquals(invalidTests, Left("Sorry last scenario 'scenario desc' does not have testOutcome equal to STARTING but FAILED"))
 
@@ -101,13 +99,13 @@ class TestsReportSpec extends FunSuite {
       tests <- TestsReport(Map.empty).asRight
 
       test11 <- TestsReport.testStarting(tests, runningScenario = t1f1s1, timestamp = 1L)
-      test21 <- TestsReport.addScreenshot(test11, t1f1s1, ReferenceData.screenshotExternalData.url1).map(_._1)
-      test31 <- TestsReport.addScreenshot(test21, t1f1s1, ReferenceData.screenshotExternalData.url2).map(_._1)
+      test21 <- TestsReport.addScreenshot(test11, t1f1s1, ReferenceData.screenshotDriverData.url1).map(_._1)
+      test31 <- TestsReport.addScreenshot(test21, t1f1s1, ReferenceData.screenshotDriverData.url2).map(_._1)
       test51 <- TestsReport.testSucceeded(test31, t1f1s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
 
       test12 <- TestsReport.testStarting(test51, runningScenario = t2f2s2, timestamp = 1L)
-      test22 <- TestsReport.addScreenshot(test12, t2f2s2, ReferenceData.screenshotExternalData.url3).map(_._1)
-      test32 <- TestsReport.addScreenshot(test22, t2f2s2, ReferenceData.screenshotExternalData.url4).map(_._1)
+      test22 <- TestsReport.addScreenshot(test12, t2f2s2, ReferenceData.screenshotDriverData.url3).map(_._1)
+      test32 <- TestsReport.addScreenshot(test22, t2f2s2, ReferenceData.screenshotDriverData.url4).map(_._1)
       test52 <- TestsReport.testFailed(test32, t2f2s2, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
     } yield test52
 
@@ -219,12 +217,12 @@ class TestsReportSpec extends FunSuite {
       test <- TestsReport(Map.empty).asRight
 
       test11 <- TestsReport.testStarting(test, runningScenario = t1_f1_s1, timestamp = 1L)
-      test21 <- TestsReport.addScreenshot(test11, t1_f1_s1, ReferenceData.screenshotExternalData.url1).map(_._1)
+      test21 <- TestsReport.addScreenshot(test11, t1_f1_s1, ReferenceData.screenshotDriverData.url1).map(_._1)
       test31 <- TestsReport.addStep(testsToBeUpdated = test21, runningScenario = t1_f1_s1, message = "m1-f1-s1", throwable = None, timestamp = 1L)
       test41 <- TestsReport.testSucceeded(test31, t1_f1_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "given", None, 5L))).getOrThrow, timestamp = 3L)
 
       test12 <- TestsReport.testStarting(test41, runningScenario = t1_f2_s1, timestamp = 1L)
-      test22 <- TestsReport.addScreenshot(test12, t1_f2_s1, ReferenceData.screenshotExternalData.url2).map(_._1)
+      test22 <- TestsReport.addScreenshot(test12, t1_f2_s1, ReferenceData.screenshotDriverData.url2).map(_._1)
       test42 <- TestsReport.addStep(testsToBeUpdated = test22, runningScenario = t1_f2_s1, message = "m1-f2-s1", throwable = None, timestamp = 1L)
       test52 <- TestsReport.testFailed(test42, t1_f2_s1, RecordedEvents.from(List(RecordedEvent(new Ordinal(122), "and", None, 5L))).getOrThrow, None, timestamp = 3L)
     } yield test52

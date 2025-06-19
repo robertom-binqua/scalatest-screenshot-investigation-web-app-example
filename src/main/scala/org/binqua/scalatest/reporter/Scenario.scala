@@ -6,7 +6,7 @@ import io.circe.{Encoder, Json}
 import org.scalatest.events.Ordinal
 
 case class Scenario(
-    id: Ordinal,
+    ordinal: Ordinal,
     description: String,
     startedTimestamp: Long,
     finishedTimestamp: Option[Long],
@@ -14,7 +14,9 @@ case class Scenario(
     steps: Option[Steps],
     testOutcome: TestOutcome,
     throwable: Option[Throwable]
-)
+) extends WithId {
+  val id: String = Utils.ordinalToString("s", ordinal)
+}
 
 object Scenario {
   implicit val ordinalEncoder: Encoder[Ordinal] = (ordinal: Ordinal) => Json.fromString(ordinal.toList.mkString("s_", "_", ""))
@@ -23,7 +25,7 @@ object Scenario {
 
   def starting(ordinal: Ordinal, name: String, timestamp: Long): Scenario =
     Scenario(
-      id = ordinal,
+      ordinal = ordinal,
       description = name,
       startedTimestamp = timestamp,
       finishedTimestamp = None,
@@ -55,9 +57,9 @@ object Scenario {
         })
   }
 
-  def addScreenshot(scenario: Scenario, screenshotExternalData: ScreenshotExternalData): (Scenario, Screenshot) = {
+  def addScreenshot(scenario: Scenario, screenshotExternalData: ScreenshotDriverData): (Scenario, Screenshot) = {
     def newScreenshot(existingScreenshots: List[Screenshot]): List[Screenshot] =
-      List(Screenshot(screenshotExternalData, scenario.id, existingScreenshots.size + 1))
+      List(Screenshot(screenshotExternalData, scenario.ordinal, existingScreenshots.size + 1))
 
     val screenshot = newScreenshot(scenario.screenshots)
 

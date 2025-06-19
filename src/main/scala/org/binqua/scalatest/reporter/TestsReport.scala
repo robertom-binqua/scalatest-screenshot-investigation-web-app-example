@@ -1,39 +1,46 @@
 package org.binqua.scalatest.reporter
 
 import cats.implicits.catsSyntaxEitherId
-import io.circe.Encoder
 import io.circe.syntax.EncoderOps
+import io.circe.{Encoder, Json, JsonObject}
 import org.binqua.scalatest.reporter.StateEvent.RecordedEvents
+import org.binqua.scalatest.reporter.effects.TestsCollectorConfiguration
 import org.scalatest.events.Ordinal
 
 case class TestsReport(tests: Map[String, Test])
 
 object TestsReport {
+
   implicit val encoder: Encoder[TestsReport] = (testsReport: TestsReport) => testsReport.tests.values.asJson
 
-  val empty: TestsReport = TestsReport(Map.empty)
+  def asJson(testsReport: TestsReport, configuration: TestsCollectorConfiguration): Json =
+    JsonObject(
+      "screenshotsLocationPrefix" -> Json.fromString(configuration.screenshotsLocationPrefix),
+      "testsReport" -> testsReport.asJson
+    ).asJson
 
   def addScreenshot(
-                     testsToBeUpdated: TestsReport,
-                     runningScenario: RunningScenario,
-                     screenshotExternalData: ScreenshotExternalData
+      testsToBeUpdated: TestsReport,
+      runningScenario: RunningScenario,
+      screenshotExternalData: ScreenshotDriverData
   ): Either[String, (TestsReport, Screenshot)] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot add a screenshot")
       .flatMap((runningTest: Test) =>
         runningTest
           .addScreenshot(runningScenario.ordinal, runningScenario.feature, runningScenario.scenario, screenshotExternalData)
           .map((updatedTest: (Test, Screenshot)) => {
-            val newTests = TestsReport(tests = testsToBeUpdated.tests.updated(runningScenario.test, updatedTest._1))
-            (newTests, updatedTest._2)
+            val (test, screenshot) = updatedTest
+            val newTests = TestsReport(tests = testsToBeUpdated.tests.updated(key = runningScenario.test, value = test))
+            (newTests, screenshot)
           })
       )
 
   def addStep(
-               testsToBeUpdated: TestsReport,
-               runningScenario: RunningScenario,
-               message: String,
-               throwable: Option[Throwable],
-               timestamp: Long
+      testsToBeUpdated: TestsReport,
+      runningScenario: RunningScenario,
+      message: String,
+      throwable: Option[Throwable],
+      timestamp: Long
   ): Either[String, TestsReport] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, "I cannot add a step.")
       .flatMap((test: Test) =>
@@ -44,11 +51,11 @@ object TestsReport {
       )
 
   def testFailed(
-                  testsToBeUpdated: TestsReport,
-                  runningScenario: RunningScenario,
-                  recordedEvent: RecordedEvents,
-                  throwable: Option[Throwable],
-                  timestamp: Long
+      testsToBeUpdated: TestsReport,
+      runningScenario: RunningScenario,
+      recordedEvent: RecordedEvents,
+      throwable: Option[Throwable],
+      timestamp: Long
   ): Either[String, TestsReport] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot set the test to failed")
       .flatMap(
@@ -57,7 +64,12 @@ object TestsReport {
           .map(TestsReport(_))
       )
 
-  def testSucceeded(testsToBeUpdated: TestsReport, runningScenario: RunningScenario, recordedEvent: RecordedEvents, timestamp: Long): Either[String, TestsReport] =
+  def testSucceeded(
+      testsToBeUpdated: TestsReport,
+      runningScenario: RunningScenario,
+      recordedEvent: RecordedEvents,
+      timestamp: Long
+  ): Either[String, TestsReport] =
     findTestToBeUpdated(testsToBeUpdated, runningScenario, details = "I cannot set the test to succeeded")
       .flatMap(
         _.markAsSucceeded(runningScenario.feature, runningScenario.scenario, recordedEvent, timestamp)
@@ -96,7 +108,7 @@ object TestsReport {
       test <- tests.tests.values
       feature <- test.features.featuresMap.values
       scenario <- feature.scenarios.scenariosMap.values
-    } yield (test, feature, scenario, scenario.id)
+    } yield (test, feature, scenario, scenario.ordinal)
 
     result.toList
       .sortWith((l, r) => l._4 > r._4)

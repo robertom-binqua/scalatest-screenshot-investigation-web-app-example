@@ -4,6 +4,8 @@ import cats.implicits.catsSyntaxEitherId
 import org.binqua.scalatest.reporter.StateEvent.RecordedEvents
 import org.scalatest.events.Ordinal
 
+case class Features(featuresMap: Map[String, Feature])
+
 object Features {
   def starting(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Features = {
     val newScenarios =
@@ -54,7 +56,7 @@ object Features {
       ordinal: Ordinal,
       featureDescription: String,
       scenarioDescription: String,
-      screenshotExternalData: ScreenshotExternalData
+      screenshotExternalData: ScreenshotDriverData
   ): Either[String, (Features, Screenshot)] =
     features.featuresMap
       .get(featureDescription)
@@ -68,5 +70,3 @@ object Features {
           })
       )
 }
-
-case class Features(featuresMap: Map[String, Feature])

@@ -18,7 +18,10 @@ object Screenshot {
     )
 }
 
-case class Screenshot(screenshotExternalData: ScreenshotExternalData, ordinal: Ordinal, index: Int) {
+case class Screenshot(screenshotDriverData: ScreenshotDriverData, ordinal: Ordinal, index: Int) extends WithId {
+  val id: String = Utils.ordinalToString("ss", ordinal)
+
+  val screenshotExternalData: ScreenshotExternalData = screenshotDriverData.screenshotExternalData
 
   private val root = s"scenario_ordinal_${ordinal.toList.mkString("_")}"
 

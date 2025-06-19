@@ -1,32 +1,58 @@
 package org.binqua.scalatest.reporter
 
-import org.binqua.scalatest.reporter.StateEvent.{RecordedEvent, RecordedEvents}
+import cats.effect.{Clock, IO}
+import org.binqua.scalatest.reporter.StateEvent.{EventIgnored, RecordedEvent, RecordedEvents}
+import org.binqua.scalatest.reporter.effects.{DateTimePrefixRootReportInitializer, ReportBuilder, ReportBuilderImpl, StreamReportJsonBuilder}
 import org.binqua.scalatest.reporter.util.utils.EitherOps
 import org.scalatest.Reporter
 import org.scalatest.events._
 
 class ScreenshotReporterRunner extends Reporter {
-  val reporter: Reporter = new ScreenshotReporterImpl(TestsCollector.reporterTestsCollector)
+
+  val reporter: Reporter = {
+    val rootReportInitializer = new DateTimePrefixRootReportInitializer[IO](Clock[IO])
+    val reportJsonBuilder = new StreamReportJsonBuilder[IO]()
+    val testsReportBuilder = new TestsReportBuilderImpl()
+    val reportBuilder: ReportBuilderImpl[IO] = new ReportBuilderImpl[IO](rootReportInitializer, reportJsonBuilder, testsReportBuilder)
+
+    new ScreenshotReporterImpl(TestsCollector.reporterTestsCollector, reportBuilder)
+  }
+
   override def apply(event: Event): Unit = reporter.apply(event)
 }
 
-class ScreenshotReporterImpl(testsCollector: ReporterTestsCollector) extends Reporter {
+class ScreenshotReporterImpl(testsCollector: ReporterTestsCollector, reportBuilder: ReportBuilder[IO]) extends Reporter {
 
   override def apply(event: Event): Unit = {
-    event match {
 
-      case RunStarting(_, _, _, _, _, _, _, timestamp) =>
-        testsCollector.add(StateEvent.RunStarting(timestamp))
+    toInternalEvent(event) match {
+
+      case EventIgnored(originalEvent) =>
+        println(s"originalEvent ignored : $originalEvent")
+
+      case completed: StateEvent.RunCompleted =>
+        val stateEvents = testsCollector.add(completed)
+        reportBuilder.build(stateEvents).unsafeRunSync()(cats.effect.unsafe.implicits.global)
+
+      case event =>
+        testsCollector.add(event)
+
+    }
+  }
+
+  private def toInternalEvent(event: Event): StateEvent = {
+    event match {
+      case runStarting: RunStarting =>
+        StateEvent.RunStarting(runStarting.timeStamp)
 
       case TestStarting(ordinal, _, testName, _, featureAndScenario, _, _, _, _, _, _, timestamp) =>
-        val testStartingEvent = Utils
+        Utils
           .createARunningScenario(ordinal, testName, featureAndScenario)
           .map(rs => StateEvent.TestStarting(rs, timestamp))
           .getOrThrow
-        testsCollector.add(testStartingEvent)
 
       case TestFailed(ordinal, _, _, testName, _, featureAndScenario, _, recordedEvents, _, throwable, _, _, _, _, _, _, timestamp) =>
-        val failedEvent = Utils
+        Utils
           .createARunningScenario(ordinal, testName, featureAndScenario)
           .map(rs =>
             StateEvent.TestFailed(
@@ -37,10 +63,9 @@ class ScreenshotReporterImpl(testsCollector: ReporterTestsCollector) extends Rep
             )
           )
           .getOrThrow
-        testsCollector.add(failedEvent)
 
       case TestSucceeded(ordinal, _, testName, _, featureAndScenario, _, recordedEvents, _, _, _, _, _, _, timestamp) =>
-        val succeededEvent: StateEvent.TestSucceeded = (for {
+        (for {
           rs <- Utils.createARunningScenario(ordinal, testName, featureAndScenario)
           recordedEvents <- RecordedEvents.from(recordedEvents.map((i: RecordableEvent) => RecordedEvent.from(i)).toList)
         } yield StateEvent.TestSucceeded(
@@ -49,22 +74,18 @@ class ScreenshotReporterImpl(testsCollector: ReporterTestsCollector) extends Rep
           timestamp = timestamp
         )).getOrThrow
 
-        testsCollector.add(succeededEvent)
-
       case NoteProvided(ordinal, message, Some(NameInfo(_, _, Some(suiteClassName), Some(testName))), throwable, _, _, _, _, timestamp) =>
-        val newNoteEvent = Utils
+        Utils
           .createARunningScenario(ordinal, suiteClassName, testName)
           .map(rs => StateEvent.Note(rs, message, throwable, timestamp))
           .getOrThrow
-        testsCollector.add(newNoteEvent)
 
-      case RunCompleted(ordinal, duration, summary, formatter, location, payload, threadName, timeStamp) =>
-        testsCollector.createReport()
+      case runCompleted: RunCompleted =>
+        StateEvent.RunCompleted(runCompleted.timeStamp)
 
       case e =>
-        println(s"Ignored event $e}")
+        EventIgnored(e.toString)
 
     }
   }
-
 }

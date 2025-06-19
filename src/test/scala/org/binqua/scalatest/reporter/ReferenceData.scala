@@ -7,7 +7,7 @@ import org.scalatest.events.Ordinal
 object ReferenceData {
 
   val startingScenario: Scenario = Scenario(
-    id = new Ordinal(1).next,
+    ordinal = new Ordinal(1).next,
     description = "desc",
     startedTimestamp = 1L,
     finishedTimestamp = Option.empty,
@@ -31,6 +31,6 @@ object ReferenceData {
     val url4: ScreenshotDriverData = ScreenshotDriverData(image = aDummyScreenshot, pageSource = "source3", screenshotExternalData.url4)
   }
 
-  private def aDummyScreenshot: Array[Byte] = Array(1.byteValue)
+  private val aDummyScreenshot: Array[Byte] = Array(1.byteValue)
 
 }

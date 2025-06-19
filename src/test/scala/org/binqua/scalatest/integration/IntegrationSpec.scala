@@ -6,17 +6,36 @@ import com.comcast.ip4s.IpLiteralSyntax
 import fs2.Pipe
 import fs2.io.file.{Files, Path}
 import munit.CatsEffectSuite
+import org.binqua.scalatest.integration.IntegrationSpec.collectAllReportFiles
 import org.binqua.scalatest.integration.http4sapp.Http4sAppServer
 import org.binqua.scalatest.web.{ConfiguredChrome, WithScreenshotsSupport}
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should
 
+object IntegrationSpec {
+
+  def collectAllReportFiles(root: Path): IO[List[String]] = {
+    val separator = '/'
+    val removeTheFirst2Dirs: Pipe[IO, Path, String] = {
+      _.filter(_.toString.split(separator).length > 2)
+        .map(_.toString.split(separator).drop(2).mkString("/"))
+    }
+
+    Files[IO]
+      .walk(root)
+      .through(removeTheFirst2Dirs)
+      .compile
+      .toList
+  }
+
+}
+
 class IntegrationSpec extends CatsEffectSuite {
 
-  private val systemPropertyKey = "reportDestinationRoot"
-  private val reportDestinationDirName = "test_dir_created_during_test"
-  private val reportDestinationDirPath = Path(reportDestinationDirName)
+  private val systemPropertyKey = "test_report_destination_root"
+  private val reportDestinationDirNameIWillBeDeleted = "thisDirHasBeenCreatedByIntegrationSpec"
+  private val reportDestinationDirPath = Path(reportDestinationDirNameIWillBeDeleted)
 
   test(
     "we can run a test containing more tests, more features and more scenarios, to create a .json to be used in the react app development - 22 files should be generated"
@@ -54,11 +73,11 @@ class IntegrationSpec extends CatsEffectSuite {
       "report/screenshots/scenario_ordinal_1_3/withNoHtml/5_ON_ENTER_PAGE.txt",
       "report/screenshots/scenario_ordinal_1_3/withNoHtml/1_ON_ENTER_PAGE.txt",
       "report/screenshots/scenario_ordinal_1_3/withNoHtml/4_ON_EXIT_PAGE.txt"
-    )
+    ).sorted
 
     val actualFileGenerated: IO[List[String]] = runTest("org.binqua.scalatest.integration.ReactAppUsagePurpose")
 
-    assertIO(obtained = actualFileGenerated, expectedFilesToBeGenerated.sorted)
+    assertIO(obtained = actualFileGenerated, expectedFilesToBeGenerated)
   }
 
   test("We can run a ThreeFeaturesWith2ScenariosEach spec") {
@@ -95,20 +114,20 @@ class IntegrationSpec extends CatsEffectSuite {
     )
 
     val expectedFilesToBeGenerated: List[String] =
-      List("report", "report/testsReport.json", "report/screenshots") :::
+      (List("report", "report/testsReport.json", "report/screenshots") :::
         List(3, 22, 43, 62, 83, 102)
-          .flatMap(partOfOrdinal => filesToBeGeneratedFromOrdinalSuffix(partOfOrdinal))
+          .flatMap(partOfOrdinal => filesToBeGeneratedFromOrdinalSuffix(partOfOrdinal))).sorted
 
     val actualFileGenerated: IO[List[String]] = runTest("org.binqua.scalatest.integration.ThreeFeaturesWith2ScenariosEach")
 
-    assertIO(obtained = actualFileGenerated, expectedFilesToBeGenerated.sorted)
+    assertIO(obtained = actualFileGenerated, expectedFilesToBeGenerated)
   }
 
   private def runTest(testToRun: String): IO[List[String]] = {
     val fileGenerated = (for {
       _ <- Http4sAppServer.run[IO](ThreeFeaturesWith2ScenariosEach.port)
       _ <- Resource.eval(Files[IO].deleteRecursively(reportDestinationDirPath).attempt)
-      _ <- Resource.eval(IO.systemPropertiesForIO.set(systemPropertyKey, reportDestinationDirName))
+      _ <- Resource.eval(IO.systemPropertiesForIO.set(systemPropertyKey, reportDestinationDirNameIWillBeDeleted))
       _ <- Resource.onFinalize[IO](IO.systemPropertiesForIO.clear(systemPropertyKey).as(unit))
     } yield ())
       .use(_ =>
@@ -118,20 +137,6 @@ class IntegrationSpec extends CatsEffectSuite {
         } yield actualReportFiles
       )
     fileGenerated.map(_.sorted)
-  }
-
-  private def collectAllReportFiles(root: Path): IO[List[String]] = {
-    val separator = '/'
-    val removeTheFirst2Dirs: Pipe[IO, Path, String] = {
-      _.filter(_.toString.split(separator).length > 2)
-        .map(_.toString.split(separator).drop(2).mkString("/"))
-    }
-
-    Files[IO]
-      .walk(root)
-      .through(removeTheFirst2Dirs)
-      .compile
-      .toList
   }
 
   private def runSeleniumTest(testToRun: String): IO[Unit] = {

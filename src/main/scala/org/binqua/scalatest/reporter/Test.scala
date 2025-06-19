@@ -6,6 +6,10 @@ import org.binqua.scalatest.reporter.StateEvent.RecordedEvents
 import org.binqua.scalatest.reporter.TestOutcome.{FAILED, SUCCEEDED}
 import org.scalatest.events.Ordinal
 
+trait WithId {
+  val id: String
+}
+
 object Test {
   implicit val encoder: Encoder[Test] = (test: Test) =>
     Json.obj(
@@ -36,10 +40,12 @@ object Test {
 
 }
 
-case class Test(name: String, features: Features, ordinal: Ordinal) {
-
+case class Test(name: String, features: Features, ordinal: Ordinal) extends WithId {
+  val id: String = Utils.ordinalToString("t", ordinal)
   def withNewFeatureOrScenario(ordinal: Ordinal, featureDescription: String, scenarioDescription: String, timestamp: Long): Either[String, Test] =
-    Features.newTestStarting(features, ordinal, featureDescription, scenarioDescription, timestamp).map(newFeatures => this.copy(features = newFeatures))
+    Features
+      .newTestStarting(features, ordinal, featureDescription, scenarioDescription, timestamp)
+      .map(newFeatures => this.copy(features = newFeatures))
 
   def markAsFailed(
       featureDescription: String,
@@ -61,7 +67,7 @@ case class Test(name: String, features: Features, ordinal: Ordinal) {
       ordinal: Ordinal,
       featureDescription: String,
       scenarioDescription: String,
-      screenshotExternalData: ScreenshotExternalData
+      screenshotExternalData: ScreenshotDriverData
   ): Either[String, (Test, Screenshot)] =
     Features
       .addScreenshot(features, ordinal, featureDescription, scenarioDescription, screenshotExternalData)

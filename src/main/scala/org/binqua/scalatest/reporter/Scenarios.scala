@@ -28,6 +28,7 @@ object Scenarios {
 }
 
 case class Scenarios(scenariosMap: Map[String, Scenario]) {
+
   def testUpdate(
       scenarioDescription: String,
       timestamp: Long,
@@ -57,13 +58,13 @@ case class Scenarios(scenariosMap: Map[String, Scenario]) {
   def withNewScreenshot(
       ordinal: Ordinal,
       scenarioDescription: String,
-      screenshotExternalData: ScreenshotExternalData
+      screenshotExternalData: ScreenshotDriverData
   ): Either[String, (Scenarios, Screenshot)] =
     scenariosMap
       .get(scenarioDescription)
       .toRight("last scenario does not have testOutcome == STARTING")
       .flatMap(lastScenario =>
-        if (lastScenario.testOutcome == TestOutcome.STARTING && lastScenario.id == ordinal) {
+        if (lastScenario.testOutcome == TestOutcome.STARTING) {
           val (updatedScenario, screenshot) = Scenario.addScreenshot(lastScenario, screenshotExternalData)
           val scenarios = this.copy(scenariosMap = this.scenariosMap.updated(scenarioDescription, updatedScenario))
           (scenarios, screenshot).asRight
